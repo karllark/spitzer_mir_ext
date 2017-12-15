@@ -5,6 +5,7 @@ import argparse
 
 import astropy.units as u
 from astropy.modeling.fitting import LevMarLSQFitter
+from astropy.modeling.fitting import SherpaFitter
 
 from dust_extinction.dust_extinction import P92
 
@@ -83,25 +84,35 @@ if __name__ == "__main__":
     # get the photometric band data
     xdata = np.array(obsext.ext_waves['BANDS'],dtype=np.float64)
     ydata = np.array(obsext.ext_curve['BANDS'],dtype=np.float64)
+    ydata_unc = np.array(obsext.ext_curve_uncs['BANDS'],dtype=np.float64)
     
     # get the stis data and concatenate with existing data
     stis_indxs, = np.where(obsext.ext_curve_uncs['STIS'] > 0.)
     xdata = np.concatenate((xdata,obsext.ext_waves['STIS'][stis_indxs]))
     ydata = np.concatenate((ydata,obsext.ext_curve['STIS'][stis_indxs]))
+    ydata_unc = np.concatenate((ydata_unc,
+                                obsext.ext_curve_uncs['STIS'][stis_indxs]))
 
     # get the irs data and concatenate with existing data
     irs_indxs, = np.where(obsext.ext_curve_uncs['IRS'] != 0.)
     xdata = np.concatenate((xdata,obsext.ext_waves['IRS'][irs_indxs]))
     ydata = np.concatenate((ydata,obsext.ext_curve['IRS'][irs_indxs]))
+    ydata_unc = np.concatenate((ydata_unc,
+                                obsext.ext_curve_uncs['IRS'][irs_indxs]))
 
     # sort data
     sindxs = np.argsort(xdata)
     xdata = xdata[sindxs]
     ydata = ydata[sindxs]
+    ydata_unc = ydata_unc[sindxs]
 
+    # check for zero uncertainty points
+    
+    
     # add units to the data
     x = xdata * u.micron
     y = ydata
+    y_unc = ydata_unc
     
     # determine the initial guess at the A(V) values
     #  just use the average at wavelengths > 5
@@ -124,8 +135,9 @@ if __name__ == "__main__":
 
     # specify and run the fit
     fit = LevMarLSQFitter()
-    p92_fit = fit(p92_init, 1./xdata, y, maxiter=200, acc=1e-10)
-
+    p92_fit = fit(p92_init, 1./xdata, y, #maxiter=200, acc=1e-10,
+                  weights=1.0/y_unc)
+    
     # message from the fitter (maxfev is maxiter)
     print('fit message')
     print(fit.fit_info['message'])
@@ -136,6 +148,11 @@ if __name__ == "__main__":
     print(p92_init._parameters)
     print('final parameters')
     print(p92_fit._parameters)
+
+    # run a different fitter
+    #sfit = SherpaFitter(statistic='chi2', optimizer='moncar',
+    #                    estmethod='confidence')    
+    #p92_sfit = sfit(p92_init, 1./xdata, y)
     
     # setup the plot
     fig, ax = plt.subplots(figsize=(12,8))

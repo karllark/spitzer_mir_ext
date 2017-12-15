@@ -62,21 +62,21 @@ class ExtData():
         if 'X' in hdulist['BANDEXT'].data.columns.names:
             self.ext_x['BANDS'] = hdulist['BANDEXT'].data['X']
         self.ext_curve['BANDS'] = hdulist['BANDEXT'].data['EXT']
-        self.ext_curve_uncs['BANDS'] = hdulist['BANDEXT'].data['EXT']
+        self.ext_curve_uncs['BANDS'] = hdulist['BANDEXT'].data['UNC']
 
         if 'IUEEXT' in extnames:
             self.ext_waves['STIS'] = hdulist['IUEEXT'].data['WAVELENGTH']
             if 'X' in hdulist['IUEEXT'].data.columns.names:
                 self.ext_x['STIS'] = hdulist['IUEEXT'].data['X']
             self.ext_curve['STIS'] = hdulist['IUEEXT'].data['EXT']
-            self.ext_curve_uncs['STIS'] = hdulist['IUEEXT'].data['EXT']
+            self.ext_curve_uncs['STIS'] = hdulist['IUEEXT'].data['EXT_UNC']
 
         if 'IRSEXT' in extnames:
             self.ext_waves['IRS'] = hdulist['IRSEXT'].data['WAVELENGTH']
             if 'X' in hdulist['IRSEXT'].data.columns.names:
                 self.ext_x['IRS'] = hdulist['IRSEXT'].data['X']
             self.ext_curve['IRS'] = hdulist['IRSEXT'].data['EXT']
-            self.ext_curve_uncs['IRS'] = hdulist['IRSEXT'].data['EXT']
+            self.ext_curve_uncs['IRS'] = hdulist['IRSEXT'].data['EXT_UNC']
 
         # get the parameters of the extiinction curve
         pheader = hdulist[0].header
