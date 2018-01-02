@@ -1,7 +1,7 @@
 Code for a Spitzer MIR Extinction Paper
 =======================================
 
-Routines for Spitzer MIR dust extincitno curve paper.
+Routines for Spitzer MIR dust extinction curve paper.
 This paper is Gordon, Misselt, et al. (in prep).
 
 In Development!
