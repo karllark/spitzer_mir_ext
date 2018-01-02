@@ -59,7 +59,7 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.major', width=2)
     matplotlib.rc('ytick.minor', width=2)
             
-    fig, ax = pyplot.subplots(nrows=1,ncols=1, figsize=(10,15))
+    fig, ax = pyplot.subplots(nrows=1,ncols=1, figsize=(10,13))
 
     sindxs = np.argsort(bvcol)
 
