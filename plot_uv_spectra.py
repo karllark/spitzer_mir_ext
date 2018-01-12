@@ -39,7 +39,6 @@ if __name__ == "__main__":
             starnames.append(name)
             tstar = StarData('DAT_files/'+name+'.dat', path='/home/kgordon/Dust/Ext/')
             stardata.append(tstar)
-            bvcol.append(tstar.data['BANDS'].get_band_mag('U')[0] - tstar.data['BANDS'].get_band_mag('J')[0])
 
     fontsize = 18
 
@@ -54,9 +53,9 @@ if __name__ == "__main__":
             
     fig, ax = pyplot.subplots(nrows=1,ncols=1, figsize=(10,12))
 
-    sindxs = np.argsort(bvcol)
+    #sindxs = np.argsort(bvcol)
 
-    norm_wave_range = 1.0/np.array([6.2,5.8])
+    norm_wave_range = 1.0/np.array([7.5,7.0])
     ann_wave_range = 1.0/np.array([7.65,7.45])
     col_vals = ['b','g','r','m','c','y']
     for i in range(len(starnames)):
@@ -72,7 +71,7 @@ if __name__ == "__main__":
                                   (stardata[k].data['STIS'].waves <= norm_wave_range[1]))
             norm_val = 1.0/np.average(stardata[k].data['STIS'].flux[norm_indxs])
             
-            norm_val *= 3.0**i
+            norm_val *= 6.0**i
             
             ax.plot(1.0/stardata[k].data['BANDS'].flat_bands_waves,stardata[k].data['BANDS'].flat_bands_fluxes*norm_val,col_vals[i%6]+'o')
 
@@ -92,7 +91,7 @@ if __name__ == "__main__":
 
     #ax.set_xscale('log')
     ax.set_yscale('log')
-    ax.set_ylim(1e-2,7e7)
+    ax.set_ylim(1e-2,7e17)
     #ax.set_ylim(1e-2,7e14)
     ax.set_xlim(3.0,10.35)
     ax.set_xlabel('$1/\lambda$ [$\mu m^{-1}$]',fontsize=1.3*fontsize)

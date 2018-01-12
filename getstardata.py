@@ -63,9 +63,9 @@ class BandData():
         
         _spitzer_band_names = ['IRAC1','IRAC2','IRAC3','IRAC4','IRS15','MIPS24']
         _spitzer_band_waves = np.array([3.52,4.45,5.66,7.67,15.4,23.36])
-        _spitzer_band_zeromag_fluxes = np.array([0.6605,0.2668,0.1069,
-                                                 0.03055,1.941e-3,
-                                                 3.831e-4])*1e-11
+        _spitzer_band_zeromag_fluxes = np.array([0.650,0.266,0.102,
+                                                 0.0304,1.941e-3,
+                                                 3.83e-4])*1e-11
 
         _wfpc2_band_names = ['F170W','F255W','F336W','F439W','F555W','F814W']
         _wfpc2_band_waves = np.array([0.170,0.255,0.336,0.439,0.555,0.814])
