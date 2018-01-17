@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
 
+import emcee
+import corner
+
 from astropy.modeling.fitting import LevMarLSQFitter
 
 from dust_extinction.dust_extinction import (P92, AxAvToExv)
@@ -17,6 +20,173 @@ class P92_Elv(P92 | AxAvToExv):
     """
     Evalute P92 on E(x-V) data including solving for A(V)
     """
+
+
+def lnprob(params, x, y, uncs, model, param_names):
+    """
+    Log likelihood
+
+    Parameters
+    ----------
+    params : array of floats
+        parameters for evaluting the model
+
+    x, y, uncs : array
+        x, y, and y uncertainties for the data
+
+    model : astropy model
+        model for evaluation
+
+    param_name : array of str
+        names of the model parameters to update based on params
+        should not include any fixed parameters
+    """
+    param_dict = dict(zip(model.param_names, model.parameters))
+    for k, cname in enumerate(param_names):
+        # impose the bounds
+        if model.bounds[cname][0] is not None:
+            if param_dict[cname] < model.bounds[cname][0]:
+                return -np.inf
+        if model.bounds[cname][1] is not None:
+            if param_dict[cname] > model.bounds[cname][1]:
+                return -np.inf
+        # otherwise, set the requested value
+        exec("model.{}.value = {}".format(cname, params[k]))
+    return -0.5*np.sum(((model(x) - y)/uncs)**2)
+
+
+def get_best_fit_params(sampler):
+    """
+    Get the best fit parameters from all the walkers
+
+    Parameters
+    ----------
+    sample : emcee sampler object
+
+    Returns
+    -------
+    fit_params_best : array of floats
+        parameters of the best fit (largest likelihood sample)
+    """
+    max_lnp = -1e32
+    nwalkers = len(sampler.lnprobability)
+    fit_params_best = None
+    for k in range(nwalkers):
+        tmax_lnp = np.max(sampler.lnprobability[k])
+        if tmax_lnp > max_lnp:
+            max_lnp = tmax_lnp
+            indxs, = np.where(sampler.lnprobability[k] == tmax_lnp)
+            fit_params_best = sampler.chain[k, indxs[0], :]
+    return fit_params_best
+
+
+def p92_emcee(x, y, uncs,
+              model, fit_param_names=None):
+    """
+    Fit the model using the emcee MCMC sampler
+
+    Parameters
+    ----------
+    x, y, uncs : array
+        x, y, and y uncertainties for the data
+
+    model : astropy model
+        model to fit
+        starting position taken from model paramter values
+
+    fit_param_names : list of string, optional
+        list of parameters to fit
+        default is to fit all non-fixed parameters
+    """
+
+    model_copy = model.copy()
+
+    # get a list of non-fixed parameters
+    if fit_param_names is None:
+        fit_param_names = []
+        for cname in model_copy.param_names:
+            if not model_copy.fixed[cname]:
+                fit_param_names.append(cname)
+
+    # sampler setup
+    ndim = len(fit_param_names)
+    nwalkers = 10*ndim
+    nsteps = 500
+    burn = 100
+
+    # needed for priors
+    # model_copy.bounds
+
+    # inital guesses at parameters
+    p0_list = []
+    param_dict = dict(zip(model_copy.param_names, model_copy.parameters))
+    for cname in fit_param_names:
+        p0_list.append(param_dict[cname])
+    p0 = np.array(p0_list)
+
+    # check if any parameters are zero and make them sligthly larger
+    p0[p0 == 0.0] = 0.1
+
+    # setting up the walkers to start "near" the inital guess
+    p = [p0*(1+1e-4*np.random.normal(0, 1., ndim)) for k in range(nwalkers)]
+
+    # ensure all the walkers start within the bounds
+    param_dict = dict(zip(model.param_names, model.parameters))
+    for cp in p:
+        for k, cname in enumerate(fit_param_names):
+            # check the bounds
+            if model.bounds[cname][0] is not None:
+                if cp[k] < model.bounds[cname][0]:
+                    cp[k] = model.bounds[cname][0]
+                    # print('min: ', cname, cp[k])
+            if model.bounds[cname][1] is not None:
+                if cp[k] > model.bounds[cname][1]:
+                    cp[k] = model.bounds[cname][1]
+                    # print('max: ', cname, cp[k])
+
+    # setup the sampler
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
+                                    args=(x, y, uncs, model_copy,
+                                          fit_param_names))
+
+    if burn is not None:
+        # burn in the walkers
+        pos, prob, state = sampler.run_mcmc(p, burn)
+        # rest the sampler
+        sampler.reset()
+
+    # do the full sampling
+    pos, prob, state = sampler.run_mcmc(pos, nsteps, rstate0=state)
+
+    # best fit parameters
+    best_params = get_best_fit_params(sampler)
+
+    # percentile parameters
+    samples = sampler.chain.reshape((-1, ndim))
+    per_params = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
+                     zip(*np.percentile(samples, [16, 50, 84],
+                                        axis=0)))
+    for k, val in enumerate(per_params):
+        exec("model_copy.{}.value = {}".format(fit_param_names[k],
+                                               best_params[k]))
+        print(fit_param_names[k], best_params[k], val)
+
+    # plot the walker chains for all parameters
+    fig, ax = plt.subplots(ndim, sharex=True, figsize=(13, 13))
+    walk_val = np.arange(nsteps)
+    for i in range(ndim):
+        for k in range(nwalkers):
+            ax[i].plot(walk_val, sampler.chain[k, :, i], '-')
+            # ax[i].set_ylabel(var_names[i])
+    fig.savefig('walker_param_values.png')
+    plt.close(fig)
+
+    # plot the 1D and 2D likelihood functions in a traditional triangle plot
+    fig = corner.corner(samples, labels=fit_param_names, show_titles=True)
+    fig.savefig('param_triangle.png')
+    plt.close(fig)
+
+    return model_copy
 
 
 if __name__ == "__main__":
@@ -47,23 +217,9 @@ if __name__ == "__main__":
 
     # fit the calculated extinction curve
     # get an observed extinction curve to fit
-    iue_gindxs = np.where(extdata.uncs['IUE'] > 0.)
-    irs_gindxs = np.where(extdata.uncs['IRS'] > 0.)
-    x = np.concatenate([extdata.waves['IUE'][iue_gindxs],
-                        extdata.waves['IRS'][irs_gindxs],
-                        extdata.waves['BAND']])
-    y = np.concatenate([extdata.exts['IUE'][iue_gindxs],
-                        extdata.exts['IRS'][irs_gindxs],
-                        extdata.exts['BAND']])
-    y_unc = np.concatenate([extdata.uncs['IUE'][iue_gindxs],
-                            extdata.uncs['IRS'][irs_gindxs],
-                            extdata.uncs['BAND']])
-
-    # sort the data
-    sindxs = np.argsort(x)
-    x = 1.0/x[sindxs]
-    y = y[sindxs]
-    y_unc = y_unc[sindxs]
+    (x, y, y_unc) = extdata.get_fitdata(['BAND', 'IUE', 'IRS'],
+                                        remove_uvwind_region=True,
+                                        remove_lya_region=True)
 
     # determine the initial guess at the A(V) values
     #  just use the average at wavelengths > 5
@@ -80,21 +236,35 @@ if __name__ == "__main__":
     # fix a number of the parameters
     #   mainly to avoid fitting parameters that are constrained at
     #   wavelengths where the observed data for this case does not exist
+    p92_init.BKG_b_0.fixed = True
     p92_init.FUV_lambda_0.fixed = True
-    # p92_init.FIR_amp_0.fixed = True
+    p92_init.FUV_b_0.fixed = True
+    p92_init.FUV_n_0.fixed = True
+    p92_init.NUV_b_0.fixed = True
+    p92_init.SIL1_b_0.fixed = True
     p92_init.SIL2_lambda_0.fixed = True
+    p92_init.SIL2_b_0.fixed = True
     p92_init.FIR_lambda_0.fixed = True
-    # p92_init.FIR_b_0.fixed = True
+    p92_init.FIR_b_0.fixed = True
 
     # pick the fitter
     fit = LevMarLSQFitter()
 
     # fit the data to the P92 model using the fitter
+    # p92_fit = fit(p92_init, x, y)
     p92_fit = fit(p92_init, x, y, weights=1.0/y_unc)
 
     # print(fit.fit_info)
     print(p92_init._parameters)
     print(p92_fit._parameters)
+
+    # run the emcee fitter to get proper fit parameter uncertainties
+    p92_fit_emcee = p92_emcee(x, y, y_unc, p92_fit)
+#                              ['BKG_amp_0', 'FUV_amp_0', 'NUV_amp_0',
+#                               'Av_1'])
+
+    # save the extinction curve and fit
+    pass
 
     # plotting setup for easier to read plots
     fontsize = 18
@@ -115,6 +285,7 @@ if __name__ == "__main__":
 
     ax.plot(1./x, p92_init(x), label='Initial guess')
     ax.plot(1./x, p92_fit(x), label='Fitted model')
+    ax.plot(1./x, p92_fit_emcee(x), label='emcee model')
 
     # finish configuring the plot
     ax.set_yscale('linear')
@@ -124,6 +295,7 @@ if __name__ == "__main__":
                   fontsize=1.3*fontsize)
     ax.tick_params('both', length=10, width=2, which='major')
     ax.tick_params('both', length=5, width=1, which='minor')
+    ax.legend()
 
     # use the whitespace better
     fig.tight_layout()
