@@ -256,10 +256,13 @@ if __name__ == "__main__":
     # p92_fit = fit(p92_init, x, y)
     p92_fit = fit(p92_init, x, y, weights=1.0/y_unc)
 
+    clean_pnames = [pname[:-2] for pname in p92_init.param_names]
+    print("P92 names")
+    print(clean_pnames)
     print("initital parameters")
-    print(p92_init._parameters)
+    print(p92_init.parameters)
     print("best fit parameters")
-    print(p92_fit._parameters)
+    print(p92_fit.parameters)
 
     best_fit_Av = p92_fit.Av_1.value
 
@@ -268,7 +271,9 @@ if __name__ == "__main__":
         p92_fit_emcee = p92_emcee(x, y, y_unc, p92_fit)
 
     # save the extinction curve and fit
-    pass
+    out_fname = "%s_%s_ext.fits" % (args.redstarname, args.compstarname)
+    extdata.save_ext_data(out_fname,
+                          p92_best_params=(clean_pnames, p92_fit.parameters))
 
     # plotting setup for easier to read plots
     fontsize = 18
@@ -291,8 +296,8 @@ if __name__ == "__main__":
     extdata.plot_ext(ax)
     extdata.plot_ext(ax2)
 
-    ax.plot(1./x, p92_init(x), label='Initial guess')
-    ax2.plot(1./x, p92_init(x), label='Initial guess')
+    ax.plot(1./x, p92_init(x), label='Initial guess', alpha=0.25)
+    ax2.plot(1./x, p92_init(x), label='Initial guess', alpha=0.25)
     ax.plot(1./x, p92_fit(x), label='Fitted model')
     ax2.plot(1./x, p92_fit(x), label='Fitted model')
     if args.emcee:
