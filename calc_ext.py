@@ -197,6 +197,8 @@ if __name__ == "__main__":
     parser.add_argument("compstarname", help="name of comparision star")
     parser.add_argument("--path", help="base path to observed data",
                         default="/home/kgordon/Dust/Ext/")
+    parser.add_argument("--emcee", help="run EMCEE fit",
+                        action="store_true")
     parser.add_argument("--png", help="save figure as a png file",
                         action="store_true")
     parser.add_argument("--eps", help="save figure as an eps file",
@@ -254,14 +256,16 @@ if __name__ == "__main__":
     # p92_fit = fit(p92_init, x, y)
     p92_fit = fit(p92_init, x, y, weights=1.0/y_unc)
 
-    # print(fit.fit_info)
+    print("initital parameters")
     print(p92_init._parameters)
+    print("best fit parameters")
     print(p92_fit._parameters)
 
-    # run the emcee fitter to get proper fit parameter uncertainties
-    p92_fit_emcee = p92_emcee(x, y, y_unc, p92_fit)
-#                              ['BKG_amp_0', 'FUV_amp_0', 'NUV_amp_0',
-#                               'Av_1'])
+    best_fit_Av = p92_fit.Av_1.value
+
+    if args.emcee:
+        # run the emcee fitter to get proper fit parameter uncertainties
+        p92_fit_emcee = p92_emcee(x, y, y_unc, p92_fit)
 
     # save the extinction curve and fit
     pass
@@ -278,14 +282,22 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.minor', width=2)
 
     # setup the plot
-    fig, ax = plt.subplots(figsize=(10, 13))
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    # subplot
+    ax2 = plt.axes([.60, .35, .35, .35])
 
     # plot the bands and all spectra for this star
     extdata.plot_ext(ax)
+    extdata.plot_ext(ax2)
 
     ax.plot(1./x, p92_init(x), label='Initial guess')
+    ax2.plot(1./x, p92_init(x), label='Initial guess')
     ax.plot(1./x, p92_fit(x), label='Fitted model')
-    ax.plot(1./x, p92_fit_emcee(x), label='emcee model')
+    ax2.plot(1./x, p92_fit(x), label='Fitted model')
+    if args.emcee:
+        ax.plot(1./x, p92_fit_emcee(x), label='emcee model')
+        ax2.plot(1./x, p92_fit_emcee(x), label='emcee model')
 
     # finish configuring the plot
     ax.set_yscale('linear')
@@ -296,6 +308,10 @@ if __name__ == "__main__":
     ax.tick_params('both', length=10, width=2, which='major')
     ax.tick_params('both', length=5, width=1, which='minor')
     ax.legend()
+
+    # finish configuring the subplot
+    ax2.set_xlim(3.0, 40.0)
+    ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
 
     # use the whitespace better
     fig.tight_layout()
