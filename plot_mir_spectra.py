@@ -14,7 +14,7 @@ from astropy.io import fits as pyfits
 import matplotlib.pyplot as pyplot
 import matplotlib
 
-from getstardata import StarData
+from measure_extinction.stardata import StarData
 
 if __name__ == "__main__":
 
@@ -35,7 +35,6 @@ if __name__ == "__main__":
     file_lines = list(f)
     starnames = []
     stardata = []
-    bvcol = []
     for line in file_lines:
         if (line.find('#') != 0) & (len(line) > 0):
             name = line.rstrip()
@@ -43,8 +42,6 @@ if __name__ == "__main__":
             tstar = StarData('DAT_files/'+name+'.dat', 
                              path='/home/kgordon/Dust/Ext/')
             stardata.append(tstar)
-            bvcol.append(tstar.data['BANDS'].get_band_mag('U')[0] 
-                         - tstar.data['BANDS'].get_band_mag('J')[0])
 
     fontsize = 18
 
@@ -60,8 +57,6 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.minor', width=2)
             
     fig, ax = pyplot.subplots(nrows=1,ncols=1, figsize=(10,13))
-
-    sindxs = np.argsort(bvcol)
 
     kxrange = [3.0, 130.]
     ann_xvals = [41.0,50.0]
@@ -83,7 +78,7 @@ if __name__ == "__main__":
                                >= norm_wave_range[0]) &
                               (stardata[k].data[spec_name].waves 
                                <= norm_wave_range[1]))
-        norm_val = 1.0/np.average(stardata[k].data[spec_name].flux[norm_indxs]
+        norm_val = 1.0/np.average(stardata[k].data[spec_name].fluxes[norm_indxs]
                                   *ymult[norm_indxs])
         off_val = 0.5*i
 
@@ -91,7 +86,7 @@ if __name__ == "__main__":
         gindxs = np.where(stardata[k].data[spec_name].npts > 0)
         max_gwave = max(stardata[k].data[spec_name].waves[gindxs])
         ax.plot(stardata[k].data[spec_name].waves[gindxs],
-                (stardata[k].data[spec_name].flux[gindxs]*ymult[gindxs]
+                (stardata[k].data[spec_name].fluxes[gindxs]*ymult[gindxs]
                  *norm_val + off_val),
                 col_vals[i%6]+'-')
 
@@ -102,7 +97,7 @@ if __name__ == "__main__":
                              (stardata[k].data[spec_name].waves 
                               <= ann_wave_range[1]) &
                              (stardata[k].data[spec_name].npts > 0))
-        ann_val = np.median(stardata[k].data[spec_name].flux[ann_indxs]
+        ann_val = np.median(stardata[k].data[spec_name].fluxes[ann_indxs]
                             *ymult[ann_indxs])
         ann_val *= norm_val
         ann_val += off_val
@@ -116,12 +111,12 @@ if __name__ == "__main__":
 
         # plot the band fluxes
         if plam4:
-            ymult = np.power(stardata[k].data['BANDS'].flat_bands_waves,4.0)
+            ymult = np.power(stardata[k].data['BAND'].waves,4.0)
         else:
-            ymult = np.full((len(stardata[k].data['BANDS'].flat_bands_waves)),
+            ymult = np.full((len(stardata[k].data['BAND'].waves)),
                             1.0)
-        ax.plot(stardata[k].data['BANDS'].flat_bands_waves,
-                stardata[k].data['BANDS'].flat_bands_fluxes*ymult
+        ax.plot(stardata[k].data['BAND'].waves,
+                stardata[k].data['BAND'].fluxes*ymult
                 *norm_val + off_val,col_vals[i%6]+'o')
     
 

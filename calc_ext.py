@@ -228,6 +228,8 @@ if __name__ == "__main__":
     #  limit as lambda -> inf, E(lamda-V) -> -A(V)
     indxs, = np.where(1./x > 5.0)
     av_guess = -1.0*np.average(y[indxs])
+    if not np.isfinite(av_guess):
+        av_guess = 1.0
 
     # initialize the model
     #    a few tweaks to the starting parameters helps find the solution
@@ -315,19 +317,22 @@ if __name__ == "__main__":
     ax.legend()
 
     # finish configuring the subplot
-    ax2.set_xlim(3.0, 40.0)
-    ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
+    sp_xlim = [3.0, 40.0]
+    ax2.set_xlim(sp_xlim)
+    # ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
+    indxs, = np.where((x > 1.0/sp_xlim[1]) & (x < 1.0/sp_xlim[0]))
+    ax2.set_ylim(min(p92_fit(x)[indxs])-0.1, max(p92_fit(x)[indxs])+0.1)
 
     # use the whitespace better
     fig.tight_layout()
 
     # plot or save to a file
-    save_str = '_spec'
+    outname = "%s_%s_ext" % (args.redstarname, args.compstarname)
     if args.png:
-        fig.savefig(args.starname.replace('.dat', save_str+'.png'))
+        fig.savefig(outname+'.png')
     elif args.eps:
-        fig.savefig(args.starname.replace('.dat', save_str+'.eps'))
+        fig.savefig(outname+'.eps')
     elif args.pdf:
-        fig.savefig(args.starname.replace('.dat', save_str+'.pdf'))
+        fig.savefig(outname+'.pdf')
     else:
         plt.show()
