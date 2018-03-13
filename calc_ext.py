@@ -235,6 +235,7 @@ if __name__ == "__main__":
     #    a few tweaks to the starting parameters helps find the solution
     p92_init = P92_Elv(BKG_amp_0=200.,
                        FUV_amp_0=100.0, FUV_lambda_0=0.06,
+                       # FIR_amp_0 = 0.0,
                        Av_1=av_guess)
 
     # fix a number of the parameters
@@ -248,6 +249,7 @@ if __name__ == "__main__":
     p92_init.SIL1_b_0.fixed = True
     p92_init.SIL2_lambda_0.fixed = True
     p92_init.SIL2_b_0.fixed = True
+    # p92_init.FIR_amp_0.fixed = True
     p92_init.FIR_lambda_0.fixed = True
     p92_init.FIR_b_0.fixed = True
 
@@ -302,6 +304,8 @@ if __name__ == "__main__":
     ax2.plot(1./x, p92_init(x), label='Initial guess', alpha=0.25)
     ax.plot(1./x, p92_fit(x), label='Fitted model')
     ax2.plot(1./x, p92_fit(x), label='Fitted model')
+    ax.plot(1./x, best_fit_Av*np.full((len(x)),-1.0)    )
+    ax2.plot(1./x, best_fit_Av*np.full((len(x)),-1.0))
     if args.emcee:
         ax.plot(1./x, p92_fit_emcee(x), label='emcee model')
         ax2.plot(1./x, p92_fit_emcee(x), label='emcee model')
@@ -317,11 +321,11 @@ if __name__ == "__main__":
     ax.legend()
 
     # finish configuring the subplot
-    sp_xlim = [3.0, 40.0]
+    sp_xlim = [2.0, 40.0]
     ax2.set_xlim(sp_xlim)
     # ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
     indxs, = np.where((x > 1.0/sp_xlim[1]) & (x < 1.0/sp_xlim[0]))
-    ax2.set_ylim(min(p92_fit(x)[indxs])-0.1, max(p92_fit(x)[indxs])+0.1)
+    ax2.set_ylim(min([min(p92_fit(x)[indxs]),-best_fit_Av])-0.1, max(p92_fit(x)[indxs])+0.1)
 
     # use the whitespace better
     fig.tight_layout()

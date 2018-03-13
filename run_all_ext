@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+
+# V stars
+python calc_ext.py hd204827 hd036512 --png
+python calc_ext.py vicyg1 hd214680 --png
+python calc_ext.py hd096042 hd031726 --png
+python calc_ext.py hd147889 hd064802 --png
+python calc_ext.py hd029309 hd064802 --png
+python calc_ext.py hd147933 hd074273 --png
+python calc_ext.py hd283809 hd064802 --png
+python calc_ext.py hd281159 hd064802 --png
+
+# III stars
+python calc_ext.py hd147701 hd195986 --png
+python calc_ext.py hd029647 hd195986 --png
+python calc_ext.py bd+63d1964 hd188209 --png
+
+# I stars
+python calc_ext.py vicyg8a hd188209 --png
+python calc_ext.py hd192660 hd204172 --png
+python calc_ext.py hd229238 hd204172 --png
+python calc_ext.py hd112272 hd204172 --png
+python calc_ext.py vicyg2 hd165024 --png
+python calc_ext.py hd014956 hd204172 --png
