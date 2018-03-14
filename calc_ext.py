@@ -16,6 +16,20 @@ from measure_extinction.stardata import StarData
 from measure_extinction.extdata import ExtData
 
 
+def tie_amps_SIL2_to_SIL1(model):
+    """
+    function to tie the SIL2 amplitude to the SIL1 amplitude
+    """
+    return model.SIL1_amp_0
+
+
+def tie_amps_FIR_to_SIL1(model):
+    """
+    function to tie the FIR amplitude to the SIL1 amplitude
+    """
+    return (0.012/0.002)* model.SIL1_amp_0
+
+
 class P92_Elv(P92 | AxAvToExv):
     """
     Evalute P92 on E(x-V) data including solving for A(V)
@@ -252,6 +266,9 @@ if __name__ == "__main__":
     # p92_init.FIR_amp_0.fixed = True
     p92_init.FIR_lambda_0.fixed = True
     p92_init.FIR_b_0.fixed = True
+
+    # p92_init.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
+    p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
 
     # pick the fitter
     fit = LevMarLSQFitter()

@@ -39,7 +39,7 @@ if __name__ == "__main__":
         if (line.find('#') != 0) & (len(line) > 0):
             name = line.rstrip()
             starnames.append(name)
-            tstar = StarData('DAT_files/'+name+'.dat', 
+            tstar = StarData('DAT_files/'+name+'.dat',
                              path='/home/kgordon/Dust/Ext/')
             stardata.append(tstar)
 
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     matplotlib.rc('xtick.minor', width=2)
     matplotlib.rc('ytick.major', width=2)
     matplotlib.rc('ytick.minor', width=2)
-            
+
     fig, ax = pyplot.subplots(nrows=1,ncols=1, figsize=(10,13))
 
     kxrange = [3.0, 130.]
@@ -74,9 +74,9 @@ if __name__ == "__main__":
             ymult = np.full((len(stardata[k].data[spec_name].waves)),1.0)
 
         # get the value to use for normalization and offset
-        norm_indxs = np.where((stardata[k].data[spec_name].waves 
+        norm_indxs = np.where((stardata[k].data[spec_name].waves
                                >= norm_wave_range[0]) &
-                              (stardata[k].data[spec_name].waves 
+                              (stardata[k].data[spec_name].waves
                                <= norm_wave_range[1]))
         norm_val = 1.0/np.average(stardata[k].data[spec_name].fluxes[norm_indxs]
                                   *ymult[norm_indxs])
@@ -92,20 +92,20 @@ if __name__ == "__main__":
 
         # annotate the spectra
         ann_wave_range = np.array([max_gwave-5.0, max_gwave-1.0])
-        ann_indxs = np.where((stardata[k].data[spec_name].waves 
+        ann_indxs = np.where((stardata[k].data[spec_name].waves
                               >= ann_wave_range[0]) &
-                             (stardata[k].data[spec_name].waves 
+                             (stardata[k].data[spec_name].waves
                               <= ann_wave_range[1]) &
                              (stardata[k].data[spec_name].npts > 0))
         ann_val = np.median(stardata[k].data[spec_name].fluxes[ann_indxs]
                             *ymult[ann_indxs])
         ann_val *= norm_val
         ann_val += off_val
-        ax.annotate(starnames[k]+'/'+stardata[k].sptype, xy=(ann_xvals[0], 
-                                                             ann_val), 
-                    xytext=(ann_xvals[1], ann_val), 
+        ax.annotate(starnames[k]+'/'+stardata[k].sptype, xy=(ann_xvals[0],
+                                                             ann_val),
+                    xytext=(ann_xvals[1], ann_val),
                     verticalalignment="center",
-                    arrowprops=dict(facecolor=col_vals[i%6], shrink=0.1), 
+                    arrowprops=dict(facecolor=col_vals[i%6], shrink=0.1),
                     fontsize=0.85*fontsize, rotation=-0.)
 
 
@@ -118,16 +118,16 @@ if __name__ == "__main__":
         ax.plot(stardata[k].data['BAND'].waves,
                 stardata[k].data['BAND'].fluxes*ymult
                 *norm_val + off_val,col_vals[i%6]+'o')
-    
+
 
     ax.set_yscale('linear')
-    ax.set_ylim(0.5,len(starnames)*0.5+2.0)
+    ax.set_ylim(0.5,len(starnames)*0.5+4.0)
     ax.set_xscale('log')
     ax.set_xlim(kxrange)
-    ax.set_xlabel('$\lambda$ [$\mu m^{-1}$]',fontsize=1.3*fontsize)
-    ax.set_ylabel('$\lambda^4 F(\lambda)/F(\lambda_n)$ + offset',
+    ax.set_xlabel('$\lambda$ [$\mu m$]',fontsize=1.3*fontsize)
+    ax.set_ylabel('$\lambda^4 F(\lambda)/F(8[ish] \mu m)$ + offset',
                   fontsize=1.3*fontsize)
-    
+
     ax.tick_params('both', length=10, width=2, which='major')
     ax.tick_params('both', length=5, width=1, which='minor')
 
@@ -142,4 +142,3 @@ if __name__ == "__main__":
         fig.savefig(args.filelist.replace('.dat',save_str+'.pdf'))
     else:
         pyplot.show()
-

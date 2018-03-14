@@ -11,6 +11,7 @@ import matplotlib.pyplot as pyplot
 import matplotlib
 
 from calc_ext import P92_Elv
+from dust_extinction.dust_extinction import P92
 from measure_extinction.extdata import ExtData
 
 if __name__ == "__main__":
@@ -19,6 +20,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filelist", help="file with list of curves to plot")
     parser.add_argument("--alav", help="plot A(lambda)/A(V)",
+                        action="store_true")
+    parser.add_argument("--modonly", help="only plot the models",
                         action="store_true")
     parser.add_argument("-p", "--png", help="save figure as a png file",
                         action="store_true")
@@ -60,14 +63,14 @@ if __name__ == "__main__":
 
     sindxs = np.argsort(avs)
 
-    kxrange = [3.0, 130.]
+    kxrange = [1.0, 130.]
     ann_xvals = [41.0, 50.0]
     spec_name = 'IRS'
     norm_wave_range = [6., 10.]
     ann_wave_range = [15.0, 18.0]
     col_vals = ['b', 'g', 'r', 'm', 'c', 'y']
 
-    mod_x = np.arange(3.0, 40.0, 0.1)
+    mod_x = 1.0/np.arange(1.0, 40.0, 0.1)
     for i in range(len(extnames)):
         k = sindxs[i]
 
@@ -78,13 +81,56 @@ if __name__ == "__main__":
                                <= norm_wave_range[1]))
 
         # plot the extinction curves
-        extdatas[k].plot_ext(ax, color=col_vals[i % 6], alav=args.alav)
+        if not args.modonly:
+            extdatas[k].plot_ext(ax, color=col_vals[i % 6], alav=args.alav)
 
         # plot the best fit P92 model
-        P92_best = P92_Elv(BKG_amp_0=extdatas[k].p92_best_fit['BKG_AMP'],
+        if args.alav:
+            P92_best = P92(BKG_amp=extdatas[k].p92_best_fit['BKG_AMP'],
+                           BKG_lambda=extdatas[k].p92_best_fit['BKG_LAMBDA'],
+                           BKG_n=extdatas[k].p92_best_fit['BKG_N'],
+                           BKG_b=extdatas[k].p92_best_fit['BKG_B'],
+                           FUV_amp=extdatas[k].p92_best_fit['FUV_AMP'],
+                           FUV_lambda=extdatas[k].p92_best_fit['FUV_LAMBDA'],
+                           FUV_n=extdatas[k].p92_best_fit['FUV_N'],
+                           FUV_b=extdatas[k].p92_best_fit['FUV_B'],
+                           NUV_amp=extdatas[k].p92_best_fit['NUV_AMP'],
+                           NUV_lambda=extdatas[k].p92_best_fit['NUV_LAMBDA'],
+                           NUV_n=extdatas[k].p92_best_fit['NUV_N'],
+                           NUV_b=extdatas[k].p92_best_fit['NUV_B'],
+                           SIL1_amp=extdatas[k].p92_best_fit['SIL1_AMP'],
+                           SIL1_lambda=extdatas[k].p92_best_fit['SIL1_LAMBDA'],
+                           SIL1_n=extdatas[k].p92_best_fit['SIL1_N'],
+                           SIL1_b=extdatas[k].p92_best_fit['SIL1_B'],
+                           FIR_amp=extdatas[k].p92_best_fit['FIR_AMP'],
+                           FIR_lambda=extdatas[k].p92_best_fit['FIR_LAMBDA'],
+                           FIR_n=extdatas[k].p92_best_fit['FIR_N'],
+                           FIR_b=extdatas[k].p92_best_fit['FIR_B'])
+        else:
+            P92_best = P92_Elv(BKG_amp_0=extdatas[k].p92_best_fit['BKG_AMP'],
+                           BKG_lambda_0=extdatas[k].p92_best_fit['BKG_LAMBDA'],
+                           BKG_n_0=extdatas[k].p92_best_fit['BKG_N'],
+                           BKG_b_0=extdatas[k].p92_best_fit['BKG_B'],
+                           FUV_amp_0=extdatas[k].p92_best_fit['FUV_AMP'],
+                           FUV_lambda_0=extdatas[k].p92_best_fit['FUV_LAMBDA'],
+                           FUV_n_0=extdatas[k].p92_best_fit['FUV_N'],
+                           FUV_b_0=extdatas[k].p92_best_fit['FUV_B'],
+                           NUV_amp_0=extdatas[k].p92_best_fit['NUV_AMP'],
+                           NUV_lambda_0=extdatas[k].p92_best_fit['NUV_LAMBDA'],
+                           NUV_n_0=extdatas[k].p92_best_fit['NUV_N'],
+                           NUV_b_0=extdatas[k].p92_best_fit['NUV_B'],
+                           SIL1_amp_0=extdatas[k].p92_best_fit['SIL1_AMP'],
+                           SIL1_lambda_0=extdatas[k].p92_best_fit['SIL1_LAMBDA'],
+                           SIL1_n_0=extdatas[k].p92_best_fit['SIL1_N'],
+                           SIL1_b_0=extdatas[k].p92_best_fit['SIL1_B'],
+                           FIR_amp_0=extdatas[k].p92_best_fit['FIR_AMP'],
+                           FIR_lambda_0=extdatas[k].p92_best_fit['FIR_LAMBDA'],
+                           FIR_n_0=extdatas[k].p92_best_fit['FIR_N'],
+                           FIR_b_0=extdatas[k].p92_best_fit['FIR_B'],
                            Av_1=extdatas[k].columns['AV'][0])
-        print(P92_best(mod_x))
-        ax.plot(1.0/mod_x, P92_best(mod_x), '-', color=col_vals[i % 6])
+
+        ax.plot(1.0/mod_x, P92_best(mod_x), '--',
+                color=col_vals[i % 6], alpha=0.5)
 
         # annotate the spectra
         #ann_wave_range = np.array([max_gwave-5.0, max_gwave-1.0])
@@ -111,6 +157,16 @@ if __name__ == "__main__":
         ax.set_ylim(-0.05, 0.2)
         ax.set_ylabel('$A(\lambda)/A(V)$',
                       fontsize=1.3*fontsize)
+        # Milky Way observed extinction from
+        # Rieke & Lebofsky (1985)
+        MW_x = 1.0/np.array([13.0, 12.5, 12.0, 11.5, 11.0, 10.5,
+                            10.0,  9.5,  9.0,  8.5,  8.0,  4.8,
+                            3.5, 2.22, 1.65, 1.25])
+        MW_axav = np.array([0.027, 0.030, 0.037, 0.047, 0.060, 0.074,
+                            0.083, 0.087, 0.074, 0.043, 0.020, 0.023,
+                            0.058, 0.112, 0.175, 0.282])
+        ax.plot(1.0/MW_x, MW_axav, 'ko')
+
     else:
         ax.set_ylim(-6.0, -1.0)
         ax.set_ylabel('$E(\lambda - V)$',
