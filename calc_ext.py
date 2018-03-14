@@ -304,8 +304,8 @@ if __name__ == "__main__":
     ax2.plot(1./x, p92_init(x), label='Initial guess', alpha=0.25)
     ax.plot(1./x, p92_fit(x), label='Fitted model')
     ax2.plot(1./x, p92_fit(x), label='Fitted model')
-    ax.plot(1./x, best_fit_Av*np.full((len(x)),-1.0)    )
-    ax2.plot(1./x, best_fit_Av*np.full((len(x)),-1.0))
+    ax.plot(1./x, best_fit_Av*np.full((len(x)), -1.0))
+    ax2.plot(1./x, best_fit_Av*np.full((len(x)), -1.0))
     if args.emcee:
         ax.plot(1./x, p92_fit_emcee(x), label='emcee model')
         ax2.plot(1./x, p92_fit_emcee(x), label='emcee model')
@@ -325,7 +325,8 @@ if __name__ == "__main__":
     ax2.set_xlim(sp_xlim)
     # ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
     indxs, = np.where((x > 1.0/sp_xlim[1]) & (x < 1.0/sp_xlim[0]))
-    ax2.set_ylim(min([min(p92_fit(x)[indxs]),-best_fit_Av])-0.1, max(p92_fit(x)[indxs])+0.1)
+    ax2.set_ylim(min([min(p92_fit(x)[indxs]), -best_fit_Av])-0.1,
+                 max(p92_fit(x)[indxs])+0.1)
 
     # use the whitespace better
     fig.tight_layout()
