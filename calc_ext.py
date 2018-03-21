@@ -27,7 +27,7 @@ def tie_amps_FIR_to_SIL1(model):
     """
     function to tie the FIR amplitude to the SIL1 amplitude
     """
-    return (0.012/0.002)* model.SIL1_amp_0
+    return (0.012/0.002)*model.SIL1_amp_0
 
 
 class P92_Elv(P92 | AxAvToExv):
