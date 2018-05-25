@@ -2,6 +2,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import argparse
+import warnings
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
@@ -10,8 +11,10 @@ import emcee
 import corner
 
 from astropy.modeling.fitting import LevMarLSQFitter
+from astropy.utils.exceptions import AstropyWarning
 
-from dust_extinction.dust_extinction import (P92, AxAvToExv)
+from dust_extinction.shapes import P92
+from dust_extinction.conversions import AxAvToExv
 from measure_extinction.stardata import StarData
 from measure_extinction.extdata import ExtData
 
@@ -95,7 +98,8 @@ def get_best_fit_params(sampler):
 
 
 def p92_emcee(x, y, uncs,
-              model, fit_param_names=None):
+              model, fit_param_names=None,
+              threads=2):
     """
     Fit the model using the emcee MCMC sampler
 
@@ -111,6 +115,9 @@ def p92_emcee(x, y, uncs,
     fit_param_names : list of string, optional
         list of parameters to fit
         default is to fit all non-fixed parameters
+
+    threads : in
+        number of threads to use for MCMC run
     """
 
     model_copy = model.copy()
@@ -125,8 +132,8 @@ def p92_emcee(x, y, uncs,
     # sampler setup
     ndim = len(fit_param_names)
     nwalkers = 10*ndim
-    nsteps = 500
-    burn = 100
+    nsteps = 1000
+    burn = 500
 
     # needed for priors
     # model_copy.bounds
@@ -139,10 +146,25 @@ def p92_emcee(x, y, uncs,
     p0 = np.array(p0_list)
 
     # check if any parameters are zero and make them sligthly larger
-    p0[p0 == 0.0] = 0.1
+    p0[p0 == 0.0] = 2.4e-3
+
+    print(fit_param_names)
+    print(p0)
 
     # setting up the walkers to start "near" the inital guess
     p = [p0*(1+1e-4*np.random.normal(0, 1., ndim)) for k in range(nwalkers)]
+
+    # for the parameters with min/max bounds set ("good priors")
+    # sample from the prior
+#    for k, cname in enumerate(fit_param_names):
+#        if ((model.bounds[cname][0] is not None)
+#                & (model.bounds[cname][1] is not None)):
+#            svals = np.random.uniform(model.bounds[cname][0],
+#                                      model.bounds[cname][1],
+#                                      nwalkers)
+#            for i in range(nwalkers):
+#                p[i][k] = svals[i]
+#            print(p)
 
     # ensure all the walkers start within the bounds
     param_dict = dict(zip(model.param_names, model.parameters))
@@ -159,7 +181,7 @@ def p92_emcee(x, y, uncs,
                     # print('max: ', cname, cp[k])
 
     # setup the sampler
-    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob,
+    sampler = emcee.EnsembleSampler(nwalkers, ndim, lnprob, threads=threads,
                                     args=(x, y, uncs, model_copy,
                                           fit_param_names))
 
@@ -196,7 +218,8 @@ def p92_emcee(x, y, uncs,
     plt.close(fig)
 
     # plot the 1D and 2D likelihood functions in a traditional triangle plot
-    fig = corner.corner(samples, labels=fit_param_names, show_titles=True)
+    fig = corner.corner(samples, labels=fit_param_names, show_titles=True,
+                        title_fmt='.3f', use_math_text=True)
     fig.savefig('param_triangle.png')
     plt.close(fig)
 
@@ -213,6 +236,8 @@ if __name__ == "__main__":
                         default="/home/kgordon/Dust/Ext/")
     parser.add_argument("--emcee", help="run EMCEE fit",
                         action="store_true")
+    parser.add_argument("--threads", type=int, default=1,
+                        help="number of threads for EMCEE run")
     parser.add_argument("--png", help="save figure as a png file",
                         action="store_true")
     parser.add_argument("--eps", help="save figure as an eps file",
@@ -267,8 +292,10 @@ if __name__ == "__main__":
     p92_init.FIR_lambda_0.fixed = True
     p92_init.FIR_b_0.fixed = True
 
+    p92_init.Av_1.bounds = [0.1, None]
+
     # p92_init.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
-    p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
+    # p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
 
     # pick the fitter
     fit = LevMarLSQFitter()
@@ -289,9 +316,18 @@ if __name__ == "__main__":
 
     if args.emcee:
         # run the emcee fitter to get proper fit parameter uncertainties
-        p92_fit_emcee = p92_emcee(x, y, y_unc, p92_fit)
+        p92_fit_emcee = p92_emcee(x, y, y_unc, p92_fit,
+                                  threads=args.threads,
+                                  fit_param_names=['Av_1',
+                                                   'BKG_amp_0',
+                                                   'NUV_amp_0', 'NUV_lambda_0',
+                                                   'FUV_amp_0',
+                                                   'SIL1_amp_0', 'SIL1_lambda_0',
+                                                   'SIL2_amp_0',
+                                                   'FIR_amp_0'])
 
     # save the extinction curve and fit
+    warnings.simplefilter('ignore', category=AstropyWarning)
     out_fname = "%s_%s_ext.fits" % (args.redstarname, args.compstarname)
     extdata.save_ext_data(out_fname,
                           p92_best_params=(clean_pnames, p92_fit.parameters))
@@ -346,7 +382,7 @@ if __name__ == "__main__":
                  max(p92_fit(x)[indxs])+0.1)
 
     # use the whitespace better
-    fig.tight_layout()
+    # fig.tight_layout()
 
     # plot or save to a file
     outname = "%s_%s_ext" % (args.redstarname, args.compstarname)

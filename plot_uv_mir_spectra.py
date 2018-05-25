@@ -6,6 +6,7 @@ import argparse
 
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy as np
 
 from measure_extinction.stardata import StarData
 
@@ -36,7 +37,7 @@ if __name__ == "__main__":
                              path='/home/kgordon/Dust/Ext/')
             stardata.append(tstar)
 
-    fontsize = 18
+    fontsize = 14
 
     font = {'size': fontsize}
     mpl.rc('font', **font)
@@ -47,7 +48,7 @@ if __name__ == "__main__":
     mpl.rc('ytick.major', width=2)
     mpl.rc('ytick.minor', width=2)
 
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(12, 8))
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(16, 6))
 
     uvoffval = 1.0
     miroffval = 0.5
@@ -60,15 +61,18 @@ if __name__ == "__main__":
                              norm_wave_range=[0.28, 0.3])
 
         # plot MIR data
-        stardata[k].plot_obs(ax[1], pcolor=pcolors[k % len(pcolors)],
-                             mlam4=True,
-                             yoffset=k*miroffval,
-                             norm_wave_range=[6., 8.])
+        plotvals = stardata[k].plot_obs(ax[1],
+                                        pcolor=pcolors[k % len(pcolors)],
+                                        mlam4=True,
+                                        yoffset=k*miroffval,
+                                        norm_wave_range=[10., 20.],
+                                        legend_key='IRS',
+                                        fontsize=fontsize)
 
     # finish the setup of the UV plot
     cax = ax[0]
-    cax.set_yscale('linear')
-    cax.set_ylim(0.5, len(starnames)*uvoffval+6.0)
+    cax.set_yscale('log')
+    cax.set_ylim(0.01, len(starnames)*uvoffval+10.)
     cax.set_xscale('linear')
     cax.set_xlim(0.1, 0.33)
     cax.set_xlabel('$\lambda$ [$\mu m$]', fontsize=1.3*fontsize)
@@ -79,9 +83,9 @@ if __name__ == "__main__":
     # finish the setup of the MIR plot
     cax = ax[1]
     cax.set_yscale('linear')
-    cax.set_ylim(0.5, len(starnames)*miroffval+3.5)
+    cax.set_ylim(0.5, len(starnames)*miroffval+1.5)
     cax.set_xscale('linear')
-    cax.set_xlim(5.0, 45.0)
+    cax.set_xlim(3.0, 35.)
     cax.set_xlabel('$\lambda$ [$\mu m$]', fontsize=1.3*fontsize)
     cax.set_ylabel('$\lambda^4 F(\lambda)/F(\lambda_n)$ + offset',
                    fontsize=1.3*fontsize)
@@ -89,6 +93,8 @@ if __name__ == "__main__":
     cax.tick_params('both', length=5, width=1, which='minor')
     cax.yaxis.tick_right()
     cax.yaxis.set_label_position("right")
+
+    ax[1].legend()
 
     fig.tight_layout()
 

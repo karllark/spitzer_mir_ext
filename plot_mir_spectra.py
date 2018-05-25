@@ -10,7 +10,6 @@ from __future__ import (absolute_import, division, print_function,
 import argparse
 
 import numpy as np
-from astropy.io import fits as pyfits
 import matplotlib.pyplot as pyplot
 import matplotlib
 
@@ -45,7 +44,7 @@ if __name__ == "__main__":
 
     fontsize = 18
 
-    font = {'size'   : fontsize}
+    font = {'size': fontsize}
 
     matplotlib.rc('font', **font)
 
@@ -56,22 +55,22 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.major', width=2)
     matplotlib.rc('ytick.minor', width=2)
 
-    fig, ax = pyplot.subplots(nrows=1,ncols=1, figsize=(10,13))
+    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 13))
 
     kxrange = [3.0, 130.]
-    ann_xvals = [41.0,50.0]
+    ann_xvals = [41.0, 50.0]
     spec_name = 'IRS'
-    norm_wave_range = [6.,10.]
-    ann_wave_range = [15.0,18.0]
-    col_vals = ['b','g','r','m','c','y']
+    norm_wave_range = [6., 10.]
+    ann_wave_range = [15.0, 18.0]
+    col_vals = ['b', 'g', 'r', 'm', 'c', 'y']
     plam4 = True
     for i in range(len(starnames)):
         k = i
 
         if plam4:
-            ymult = np.power(stardata[k].data[spec_name].waves,4.0)
+            ymult = np.power(stardata[k].data[spec_name].waves, 4.0)
         else:
-            ymult = np.full((len(stardata[k].data[spec_name].waves)),1.0)
+            ymult = np.full((len(stardata[k].data[spec_name].waves)), 1.0)
 
         # get the value to use for normalization and offset
         norm_indxs = np.where((stardata[k].data[spec_name].waves
@@ -79,7 +78,7 @@ if __name__ == "__main__":
                               (stardata[k].data[spec_name].waves
                                <= norm_wave_range[1]))
         norm_val = 1.0/np.average(stardata[k].data[spec_name].fluxes[norm_indxs]
-                                  *ymult[norm_indxs])
+                                  * ymult[norm_indxs])
         off_val = 0.5*i
 
         # plot the spectroscopic data
@@ -87,8 +86,8 @@ if __name__ == "__main__":
         max_gwave = max(stardata[k].data[spec_name].waves[gindxs])
         ax.plot(stardata[k].data[spec_name].waves[gindxs],
                 (stardata[k].data[spec_name].fluxes[gindxs]*ymult[gindxs]
-                 *norm_val + off_val),
-                col_vals[i%6]+'-')
+                 * norm_val + off_val),
+                col_vals[i % 6] + '-')
 
         # annotate the spectra
         ann_wave_range = np.array([max_gwave-5.0, max_gwave-1.0])
@@ -98,33 +97,31 @@ if __name__ == "__main__":
                               <= ann_wave_range[1]) &
                              (stardata[k].data[spec_name].npts > 0))
         ann_val = np.median(stardata[k].data[spec_name].fluxes[ann_indxs]
-                            *ymult[ann_indxs])
+                            * ymult[ann_indxs])
         ann_val *= norm_val
         ann_val += off_val
         ax.annotate(starnames[k]+'/'+stardata[k].sptype, xy=(ann_xvals[0],
                                                              ann_val),
                     xytext=(ann_xvals[1], ann_val),
                     verticalalignment="center",
-                    arrowprops=dict(facecolor=col_vals[i%6], shrink=0.1),
+                    arrowprops=dict(facecolor=col_vals[i % 6], shrink=0.1),
                     fontsize=0.85*fontsize, rotation=-0.)
-
 
         # plot the band fluxes
         if plam4:
-            ymult = np.power(stardata[k].data['BAND'].waves,4.0)
+            ymult = np.power(stardata[k].data['BAND'].waves, 4.0)
         else:
             ymult = np.full((len(stardata[k].data['BAND'].waves)),
                             1.0)
         ax.plot(stardata[k].data['BAND'].waves,
                 stardata[k].data['BAND'].fluxes*ymult
-                *norm_val + off_val,col_vals[i%6]+'o')
-
+                * norm_val + off_val, col_vals[i % 6] + 'o')
 
     ax.set_yscale('linear')
-    ax.set_ylim(0.5,len(starnames)*0.5+4.0)
+    ax.set_ylim(0.5, len(starnames) * 0.5 + 4.0)
     ax.set_xscale('log')
     ax.set_xlim(kxrange)
-    ax.set_xlabel('$\lambda$ [$\mu m$]',fontsize=1.3*fontsize)
+    ax.set_xlabel('$\lambda$ [$\mu m$]', fontsize=1.3 * fontsize)
     ax.set_ylabel('$\lambda^4 F(\lambda)/F(8[ish] \mu m)$ + offset',
                   fontsize=1.3*fontsize)
 
@@ -135,10 +132,10 @@ if __name__ == "__main__":
 
     save_str = '_mspec'
     if args.png:
-        fig.savefig(args.filelist.replace('.dat',save_str+'.png'))
+        fig.savefig(args.filelist.replace('.dat', save_str+'.png'))
     elif args.eps:
-        fig.savefig(args.filelist.replace('.dat',save_str+'.eps'))
+        fig.savefig(args.filelist.replace('.dat', save_str+'.eps'))
     elif args.pdf:
-        fig.savefig(args.filelist.replace('.dat',save_str+'.pdf'))
+        fig.savefig(args.filelist.replace('.dat', save_str+'.pdf'))
     else:
         pyplot.show()

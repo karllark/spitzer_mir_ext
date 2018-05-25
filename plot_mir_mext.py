@@ -11,7 +11,7 @@ import matplotlib.pyplot as pyplot
 import matplotlib
 
 from calc_ext import P92_Elv
-from dust_extinction.dust_extinction import P92
+from dust_extinction.shapes import P92
 from measure_extinction.extdata import ExtData
 
 if __name__ == "__main__":
@@ -82,7 +82,10 @@ if __name__ == "__main__":
 
         # plot the extinction curves
         if not args.modonly:
-            extdatas[k].plot_ext(ax, color=col_vals[i % 6], alav=args.alav)
+            extdatas[k].plot_ext(ax, color=col_vals[i % 6],
+                                 annotate_key='IRS',
+                                 alav=args.alav,
+                                 fontsize=fontsize)
 
         # plot the best fit P92 model
         if args.alav:
@@ -131,24 +134,6 @@ if __name__ == "__main__":
 
         ax.plot(1.0/mod_x, P92_best(mod_x), '--',
                 color=col_vals[i % 6], alpha=0.5)
-
-        # annotate the spectra
-        #ann_wave_range = np.array([max_gwave-5.0, max_gwave-1.0])
-        #ann_indxs = np.where((extdata[k].data[spec_name].waves
-        #                      >= ann_wave_range[0]) &
-        #                     (extdata[k].data[spec_name].waves
-        #                      <= ann_wave_range[1]) &
-        #                     (extdata[k].data[spec_name].npts > 0))
-        #ann_val = np.median(extdata[k].data[spec_name].fluxes[ann_indxs]
-        #                    *ymult[ann_indxs])
-        #ann_val *= norm_val
-        #ann_val += off_val
-        #ax.annotate(starnames[k]+'/'+extdata[k].sptype, xy=(ann_xvals[0],
-        #                                                     ann_val),
-        #            xytext=(ann_xvals[1], ann_val),
-        #            verticalalignment="center",
-        #            arrowprops=dict(facecolor=col_vals[i%6], shrink=0.1),
-        #            fontsize=0.85*fontsize, rotation=-0.)
 
     ax.set_yscale('linear')
     ax.set_xscale('log')
