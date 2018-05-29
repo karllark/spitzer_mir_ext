@@ -62,10 +62,10 @@ def lnprob(params, x, y, uncs, model, param_names):
     for k, cname in enumerate(param_names):
         # impose the bounds
         if model.bounds[cname][0] is not None:
-            if param_dict[cname] < model.bounds[cname][0]:
+            if params[k] < model.bounds[cname][0]:
                 return -np.inf
         if model.bounds[cname][1] is not None:
-            if param_dict[cname] > model.bounds[cname][1]:
+            if params[k] > model.bounds[cname][1]:
                 return -np.inf
         # otherwise, set the requested value
         exec("model.{}.value = {}".format(cname, params[k]))
@@ -99,7 +99,8 @@ def get_best_fit_params(sampler):
 
 def p92_emcee(x, y, uncs,
               model, fit_param_names=None,
-              threads=2):
+              threads=1, return_sampler=False,
+              nburn=100, nsteps=500):
     """
     Fit the model using the emcee MCMC sampler
 
@@ -116,8 +117,17 @@ def p92_emcee(x, y, uncs,
         list of parameters to fit
         default is to fit all non-fixed parameters
 
-    threads : in
+    threads : int
         number of threads to use for MCMC run
+
+    nburn : int
+        number of steps for the MCMC burn in
+
+    nsteps : int
+        number of steps for the MCMC sampling
+
+    return_sampler: booelean
+        return emcee sampler, return is now (best_fit_model, sampler)
     """
 
     model_copy = model.copy()
@@ -132,8 +142,6 @@ def p92_emcee(x, y, uncs,
     # sampler setup
     ndim = len(fit_param_names)
     nwalkers = 10*ndim
-    nsteps = 1000
-    burn = 500
 
     # needed for priors
     # model_copy.bounds
@@ -185,9 +193,9 @@ def p92_emcee(x, y, uncs,
                                     args=(x, y, uncs, model_copy,
                                           fit_param_names))
 
-    if burn is not None:
+    if nburn is not None:
         # burn in the walkers
-        pos, prob, state = sampler.run_mcmc(p, burn)
+        pos, prob, state = sampler.run_mcmc(p, nburn)
         # rest the sampler
         sampler.reset()
 
@@ -202,28 +210,42 @@ def p92_emcee(x, y, uncs,
     per_params = map(lambda v: (v[1], v[2]-v[1], v[1]-v[0]),
                      zip(*np.percentile(samples, [16, 50, 84],
                                         axis=0)))
+    # set the returned model parameters to the p50 values
     for k, val in enumerate(per_params):
         exec("model_copy.{}.value = {}".format(fit_param_names[k],
-                                               best_params[k]))
+                                               val[0]))
         print(fit_param_names[k], best_params[k], val)
 
+    if return_sampler:
+        return (model_copy, sampler)
+    else:
+        return model_copy
+
+
+def plot_emcee_results(sampler,
+                       fit_param_names,
+                       filebase=''):
+    """
+    Plot the standard triangle and diagnostic walker plots
+    """
+
     # plot the walker chains for all parameters
+    nwalkers, nsteps, ndim = sampler.chain.shape
     fig, ax = plt.subplots(ndim, sharex=True, figsize=(13, 13))
     walk_val = np.arange(nsteps)
     for i in range(ndim):
         for k in range(nwalkers):
             ax[i].plot(walk_val, sampler.chain[k, :, i], '-')
-            # ax[i].set_ylabel(var_names[i])
-    fig.savefig('walker_param_values.png')
+            ax[i].set_ylabel(fit_param_names[i])
+    fig.savefig('%s_walker_param_values.png' % filebase)
     plt.close(fig)
 
     # plot the 1D and 2D likelihood functions in a traditional triangle plot
+    samples = sampler.chain.reshape((-1, ndim))
     fig = corner.corner(samples, labels=fit_param_names, show_titles=True,
                         title_fmt='.3f', use_math_text=True)
-    fig.savefig('param_triangle.png')
+    fig.savefig('%s_param_triangle.png' % filebase)
     plt.close(fig)
-
-    return model_copy
 
 
 if __name__ == "__main__":
@@ -236,6 +258,10 @@ if __name__ == "__main__":
                         default="/home/kgordon/Dust/Ext/")
     parser.add_argument("--emcee", help="run EMCEE fit",
                         action="store_true")
+    parser.add_argument("--nburn", type=int, default=100,
+                        help='# of burn steps in MCMC chain')
+    parser.add_argument("--nsteps", type=int, default=500,
+                        help='# of steps in MCMC chain')
     parser.add_argument("--threads", type=int, default=1,
                         help="number of threads for EMCEE run")
     parser.add_argument("--png", help="save figure as a png file",
@@ -251,6 +277,9 @@ if __name__ == "__main__":
                           path=args.path)
     compstarobs = StarData('DAT_files/%s.dat' % args.compstarname,
                            path=args.path)
+
+    # output filebase
+    filebase = 'fits/%s_%s' % (args.redstarname, args.compstarname)
 
     # calculate the extinction curve
     extdata = ExtData()
@@ -316,19 +345,26 @@ if __name__ == "__main__":
 
     if args.emcee:
         # run the emcee fitter to get proper fit parameter uncertainties
-        p92_fit_emcee = p92_emcee(x, y, y_unc, p92_fit,
+        fit_param_names = ['Av_1',
+                           'BKG_amp_0', 'BKG_lambda_0',
+                           'NUV_amp_0', 'NUV_lambda_0',
+                           'FUV_amp_0',
+                           'SIL1_amp_0', 'SIL1_lambda_0',
+                           'SIL2_amp_0',
+                           'FIR_amp_0']
+        emcee_results = p92_emcee(x, y, y_unc, p92_fit,
+                                  nburn=args.nburn,
+                                  nsteps=args.nsteps,
                                   threads=args.threads,
-                                  fit_param_names=['Av_1',
-                                                   'BKG_amp_0',
-                                                   'NUV_amp_0', 'NUV_lambda_0',
-                                                   'FUV_amp_0',
-                                                   'SIL1_amp_0', 'SIL1_lambda_0',
-                                                   'SIL2_amp_0',
-                                                   'FIR_amp_0'])
+                                  fit_param_names=fit_param_names,
+                                  return_sampler=True)
+        p92_fit_emcee, sampler = emcee_results
+        clean_pnames_emcee = [pname[:-2] for pname in fit_param_names]
+        plot_emcee_results(sampler, clean_pnames_emcee, filebase=filebase)
 
     # save the extinction curve and fit
     warnings.simplefilter('ignore', category=AstropyWarning)
-    out_fname = "%s_%s_ext.fits" % (args.redstarname, args.compstarname)
+    out_fname = "fits/%s_%s_ext.fits" % (args.redstarname, args.compstarname)
     extdata.save_ext_data(out_fname,
                           p92_best_params=(clean_pnames, p92_fit.parameters))
 
@@ -350,18 +386,31 @@ if __name__ == "__main__":
     ax2 = plt.axes([.60, .35, .35, .35])
 
     # plot the bands and all spectra for this star
-    extdata.plot_ext(ax)
-    extdata.plot_ext(ax2)
+    extdata.plot_ext(ax, color='k', alpha=0.5)
+    extdata.plot_ext(ax2, color='k', alpha=0.5)
 
-    ax.plot(1./x, p92_init(x), label='Initial guess', alpha=0.25)
-    ax2.plot(1./x, p92_init(x), label='Initial guess', alpha=0.25)
-    ax.plot(1./x, p92_fit(x), label='Fitted model')
-    ax2.plot(1./x, p92_fit(x), label='Fitted model')
-    ax.plot(1./x, best_fit_Av*np.full((len(x)), -1.0))
-    ax2.plot(1./x, best_fit_Av*np.full((len(x)), -1.0))
+    # ax.plot(1./x, p92_init(x), 'p-', label='Initial guess', alpha=0.25)
+    # ax2.plot(1./x, p92_init(x), 'p-', label='Initial guess', alpha=0.25)
     if args.emcee:
-        ax.plot(1./x, p92_fit_emcee(x), label='emcee model')
-        ax2.plot(1./x, p92_fit_emcee(x), label='emcee model')
+        # plot the walkers with transparancy
+        nwalkers, nsteps, ndim = sampler.chain.shape
+        nwalkers = 1
+        # nsteps = 100
+        for k in range(nwalkers):
+            for j in range(nsteps):
+                for i, pname in enumerate(fit_param_names):
+                    exec("p92_fit_emcee.{}.value = {}".format(pname,
+                                                sampler.chain[k, j, i]))
+                ax.plot(1./x, p92_fit_emcee(x), 'b-', alpha=0.01)
+                ax2.plot(1./x, p92_fit_emcee(x), 'b-', alpha=0.01)
+
+        # p50 results
+        ax.plot(1./x, p92_fit_emcee(x), 'b-', label='EMCEE Fits')
+        ax2.plot(1./x, p92_fit_emcee(x), 'b-')
+    ax.plot(1./x, p92_fit(x), 'r-', label='Best Fit')
+    ax2.plot(1./x, p92_fit(x), 'r-')
+    ax.plot(1./x, best_fit_Av*np.full((len(x)), -1.0), '-', label='-A(V)')
+    ax2.plot(1./x, best_fit_Av*np.full((len(x)), -1.0), '-')
 
     # finish configuring the plot
     ax.set_yscale('linear')
@@ -382,10 +431,11 @@ if __name__ == "__main__":
                  max(p92_fit(x)[indxs])+0.1)
 
     # use the whitespace better
-    # fig.tight_layout()
+    warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
+    fig.tight_layout()
 
     # plot or save to a file
-    outname = "%s_%s_ext" % (args.redstarname, args.compstarname)
+    outname = "%s_ext" % filebase
     if args.png:
         fig.savefig(outname+'.png')
     elif args.eps:
