@@ -409,8 +409,59 @@ if __name__ == "__main__":
         ax2.plot(1./x, p92_fit_emcee(x), 'b-')
     ax.plot(1./x, p92_fit(x), 'r-', label='Best Fit')
     ax2.plot(1./x, p92_fit(x), 'r-')
+
+    # show components of best fitter
+    p92_comps = p92_fit.copy()
+    p92_comps.FUV_amp_0 = 0.0
+    p92_comps.NUV_amp_0 = 0.0
+    p92_comps.SIL1_amp_0 = 0.0
+    p92_comps.SIL2_amp_0 = 0.0
+    p92_comps.FIR_amp_0 = 0.0
+    ax.plot(1./x, p92_comps(x), 'k-', alpha=0.5)
+    ax2.plot(1./x, p92_comps(x), 'k-', alpha=0.5)
+
     ax.plot(1./x, best_fit_Av*np.full((len(x)), -1.0), '-', label='-A(V)')
     ax2.plot(1./x, best_fit_Av*np.full((len(x)), -1.0), '-')
+
+    p92_comps = p92_fit.copy()
+    p92_comps.NUV_amp_0 = 0.0
+    p92_comps.SIL1_amp_0 = 0.0
+    p92_comps.SIL2_amp_0 = 0.0
+    p92_comps.FIR_amp_0 = 0.0
+    ax.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+    ax2.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+
+    p92_comps = p92_fit.copy()
+    p92_comps.FUV_amp_0 = 0.0
+    p92_comps.SIL1_amp_0 = 0.0
+    p92_comps.SIL2_amp_0 = 0.0
+    p92_comps.FIR_amp_0 = 0.0
+    ax.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+    ax2.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+
+    p92_comps = p92_fit.copy()
+    p92_comps.FUV_amp_0 = 0.0
+    p92_comps.NUV_amp_0 = 0.0
+    p92_comps.SIL2_amp_0 = 0.0
+    p92_comps.FIR_amp_0 = 0.0
+    ax.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+    ax2.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+
+    p92_comps = p92_fit.copy()
+    p92_comps.FUV_amp_0 = 0.0
+    p92_comps.NUV_amp_0 = 0.0
+    p92_comps.SIL1_amp_0 = 0.0
+    p92_comps.FIR_amp_0 = 0.0
+    ax.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+    ax2.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+
+    p92_comps = p92_fit.copy()
+    p92_comps.FUV_amp_0 = 0.0
+    p92_comps.NUV_amp_0 = 0.0
+    p92_comps.SIL1_amp_0 = 0.0
+    p92_comps.SIL2_amp_0 = 0.0
+    ax.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
+    ax2.plot(1./x, p92_comps(x), 'k--', alpha=0.5)
 
     # finish configuring the plot
     ax.set_yscale('linear')
@@ -423,7 +474,7 @@ if __name__ == "__main__":
     ax.legend()
 
     # finish configuring the subplot
-    sp_xlim = [2.0, 40.0]
+    sp_xlim = [2.0, 35.0]
     ax2.set_xlim(sp_xlim)
     # ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
     indxs, = np.where((x > 1.0/sp_xlim[1]) & (x < 1.0/sp_xlim[0]))

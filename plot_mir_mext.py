@@ -21,7 +21,9 @@ if __name__ == "__main__":
     parser.add_argument("filelist", help="file with list of curves to plot")
     parser.add_argument("--alav", help="plot A(lambda)/A(V)",
                         action="store_true")
-    parser.add_argument("--modonly", help="only plot the models",
+    parser.add_argument("--models", help="plot the best fit models",
+                        action="store_true")
+    parser.add_argument("--modonly", help="only plot the best fit models",
                         action="store_true")
     parser.add_argument("-p", "--png", help="save figure as a png file",
                         action="store_true")
@@ -63,7 +65,7 @@ if __name__ == "__main__":
 
     sindxs = np.argsort(avs)
 
-    kxrange = [1.0, 130.]
+    kxrange = [1.0, 40]
     ann_xvals = [41.0, 50.0]
     spec_name = 'IRS'
     norm_wave_range = [6., 10.]
@@ -83,9 +85,9 @@ if __name__ == "__main__":
         # plot the extinction curves
         if not args.modonly:
             extdatas[k].plot_ext(ax, color=col_vals[i % 6],
-                                 annotate_key='IRS',
                                  alav=args.alav,
                                  fontsize=fontsize)
+                                 # annotate_key='IRS',
 
         # plot the best fit P92 model
         if args.alav:
@@ -132,14 +134,18 @@ if __name__ == "__main__":
                            FIR_b_0=extdatas[k].p92_best_fit['FIR_B'],
                            Av_1=extdatas[k].columns['AV'][0])
 
-        ax.plot(1.0/mod_x, P92_best(mod_x), '--',
-                color=col_vals[i % 6], alpha=0.5)
+        if args.models:
+            ax.plot(1.0/mod_x, P92_best(mod_x), '--',
+                    color=col_vals[i % 6], alpha=0.5)
 
-    ax.set_yscale('linear')
+    if args.alav:
+        ax.set_yscale('log')
+    else:
+        ax.set_yscale('linear')
     ax.set_xscale('log')
     ax.set_xlim(kxrange)
     if args.alav:
-        ax.set_ylim(-0.05, 0.2)
+        ax.set_ylim(0.01, 0.2)
         ax.set_ylabel('$A(\lambda)/A(V)$',
                       fontsize=1.3*fontsize)
         # Milky Way observed extinction from

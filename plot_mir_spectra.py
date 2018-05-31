@@ -42,7 +42,7 @@ if __name__ == "__main__":
                              path='/home/kgordon/Dust/Ext/')
             stardata.append(tstar)
 
-    fontsize = 18
+    fontsize = 12
 
     font = {'size': fontsize}
 
@@ -55,10 +55,13 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.major', width=2)
     matplotlib.rc('ytick.minor', width=2)
 
-    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 13))
+    # fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 13))
+    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 4))
 
-    kxrange = [3.0, 130.]
-    ann_xvals = [41.0, 50.0]
+    # kxrange = [3.0, 130.]
+    kxrange = [3.0, 65.]
+    # ann_xvals = [41.0, 50.0]
+    ann_xvals = [35.0, 42.0]
     spec_name = 'IRS'
     norm_wave_range = [6., 10.]
     ann_wave_range = [15.0, 18.0]
@@ -122,7 +125,7 @@ if __name__ == "__main__":
     ax.set_xscale('log')
     ax.set_xlim(kxrange)
     ax.set_xlabel('$\lambda$ [$\mu m$]', fontsize=1.3 * fontsize)
-    ax.set_ylabel('$\lambda^4 F(\lambda)/F(8[ish] \mu m)$ + offset',
+    ax.set_ylabel('$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset',
                   fontsize=1.3*fontsize)
 
     ax.tick_params('both', length=10, width=2, which='major')
