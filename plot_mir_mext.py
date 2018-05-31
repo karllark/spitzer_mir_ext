@@ -42,7 +42,7 @@ if __name__ == "__main__":
         if (line.find('#') != 0) & (len(line) > 0):
             name = line.rstrip()
             extnames.append(name)
-            text = ExtData(filename=name)
+            text = ExtData(filename='fits/%s' % name)
             extdatas.append(text)
             avs.append(text.columns['AV'][0])
 
