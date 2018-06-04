@@ -10,20 +10,30 @@ import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
 
+from astropy.table import Table
+
 from calc_ext import P92_Elv
 from dust_extinction.shapes import P92
-from measure_extinction.extdata import ExtData
+from measure_extinction.extdata import (ExtData, AverageExtData)
 
 if __name__ == "__main__":
 
     # commandline parser
     parser = argparse.ArgumentParser()
     parser.add_argument("filelist", help="file with list of curves to plot")
+    parser.add_argument("--rebin_fac", type=int, default=None,
+                        help="rebin factor for spectra")
     parser.add_argument("--alav", help="plot A(lambda)/A(V)",
+                        action="store_true")
+    parser.add_argument("--ave", help="plot the average",
                         action="store_true")
     parser.add_argument("--models", help="plot the best fit models",
                         action="store_true")
     parser.add_argument("--modonly", help="only plot the best fit models",
+                        action="store_true")
+    parser.add_argument("--prevobs", help="plot previous observations",
+                        action="store_true")
+    parser.add_argument("--dg_models", help="plot dust grain models",
                         action="store_true")
     parser.add_argument("-p", "--png", help="save figure as a png file",
                         action="store_true")
@@ -61,7 +71,11 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.major', width=2)
     matplotlib.rc('ytick.minor', width=2)
 
-    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 13))
+    if args.alav:
+        figsize = (10, 6)
+    else:
+        figsize = (10, 12)
+    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=figsize)
 
     sindxs = np.argsort(avs)
 
@@ -71,22 +85,20 @@ if __name__ == "__main__":
     norm_wave_range = [6., 10.]
     ann_wave_range = [15.0, 18.0]
     col_vals = ['b', 'g', 'r', 'm', 'c', 'y']
+    lin_vals = ['--', ':', '-.']
 
     mod_x = 1.0/np.arange(1.0, 40.0, 0.1)
     for i in range(len(extnames)):
         k = sindxs[i]
 
-        # get the value to use for normalization and offset
-        norm_indxs = np.where((extdatas[k].waves[spec_name]
-                               >= norm_wave_range[0]) &
-                              (extdatas[k].waves[spec_name]
-                               <= norm_wave_range[1]))
-
         # plot the extinction curves
         if not args.modonly:
             extdatas[k].plot_ext(ax, color=col_vals[i % 6],
                                  alav=args.alav,
+                                 alpha=0.5,
+                                 rebin_fac=args.rebin_fac,
                                  fontsize=fontsize)
+                                 # legend_key='IRS')
                                  # annotate_key='IRS',
 
         # plot the best fit P92 model
@@ -135,33 +147,95 @@ if __name__ == "__main__":
                            Av_1=extdatas[k].columns['AV'][0])
 
         if args.models:
-            ax.plot(1.0/mod_x, P92_best(mod_x), '--',
-                    color=col_vals[i % 6], alpha=0.5)
+            if args.alav:
+                ltext = None
+            else:
+                ltext = extdatas[k].red_file.replace('DAT_files/','')
+                ltext = ltext.replace('.dat','')
+            ax.plot(1.0/mod_x, P92_best(mod_x), lin_vals[i%3],
+                    color=col_vals[i % 6], alpha=0.5,
+                    label=ltext)
 
-    if args.alav:
-        ax.set_yscale('log')
-    else:
-        ax.set_yscale('linear')
+    ax.set_yscale('linear')
     ax.set_xscale('log')
     ax.set_xlim(kxrange)
     if args.alav:
-        ax.set_ylim(0.01, 0.2)
+        ax.set_ylim(0.0, 0.25)
         ax.set_ylabel('$A(\lambda)/A(V)$',
                       fontsize=1.3*fontsize)
-        # Milky Way observed extinction from
-        # Rieke & Lebofsky (1985)
-        MW_x = 1.0/np.array([13.0, 12.5, 12.0, 11.5, 11.0, 10.5,
-                            10.0,  9.5,  9.0,  8.5,  8.0,  4.8,
-                            3.5, 2.22, 1.65, 1.25])
-        MW_axav = np.array([0.027, 0.030, 0.037, 0.047, 0.060, 0.074,
-                            0.083, 0.087, 0.074, 0.043, 0.020, 0.023,
-                            0.058, 0.112, 0.175, 0.282])
-        ax.plot(1.0/MW_x, MW_axav, 'ko')
+        if args.prevobs:
+            # Milky Way observed extinction from
+            # Rieke & Lebofsky (1985)
+            MW_x = 1.0/np.array([13.0, 12.5, 12.0, 11.5, 11.0, 10.5,
+                                10.0,  9.5,  9.0,  8.5,  8.0,  4.8,
+                                3.5, 2.22, 1.65, 1.25])
+            MW_axav = np.array([0.027, 0.030, 0.037, 0.047, 0.060, 0.074,
+                                0.083, 0.087, 0.074, 0.043, 0.020, 0.023,
+                                0.058, 0.112, 0.175, 0.282])
+            ax.plot(1.0/MW_x, MW_axav, 'bo',
+                    label='GalCenter; Rieke & Lebofsky (1985)')
 
+            remy_wave = np.array([1.24,1.664,2.164,3.545,4.442,5.675,7.760])
+            remy_alak = np.array([2.50,1.55,1.00,0.56,0.43,0.43,0.43])
+            remy_alak_unc = np.array([0.15,0.08,0.0,0.06,0.08,0.10,0.10])
+            avak = 8.5
+            remy_alav = remy_alak/avak
+            remy_alav_unc = remy_alak_unc/avak
+            # ax.errorbar(remy_wave, remy_alav, yerr=remy_alav_unc,
+            #             fmt='go', label='Indebetouw et al. (2005)')
+            ax.plot(remy_wave, remy_alav, 'go',
+                    label='GalPlane; Indebetouw et al. (2005)')
+
+            lutz_wave = np.array([2.622, 2.748, 2.852, 3.017, 3.282, 3.742,
+            	                  3.996, 4.347, 5.097, 5.865, 6.749, 7.411,
+                                  8.609, 12.28, 18.72])
+            lutz_alav = np.array([0.07519, 0.06481, 0.07513, 0.08142, 0.06922,
+                                  0.05500, 0.05070, 0.05205, 0.04859, 0.05054,
+                                  0.04532, 0.04349, 0.07962, 0.05445, 0.05499])
+            ax.plot(lutz_wave, lutz_alav, 'mo', label='GalCenter; Lutz (1999)')
+
+            a = Table.read('data/pixie_dust_chiar_2005_modified.dat',
+                           format='ascii.commented_header')
+            # table in A(l)/A(K) units
+            #ax.plot(a['wave'], 0.12*a['galcen'], 'co',
+            #        label='Chiar & Tielens (2005)')
+            ax.plot(a['wave'], 0.12*a['local'], 'co',
+                    label='GalCenter; Chiar & Tielens (2005)')
+
+            if args.dg_models:
+                a = Table.read('data/kext_albedo_WD_MW_3.1_60_D03.all_modified',
+                               format='ascii.commented_header')
+                ax.plot(a['lambda'], a['C_ext/H']/4.802e-22, 'k--',
+                        label='MW R(V)=3.1 (Draine 2003)', alpha=0.5)
+
+                b = Table.read('data/kext_albedo_WD_MW_5.5A_30_D03.all_modified',
+                               format='ascii.commented_header')
+                ax.plot(b['lambda'], b['C_ext/H']/6.622E-22, 'k:',
+                        label='MW R(V)=5.5; sizedist=A (Draine 2003)',
+                        alpha=0.5)
+
+                b = Table.read('data/kext_albedo_WD_MW_5.5B_30.dat_modified',
+                               format='ascii.commented_header')
+                ax.plot(b['lambda'], b['C_ext/H']/4.789E-22, 'k-.',
+                        label='MW R(V)=5.5; sizedist=B (Weingartner & Draine 2001)',
+                        alpha=0.5)
+
+
+        # get the average extinction curve
+        if args.ave:
+            ave_extdata = AverageExtData(extdatas, alav=True)
+            ave_extdata.plot_ext(ax, color='k',
+                                 fontsize=fontsize,
+                                 legend_key='IRS',
+                                 legend_label='Average (this work)')
+
+        ax.legend(fontsize=12)
     else:
-        ax.set_ylim(-6.0, -1.0)
+        ax.set_xlim(1.0,40.)
+        ax.set_ylim(-6, -0.5)
         ax.set_ylabel('$E(\lambda - V)$',
                       fontsize=1.3*fontsize)
+        ax.legend(fontsize=12, ncol=4)
 
     ax.tick_params('both', length=10, width=2, which='major')
     ax.tick_params('both', length=5, width=1, which='minor')
