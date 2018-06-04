@@ -216,6 +216,10 @@ def p92_emcee(x, y, uncs,
                                                val[0]))
         print(fit_param_names[k], best_params[k], val)
 
+    clean_pnames = [pname[:-2] for pname in fit_param_names]
+    model_copy.p92_emcee_param_names = clean_pnames
+    model_copy.p92_emcee_per_params = per_params
+
     if return_sampler:
         return (model_copy, sampler)
     else:
