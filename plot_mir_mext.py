@@ -187,12 +187,17 @@ if __name__ == "__main__":
                     label='GalPlane; Indebetouw et al. (2005)')
 
             lutz_wave = np.array([2.622, 2.748, 2.852, 3.017, 3.282, 3.742,
-            	                  3.996, 4.347, 5.097, 5.865, 6.749, 7.411,
+                                  3.996, 4.347, 5.097, 5.865, 6.749, 7.411,
                                   8.609, 12.28, 18.72])
             lutz_alav = np.array([0.07519, 0.06481, 0.07513, 0.08142, 0.06922,
                                   0.05500, 0.05070, 0.05205, 0.04859, 0.05054,
                                   0.04532, 0.04349, 0.07962, 0.05445, 0.05499])
-            ax.plot(lutz_wave, lutz_alav, 'mo', label='GalCenter; Lutz (1999)')
+            # ax.plot(lutz_wave, lutz_alav, 'mo', label='GalCenter; Lutz (1999)')
+
+            a = Table.read('data/fritz11_galcenter.dat',
+                           format='ascii.commented_header')
+            ax.plot(a['wave'], 0.12*a['ext']/2.62, 'mo',
+                    label='GalCenter; Fritz et al. (2011)')
 
             a = Table.read('data/pixie_dust_chiar_2005_modified.dat',
                            format='ascii.commented_header')
