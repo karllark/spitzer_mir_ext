@@ -7,7 +7,7 @@ This paper is Gordon, Misselt, et al. (in prep).
 In Development!
 ---------------
 
-Active devleopment.
+Active development.
 Data still in changing.
 Use at your own risk.
 
@@ -20,4 +20,3 @@ License
 
 This code is licensed under a 3-clause BSD style license (see the
 ``LICENSE`` file).
-
