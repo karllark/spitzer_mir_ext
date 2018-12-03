@@ -72,7 +72,7 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.minor', width=2)
 
     if args.alav:
-        figsize = (10, 6)
+        figsize = (10, 8)
     else:
         figsize = (10, 12)
     fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=figsize)
@@ -234,13 +234,15 @@ if __name__ == "__main__":
                                  legend_key='IRS',
                                  legend_label='Average (this work)')
 
-        ax.legend(fontsize=12)
+        ax.legend(fontsize=fontsize)
     else:
         ax.set_xlim(1.0,40.)
         ax.set_ylim(-6, -0.5)
         ax.set_ylabel('$E(\lambda - V)$',
                       fontsize=1.3*fontsize)
         ax.legend(fontsize=12, ncol=4)
+
+    ax.set_xlabel(r'$\lambda$ [$\mu m$]')
 
     ax.tick_params('both', length=10, width=2, which='major')
     ax.tick_params('both', length=5, width=1, which='minor')
