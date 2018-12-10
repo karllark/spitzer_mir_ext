@@ -5,7 +5,8 @@ readcol,'ir_standards_culled.dat',irs_standards_in,format='(A)'
 sindxs = sort(irs_standards_in)
 irs_standards_in = irs_standards_in[sindxs]
 
-files = 'DAT_files/' + irs_standards_in + '.dat'
+dat_path = '~/Python_git/extstar_data/DAT_files/'
+files = dat_path + irs_standards_in + '.dat'
 n_files = n_elements(files)
 
 openw,unit1,'ir_ext_phot.tex',/get_lun
@@ -20,37 +21,31 @@ for i = 0,(n_files-1) do begin
     ostr = strupcase(irs_standards_in[i])
 
     mag = get_band_mag(star_data,'IRAC1',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRAC2',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRAC3',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRAC4',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRS15',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'MIPS24',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
@@ -72,37 +67,31 @@ for i = 0,(n_files-1) do begin
     ostr = strupcase(irs_reddened_in[i])
 
     mag = get_band_mag(star_data,'IRAC1',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRAC2',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRAC3',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRAC4',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'IRS15',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
 
     mag = get_band_mag(star_data,'MIPS24',mag_unc)
-    mag_unc = sqrt(mag_unc^2 + 0.02^2)
     if (mag GT -1.0) then $
       ostr += ' & $' + string(mag,format='(F6.3)') + ' \pm ' + string(mag_unc,format='(F6.3)') + '$' $
     else ostr += ' & \nodata'
@@ -114,5 +103,7 @@ endfor
 printf,unit1,'\enddata'
 printf,unit1,'\end{deluxetable*}'
 free_lun,unit1
+
+print, 'done'
 
 end

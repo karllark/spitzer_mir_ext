@@ -7,9 +7,13 @@ readcol,'~/Dust/Ext/MIPS/irext_mips24_all.dat', $
         tag,aorkey,name,obstime,aflux,asn,afluxmjy,pflux,psn,flux
 
 flux_unc = flux/psn
+; 2% uncertainty from absflux calibration (Engelbracht et al. 2007)
+flux_unc = sqrt(flux_unc^2 + (flux*0.02)^2)
 
 uindxs = uniq(name)
 n_uindxs = n_elements(uindxs)
+
+dat_path = '~/Python_git/extstar_data/DAT_files/'
 
 ;n_uindxs = 1
 for i = 0,(n_uindxs-1) do begin
@@ -20,11 +24,11 @@ for i = 0,(n_uindxs-1) do begin
     if (newname EQ 'ngc2024') then newname += '_1'
     if (newname EQ 'bd+631964') then newname = 'bd+63d1964'
 
-    if (not file_test('DAT_files/' + newname + '_old.dat')) then $
-      file_move,'DAT_files/' + newname + '.dat','DAT_files/' + newname + '_old.dat'
+    if (not file_test(dat_path + newname + '_old.dat')) then $
+      file_move,dat_path + newname + '.dat',dat_path + newname + '_old.dat'
 
-    openr,iunit,'DAT_files/' + newname + '_old.dat',/get_lun
-    openw,ounit,'DAT_files/' + newname + '.dat',/get_lun
+    openr,iunit,dat_path + newname + '_old.dat',/get_lun
+    openw,ounit,dat_path + newname + '.dat',/get_lun
 
     print,newname,'; old MIPS'
     tstr = ''
@@ -47,7 +51,7 @@ for i = 0,(n_uindxs-1) do begin
         print,ostr
         printf,ounit,ostr
     endfor
-    
+
     free_lun,iunit
     free_lun,ounit
 endfor

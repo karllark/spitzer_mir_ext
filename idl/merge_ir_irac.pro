@@ -6,8 +6,12 @@ readcol,'~/Spitzer/IR_Ext/IRAC/irext_spitzer_ave_phot_subarray_rad3_sky10_20.dat
         format='(A15,A6,F8.2,F8.2,F12.4,F12.4,F12.4,F12.4)', $
         name,filter,x,y,flux,flux_unc,sky_flux,sky_flux_unc
 
+flux_unc = sqrt(flux_unc^2 + (flux*0.02)^2)
+
 uindxs = uniq(name)
 n_uindxs = n_elements(uindxs)
+
+dat_path = '~/Python_git/extstar_data/DAT_files/'
 
 ;n_uindxs = 1
 for i = 0,(n_uindxs-1) do begin
@@ -16,11 +20,11 @@ for i = 0,(n_uindxs-1) do begin
     if (strlen(newname) EQ 7) then newname = repstr(newname,'hd','hd0')
     if (newname EQ 'ngc2024') then newname += '_1'
 
-    if (not file_test('DAT_files/' + newname + '_old.dat')) then $
-      file_move,'DAT_files/' + newname + '.dat','DAT_files/' + newname + '_old.dat'
+    if (not file_test(dat_path + newname + '_old.dat')) then $
+      file_move,dat_path + newname + '.dat',dat_path + newname + '_old.dat'
 
-    openr,iunit,'DAT_files/' + newname + '_old.dat',/get_lun
-    openw,ounit,'DAT_files/' + newname + '.dat',/get_lun
+    openr,iunit,dat_path + newname + '_old.dat',/get_lun
+    openw,ounit,dat_path + newname + '.dat',/get_lun
 
     print,newname,'; old IRAC'
     tstr = ''
@@ -50,7 +54,7 @@ for i = 0,(n_uindxs-1) do begin
         print,ostr
         printf,ounit,ostr
     endfor
-    
+
     free_lun,iunit
     free_lun,ounit
 endfor
