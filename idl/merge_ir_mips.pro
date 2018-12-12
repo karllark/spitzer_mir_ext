@@ -24,10 +24,10 @@ for i = 0,(n_uindxs-1) do begin
     if (newname EQ 'ngc2024') then newname += '_1'
     if (newname EQ 'bd+631964') then newname = 'bd+63d1964'
 
-    if (not file_test(dat_path + newname + '_old.dat')) then $
-      file_move,dat_path + newname + '.dat',dat_path + newname + '_old.dat'
+    if (not file_test(dat_path + newname + '_old_mips.dat')) then $
+      file_move,dat_path + newname + '.dat',dat_path + newname + '_old_mips.dat'
 
-    openr,iunit,dat_path + newname + '_old.dat',/get_lun
+    openr,iunit,dat_path + newname + '_old_mips.dat',/get_lun
     openw,ounit,dat_path + newname + '.dat',/get_lun
 
     print,newname,'; old MIPS'

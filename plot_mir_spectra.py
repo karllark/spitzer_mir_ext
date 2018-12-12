@@ -39,7 +39,7 @@ if __name__ == "__main__":
             name = line.rstrip()
             starnames.append(name)
             tstar = StarData('DAT_files/'+name+'.dat',
-                             path='/home/kgordon/Dust/Ext/')
+                             path='/home/kgordon/Python_git/extstar_data/')
             stardata.append(tstar)
 
     fontsize = 12

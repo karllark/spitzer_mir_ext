@@ -6,6 +6,11 @@ readcol,'~/Dust/Ext/IRSB/irext_spitzer_phot_irs_rad12_sky18_25.dat', $
         format='(A15,A6,F8.2,F8.2,F10.2,F10.2,F10.2,F10.2)', $
         name,filter,x,y,flux,flux_unc,sky_flux,sky_flux_unc
 
+dat_path = '~/Python_git/extstar_data/DAT_files/'
+
+; 2% uncertainty from absflux calibration similar to IRAC/MIPS
+flux_unc = sqrt(flux_unc^2 + (flux*0.02)^2)
+
 uindxs = uniq(name)
 n_uindxs = n_elements(uindxs)
 
@@ -18,11 +23,11 @@ for i = 0,(n_uindxs-1) do begin
     if (newname EQ 'ngc2024') then newname += '_1'
     if (newname EQ 'bd+631964') then newname = 'bd+63d1964'
 
-    if (not file_test('DAT_files/' + newname + '_old4.dat')) then $
-      file_move,'DAT_files/' + newname + '.dat','DAT_files/' + newname + '_old4.dat'
+    if (not file_test('DAT_files/' + newname + '_old_irs.dat')) then $
+      file_move,dat_path + newname + '.dat',dat_path + newname + '_old_irs.dat'
 
-    openr,iunit,'DAT_files/' + newname + '_old4.dat',/get_lun
-    openw,ounit,'DAT_files/' + newname + '.dat',/get_lun
+    openr,iunit,dat_path + newname + '_old_irs.dat',/get_lun
+    openw,ounit,dat_path + newname + '.dat',/get_lun
 
     print,newname,'; old IRS15'
     tstr = ''
@@ -47,7 +52,7 @@ for i = 0,(n_uindxs-1) do begin
         print,ostr
         printf,ounit,ostr
     endfor
-    
+
     free_lun,iunit
     free_lun,ounit
 endfor

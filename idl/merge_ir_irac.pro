@@ -20,10 +20,10 @@ for i = 0,(n_uindxs-1) do begin
     if (strlen(newname) EQ 7) then newname = repstr(newname,'hd','hd0')
     if (newname EQ 'ngc2024') then newname += '_1'
 
-    if (not file_test(dat_path + newname + '_old.dat')) then $
-      file_move,dat_path + newname + '.dat',dat_path + newname + '_old.dat'
+    if (not file_test(dat_path + newname + '_old_irac.dat')) then $
+      file_move,dat_path + newname + '.dat',dat_path + newname + '_old_irac.dat'
 
-    openr,iunit,dat_path + newname + '_old.dat',/get_lun
+    openr,iunit,dat_path + newname + '_old_irac.dat',/get_lun
     openw,ounit,dat_path + newname + '.dat',/get_lun
 
     print,newname,'; old IRAC'
