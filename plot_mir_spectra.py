@@ -56,16 +56,17 @@ if __name__ == "__main__":
     matplotlib.rc('ytick.minor', width=2)
 
     # fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 13))
-    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 4))
+    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=(10, 8))
 
     # kxrange = [3.0, 130.]
-    kxrange = [3.0, 65.]
+    kxrange = [1.0, 65.]
     # ann_xvals = [41.0, 50.0]
     ann_xvals = [35.0, 42.0]
     spec_name = 'IRS'
     norm_wave_range = [6., 10.]
     ann_wave_range = [15.0, 18.0]
     col_vals = ['b', 'g', 'r', 'm', 'c', 'y']
+    # col_vals = ['k', 'k', 'k', 'k', 'k', 'k']
     plam4 = True
     for i in range(len(starnames)):
         k = i
