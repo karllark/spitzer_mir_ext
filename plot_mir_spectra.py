@@ -21,6 +21,7 @@ def plot_mir_set(ax, starnames, extra_off_val=0.0,
                  norm_wave_range=[6., 10.],
                  col_vals=['b', 'g', 'r', 'm', 'c', 'y'],
                  ann_xvals=[35.0, 42.0],
+                 ann_wave_range=[9.0, 15.0],
                  fontsize=12):
     """
     Plot a set of spectra
@@ -29,7 +30,8 @@ def plot_mir_set(ax, starnames, extra_off_val=0.0,
     spec_name = 'IRS'
     for i in range(len(starnames)):
         stardata = StarData('DAT_files/'+starnames[i]+'.dat',
-                            path='/home/kgordon/Python_git/extstar_data/')
+                            path='/home/kgordon/Python_git/extstar_data/',
+                            use_corfac=True)
 
         if plam4:
             ymult = np.power(stardata.data[spec_name].waves, 4.0)
@@ -56,7 +58,6 @@ def plot_mir_set(ax, starnames, extra_off_val=0.0,
 
         # annotate the spectra
         # ann_wave_range = np.array([max_gwave-5.0, max_gwave-1.0])
-        ann_wave_range = [9.0, 15.0]
         ann_indxs = np.where((stardata.data[spec_name].waves
                               >= ann_wave_range[0]) &
                              (stardata.data[spec_name].waves
