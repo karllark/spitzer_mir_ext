@@ -31,7 +31,7 @@ for i = 0,(n_uindxs-1) do begin
     tstr = ''
     while (not eof(iunit)) do begin
         readf,iunit,tstr
-        if (strmid(tstr,0,10) EQ 'corfac_irs') then begin
+        if ((strmid(tstr,0,10) EQ 'corfac_irs') AND (strmid(tstr,0,18) NE 'corfac_irs_maxwave')) then begin
             print,tstr
         endif else begin
             printf,ounit,tstr

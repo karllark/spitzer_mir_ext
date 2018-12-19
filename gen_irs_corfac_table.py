@@ -2,13 +2,9 @@
 #
 # Program to generate the table of IRS correction factors
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
 import argparse
 
-import numpy as np
-
-from getstardata import StarData
+from measure_extinction.stardata import StarData
 
 if __name__ == "__main__":
 
@@ -28,13 +24,13 @@ if __name__ == "__main__":
         if (line.find('#') != 0) & (len(line) > 0):
             name = line.rstrip()
             starnames.append(name)
-            tstar = StarData('DAT_files/'+name+'.dat', 
-                             path='/home/kgordon/Dust/Ext/')
+            tstar = StarData('DAT_files/'+name+'.dat',
+                             path='/home/kgordon/Python_git/extstar_data/')
             if 'IRS_slope' in tstar.corfac.keys():
-                print('%s & %.3f & %.3f & %.3f \\\\'%(name.upper(), 
-                                            tstar.corfac['IRS'], 
-                                            tstar.corfac['IRS_slope'], 
+                print('%s & %.3f & %.3f & %.3f \\\\'%(name.upper(),
+                                            tstar.corfac['IRS'],
+                                            tstar.corfac['IRS_slope'],
                                             tstar.corfac['IRS_zerowave']))
             else:
-                print('%s & %.3f & \\nodata & \\nodata \\\\'%(name.upper(), 
+                print('%s & %.3f & \\nodata & \\nodata \\\\'%(name.upper(),
                                             tstar.corfac['IRS']))
