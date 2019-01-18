@@ -56,11 +56,11 @@ if __name__ == '__main__':
     plot_mir_set(ax, starnames, extra_off_val=0.0,
                  ann_xvals=[9.0, 9.0], ann_wave_range=[5.0, 9.0])
 
-    ann_set(ax, fontsize, [35.0, 38.0], [8.9, 4.8], [45.0, 42.0],
+    ann_set(ax, fontsize, [35.0, 38.0], [10.5, 1.5], [45.0, 42.0],
             'Giants and Supergiants', '(ordered by wind srength)')
 
     ax.set_yscale('linear')
-    ax.set_ylim(0.5, 9.)
+    ax.set_ylim(0.5, 11.)
     ax.set_xscale('log')
     ax.set_xlim(kxrange)
     ax.set_xlabel('$\lambda$ [$\mu m$]', fontsize=1.3 * fontsize)
