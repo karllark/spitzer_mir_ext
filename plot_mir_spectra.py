@@ -13,6 +13,8 @@ import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
 
+import astropy.units as u
+
 from measure_extinction.stardata import StarData
 
 
@@ -22,26 +24,30 @@ def plot_mir_set(ax, starnames, extra_off_val=0.0,
                  col_vals=['b', 'g', 'r', 'm', 'c', 'y'],
                  ann_xvals=[35.0, 42.0],
                  ann_wave_range=[9.0, 15.0],
-                 fontsize=12):
+                 fontsize=12,
+                 path='/home/kgordon/Python_git/extstar_data/',
+                 subpath='DAT_files/'):
     """
     Plot a set of spectra
     """
 
     spec_name = 'IRS'
     for i in range(len(starnames)):
-        stardata = StarData('DAT_files/'+starnames[i]+'.dat',
-                            path='/home/kgordon/Python_git/extstar_data/',
+        stardata = StarData(subpath+starnames[i]+'.dat',
+                            path=path,
                             use_corfac=True)
 
+        waves = stardata.data[spec_name].waves.to(u.micron).value
+
         if plam4:
-            ymult = np.power(stardata.data[spec_name].waves, 4.0)
+            ymult = np.power(waves, 4.0)
         else:
-            ymult = np.full((len(stardata.data[spec_name].waves)), 1.0)
+            ymult = np.full((len(waves)), 1.0)
 
         # get the value to use for normalization and offset
-        norm_indxs = np.where((stardata.data[spec_name].waves
+        norm_indxs = np.where((waves
                                >= norm_wave_range[0]) &
-                              (stardata.data[spec_name].waves
+                              (waves
                                <= norm_wave_range[1]))
         norm_val = 1.0/np.average(
             stardata.data[spec_name].fluxes[norm_indxs]
@@ -51,16 +57,16 @@ def plot_mir_set(ax, starnames, extra_off_val=0.0,
         # plot the spectroscopic data
         gindxs = np.where(stardata.data[spec_name].npts > 0)
         # max_gwave = max(stardata.data[spec_name].waves[gindxs])
-        ax.plot(stardata.data[spec_name].waves[gindxs],
+        ax.plot(waves[gindxs],
                 (stardata.data[spec_name].fluxes[gindxs]*ymult[gindxs]
                  * norm_val + off_val),
                 col_vals[i % 6] + '-')
 
         # annotate the spectra
         # ann_wave_range = np.array([max_gwave-5.0, max_gwave-1.0])
-        ann_indxs = np.where((stardata.data[spec_name].waves
+        ann_indxs = np.where((waves
                               >= ann_wave_range[0]) &
-                             (stardata.data[spec_name].waves
+                             (waves
                               <= ann_wave_range[1]) &
                              (stardata.data[spec_name].npts > 0))
         ann_val = np.median(stardata.data[spec_name].fluxes[ann_indxs]
