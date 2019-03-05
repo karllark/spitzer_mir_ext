@@ -207,23 +207,24 @@ if __name__ == "__main__":
             ax.plot(a['wave'], 0.12*a['local'], 'co',
                     label='GalCenter; Chiar & Tielens (2005)')
 
-            if args.dg_models:
-                a = Table.read('data/kext_albedo_WD_MW_3.1_60_D03.all_modified',
-                               format='ascii.commented_header')
-                ax.plot(a['lambda'], a['C_ext/H']/4.802e-22, 'k--',
-                        label='MW R(V)=3.1 (Draine 2003)', alpha=0.5)
+        if args.dg_models:
+            print('test')
+            a = Table.read('data/kext_albedo_WD_MW_3.1_60_D03.all_modified',
+                           format='ascii.commented_header')
+            ax.plot(a['lambda'], a['C_ext/H']/4.802e-22, 'k--',
+                    label='MW R(V)=3.1 (Draine 2003)', alpha=0.5)
 
-                b = Table.read('data/kext_albedo_WD_MW_5.5A_30_D03.all_modified',
-                               format='ascii.commented_header')
-                ax.plot(b['lambda'], b['C_ext/H']/6.622E-22, 'k:',
-                        label='MW R(V)=5.5; sizedist=A (Draine 2003)',
-                        alpha=0.5)
+            b = Table.read('data/kext_albedo_WD_MW_5.5A_30_D03.all_modified',
+                           format='ascii.commented_header')
+            ax.plot(b['lambda'], b['C_ext/H']/6.622E-22, 'k:',
+                    label='MW R(V)=5.5; sizedist=A (Draine 2003)',
+                    alpha=0.5)
 
-                b = Table.read('data/kext_albedo_WD_MW_5.5B_30.dat_modified',
-                               format='ascii.commented_header')
-                ax.plot(b['lambda'], b['C_ext/H']/4.789E-22, 'k-.',
-                        label='MW R(V)=5.5; sizedist=B (Weingartner & Draine 2001)',
-                        alpha=0.5)
+            b = Table.read('data/kext_albedo_WD_MW_5.5B_30.dat_modified',
+                           format='ascii.commented_header')
+            ax.plot(b['lambda'], b['C_ext/H']/4.789E-22, 'k-.',
+                    label='MW R(V)=5.5; sizedist=B (Weingartner & Draine 2001)',
+                    alpha=0.5)
 
 
         # get the average extinction curve
@@ -232,6 +233,7 @@ if __name__ == "__main__":
             ave_extdata.plot_ext(ax, color='k',
                                  fontsize=fontsize,
                                  legend_key='IRS',
+                                 rebin_fac=args.rebin_fac,
                                  legend_label='Average (this work)')
 
         ax.legend(fontsize=fontsize)
