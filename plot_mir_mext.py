@@ -208,7 +208,6 @@ if __name__ == "__main__":
                     label='GalCenter; Chiar & Tielens (2005)')
 
         if args.dg_models:
-            print('test')
             a = Table.read('data/kext_albedo_WD_MW_3.1_60_D03.all_modified',
                            format='ascii.commented_header')
             ax.plot(a['lambda'], a['C_ext/H']/4.802e-22, 'k--',
@@ -226,7 +225,6 @@ if __name__ == "__main__":
                     label='MW R(V)=5.5; sizedist=B (Weingartner & Draine 2001)',
                     alpha=0.5)
 
-
         # get the average extinction curve
         if args.ave:
             ave_extdata = AverageExtData(extdatas, alav=True)
@@ -235,6 +233,7 @@ if __name__ == "__main__":
                                  legend_key='IRS',
                                  rebin_fac=args.rebin_fac,
                                  legend_label='Average (this work)')
+            ave_extdata.save_ext_data('test.fits')
 
         ax.legend(fontsize=fontsize)
     else:
