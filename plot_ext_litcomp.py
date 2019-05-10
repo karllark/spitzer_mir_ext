@@ -179,8 +179,8 @@ if __name__ == "__main__":
 
     save_str = '_litcomp'
     if args.png:
-        fig.savefig(avefilename.replace('.dat', save_str+'.png'))
+        fig.savefig(avefilename.replace('.fits', save_str+'.png'))
     elif args.pdf:
-        fig.savefig(avefilename.replace('.dat', save_str+'.pdf'))
+        fig.savefig(avefilename.replace('.fits', save_str+'.pdf'))
     else:
         pyplot.show()

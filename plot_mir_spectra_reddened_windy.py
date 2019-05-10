@@ -3,6 +3,8 @@ import argparse
 import matplotlib.pyplot as plt
 import matplotlib
 
+import astropy.units as u
+
 from plot_mir_spectra import plot_mir_set, ann_set
 
 if __name__ == '__main__':
@@ -52,9 +54,9 @@ if __name__ == '__main__':
 
     starnames = ['bd+63d1964', 'hd149404', 'hd169454', 'hd229059',
                  'hd166734', 'vicyg5', 'hd034921',
-                 'hd197702', 'hd206773']
+                 'hd197702', 'hd206773', 'hd152408']
     plot_mir_set(ax, starnames, extra_off_val=0.0,
-                 ann_xvals=[9.0, 9.0], ann_wave_range=[5.0, 9.0])
+                 ann_xvals=[9.0, 9.0], ann_wave_range=[6.0, 10.0]*u.micron)
 
     ann_set(ax, fontsize, [35.0, 38.0], [10.5, 1.5], [45.0, 42.0],
             'Giants and Supergiants', '(ordered by wind srength)')

@@ -9,7 +9,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 import argparse
 
-import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
 
@@ -30,65 +29,21 @@ def plot_mir_set(ax, starnames, extra_off_val=0.0,
     """
     Plot a set of spectra
     """
-
-    spec_name = 'IRS'
     for i in range(len(starnames)):
         stardata = StarData(subpath+starnames[i]+'.dat',
                             path=path,
                             use_corfac=True)
 
-        waves = stardata.data[spec_name].waves.to(u.micron).value
-
-        if plam4:
-            ymult = np.power(waves, 4.0)
-        else:
-            ymult = np.full((len(waves)), 1.0)
-
-        # get the value to use for normalization and offset
-        norm_indxs = np.where((waves
-                               >= norm_wave_range[0]) &
-                              (waves
-                               <= norm_wave_range[1]))
-        norm_val = 1.0/np.average(
-            stardata.data[spec_name].fluxes[norm_indxs]
-            * ymult[norm_indxs])
-        off_val = extra_off_val + 0.5*i
-
-        # plot the spectroscopic data
-        gindxs = np.where(stardata.data[spec_name].npts > 0)
-        # max_gwave = max(stardata.data[spec_name].waves[gindxs])
-        ax.plot(waves[gindxs],
-                (stardata.data[spec_name].fluxes[gindxs]*ymult[gindxs]
-                 * norm_val + off_val),
-                col_vals[i % 6] + '-')
-
-        # annotate the spectra
-        # ann_wave_range = np.array([max_gwave-5.0, max_gwave-1.0])
-        ann_indxs = np.where((waves
-                              >= ann_wave_range[0]) &
-                             (waves
-                              <= ann_wave_range[1]) &
-                             (stardata.data[spec_name].npts > 0))
-        ann_val = np.median(stardata.data[spec_name].fluxes[ann_indxs]
-                            * ymult[ann_indxs])
-        ann_val *= norm_val
-        ann_val += off_val + 0.2
-        ax.annotate(starnames[i]+' '+stardata.sptype, xy=(ann_xvals[0],
-                                                          ann_val),
-                    xytext=(ann_xvals[1], ann_val),
-                    verticalalignment="center",
-                    arrowprops=dict(facecolor=col_vals[i % 6], shrink=0.1),
-                    fontsize=0.85*fontsize, rotation=-0.)
-
-        # plot the band fluxes
-        if plam4:
-            ymult = np.power(stardata.data['BAND'].waves, 4.0)
-        else:
-            ymult = np.full((len(stardata.data['BAND'].waves)),
-                            1.0)
-        ax.plot(stardata.data['BAND'].waves,
-                stardata.data['BAND'].fluxes*ymult
-                * norm_val + off_val, col_vals[i % 6] + 'o')
+        stardata.plot(ax, mlam4=True,
+                      norm_wave_range=norm_wave_range*u.micron,
+                      yoffset=extra_off_val + 0.5*i,
+                      pcolor=col_vals[i % 6],
+                      annotate_key='IRS',
+                      annotate_wave_range=ann_wave_range,
+                      annotate_text=starnames[i] + ' ' + stardata.sptype,
+                      fontsize=fontsize,
+                      annotate_rotation=5.,
+                      annotate_yoffset=0.1)
 
 
 def ann_set(ax, fontsize,
