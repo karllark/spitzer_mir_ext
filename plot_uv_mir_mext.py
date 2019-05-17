@@ -16,72 +16,16 @@ from calc_ext import P92_Elv
 from dust_extinction.shapes import P92
 from measure_extinction.extdata import (ExtData, AverageExtData)
 
-if __name__ == "__main__":
 
-    # commandline parser
-    parser = argparse.ArgumentParser()
-    parser.add_argument("filelist", help="file with list of curves to plot")
-    parser.add_argument("--rebin_fac", type=int, default=None,
-                        help="rebin factor for spectra")
-    parser.add_argument("--alav", help="plot A(lambda)/A(V)",
-                        action="store_true")
-    parser.add_argument("--ave", help="plot the average",
-                        action="store_true")
-    parser.add_argument("--models", help="plot the best fit models",
-                        action="store_true")
-    parser.add_argument("--modonly", help="only plot the best fit models",
-                        action="store_true")
-    parser.add_argument("--prevobs", help="plot previous observations",
-                        action="store_true")
-    parser.add_argument("--dg_models", help="plot dust grain models",
-                        action="store_true")
-    parser.add_argument("-p", "--png", help="save figure as a png file",
-                        action="store_true")
-    parser.add_argument("-e", "--eps", help="save figure as an eps file",
-                        action="store_true")
-    parser.add_argument("--pdf", help="save figure as a pdf file",
-                        action="store_true")
-    args = parser.parse_args()
-
-    filename = args.filelist
-
-    f = open(filename, 'r')
-    file_lines = list(f)
-    extnames = []
-    extdatas = []
-    avs = []
-    for line in file_lines:
-        if (line.find('#') != 0) & (len(line) > 0):
-            name = line.rstrip()
-            extnames.append(name)
-            text = ExtData(filename='fits/%s' % name)
-            extdatas.append(text)
-            avs.append(text.columns['AV'][0])
-
-    fontsize = 18
-
-    font = {'size': fontsize}
-
-    matplotlib.rc('font', **font)
-
-    matplotlib.rc('lines', linewidth=1)
-    matplotlib.rc('axes', linewidth=2)
-    matplotlib.rc('xtick.major', width=2)
-    matplotlib.rc('xtick.minor', width=2)
-    matplotlib.rc('ytick.major', width=2)
-    matplotlib.rc('ytick.minor', width=2)
-
-    if args.alav:
-        figsize = (10, 8)
-    else:
-        figsize = (10, 12)
-    fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=figsize)
-
+def plot_all_ext(ax,
+                 kxrange,
+                 kyrange):
+    """
+    plot all the extintion info on the specified plot
+    """
     sindxs = np.argsort(avs)
 
-    kxrange = [1.0, 40.0]
     ann_xvals = [41.0, 50.0]
-    spec_name = 'IRS'
     norm_wave_range = [6., 10.]
     ann_wave_range = [15.0, 18.0]
     col_vals = ['b', 'g', 'r', 'm', 'c', 'y']
@@ -98,8 +42,6 @@ if __name__ == "__main__":
                                  alpha=0.5,
                                  rebin_fac=args.rebin_fac,
                                  fontsize=fontsize)
-                                 # legend_key='IRS')
-                                 # annotate_key='IRS',
 
         # plot the best fit P92 model
         if args.alav:
@@ -124,35 +66,36 @@ if __name__ == "__main__":
                            FIR_n=extdatas[k].p92_best_fit['FIR_N'],
                            FIR_b=extdatas[k].p92_best_fit['FIR_B'])
         else:
-            P92_best = P92_Elv(BKG_amp_0=extdatas[k].p92_best_fit['BKG_AMP'],
-                           BKG_lambda_0=extdatas[k].p92_best_fit['BKG_LAMBDA'],
-                           BKG_n_0=extdatas[k].p92_best_fit['BKG_N'],
-                           BKG_b_0=extdatas[k].p92_best_fit['BKG_B'],
-                           FUV_amp_0=extdatas[k].p92_best_fit['FUV_AMP'],
-                           FUV_lambda_0=extdatas[k].p92_best_fit['FUV_LAMBDA'],
-                           FUV_n_0=extdatas[k].p92_best_fit['FUV_N'],
-                           FUV_b_0=extdatas[k].p92_best_fit['FUV_B'],
-                           NUV_amp_0=extdatas[k].p92_best_fit['NUV_AMP'],
-                           NUV_lambda_0=extdatas[k].p92_best_fit['NUV_LAMBDA'],
-                           NUV_n_0=extdatas[k].p92_best_fit['NUV_N'],
-                           NUV_b_0=extdatas[k].p92_best_fit['NUV_B'],
-                           SIL1_amp_0=extdatas[k].p92_best_fit['SIL1_AMP'],
-                           SIL1_lambda_0=extdatas[k].p92_best_fit['SIL1_LAMBDA'],
-                           SIL1_n_0=extdatas[k].p92_best_fit['SIL1_N'],
-                           SIL1_b_0=extdatas[k].p92_best_fit['SIL1_B'],
-                           FIR_amp_0=extdatas[k].p92_best_fit['FIR_AMP'],
-                           FIR_lambda_0=extdatas[k].p92_best_fit['FIR_LAMBDA'],
-                           FIR_n_0=extdatas[k].p92_best_fit['FIR_N'],
-                           FIR_b_0=extdatas[k].p92_best_fit['FIR_B'],
-                           Av_1=extdatas[k].columns['AV'][0])
+            P92_best = P92_Elv(
+                BKG_amp_0=extdatas[k].p92_best_fit['BKG_AMP'],
+                BKG_lambda_0=extdatas[k].p92_best_fit['BKG_LAMBDA'],
+                BKG_n_0=extdatas[k].p92_best_fit['BKG_N'],
+                BKG_b_0=extdatas[k].p92_best_fit['BKG_B'],
+                FUV_amp_0=extdatas[k].p92_best_fit['FUV_AMP'],
+                FUV_lambda_0=extdatas[k].p92_best_fit['FUV_LAMBDA'],
+                FUV_n_0=extdatas[k].p92_best_fit['FUV_N'],
+                FUV_b_0=extdatas[k].p92_best_fit['FUV_B'],
+                NUV_amp_0=extdatas[k].p92_best_fit['NUV_AMP'],
+                NUV_lambda_0=extdatas[k].p92_best_fit['NUV_LAMBDA'],
+                NUV_n_0=extdatas[k].p92_best_fit['NUV_N'],
+                NUV_b_0=extdatas[k].p92_best_fit['NUV_B'],
+                SIL1_amp_0=extdatas[k].p92_best_fit['SIL1_AMP'],
+                SIL1_lambda_0=extdatas[k].p92_best_fit['SIL1_LAMBDA'],
+                SIL1_n_0=extdatas[k].p92_best_fit['SIL1_N'],
+                SIL1_b_0=extdatas[k].p92_best_fit['SIL1_B'],
+                FIR_amp_0=extdatas[k].p92_best_fit['FIR_AMP'],
+                FIR_lambda_0=extdatas[k].p92_best_fit['FIR_LAMBDA'],
+                FIR_n_0=extdatas[k].p92_best_fit['FIR_N'],
+                FIR_b_0=extdatas[k].p92_best_fit['FIR_B'],
+                Av_1=extdatas[k].columns['AV'][0])
 
         if args.models:
             if args.alav:
                 ltext = None
             else:
-                ltext = extdatas[k].red_file.replace('DAT_files/','')
-                ltext = ltext.replace('.dat','')
-            ax.plot(1.0/mod_x, P92_best(mod_x), lin_vals[i%3],
+                ltext = extdatas[k].red_file.replace('DAT_files/', '')
+                ltext = ltext.replace('.dat', '')
+            ax.plot(1.0/mod_x, P92_best(mod_x), lin_vals[i % 3],
                     color=col_vals[i % 6], alpha=0.5,
                     label=ltext)
 
@@ -233,21 +176,87 @@ if __name__ == "__main__":
                                  legend_key='IRS',
                                  rebin_fac=args.rebin_fac,
                                  legend_label='Average (this work)')
-            ave_extdata.save_ext_data(
-                args.filelist.replace('.dat', '_ave.fits'))
+            ave_extdata.save_ext_data('test.fits')
 
         ax.legend(fontsize=fontsize)
     else:
-        ax.set_xlim(1.0, 40.)
-        ax.set_ylim(-6, -0.5)
+        ax.set_xlim(kxrange)
+        ax.set_ylim(kyrange)
         ax.set_ylabel('$E(\lambda - V)$',
                       fontsize=1.3*fontsize)
         ax.legend(fontsize=12, ncol=4)
+
+    print(kxrange)
 
     ax.set_xlabel(r'$\lambda$ [$\mu m$]')
 
     ax.tick_params('both', length=10, width=2, which='major')
     ax.tick_params('both', length=5, width=1, which='minor')
+
+
+if __name__ == "__main__":
+
+    # commandline parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("filelist", help="file with list of curves to plot")
+    parser.add_argument("--rebin_fac", type=int, default=None,
+                        help="rebin factor for spectra")
+    parser.add_argument("--alav", help="plot A(lambda)/A(V)",
+                        action="store_true")
+    parser.add_argument("--ave", help="plot the average",
+                        action="store_true")
+    parser.add_argument("--models", help="plot the best fit models",
+                        action="store_true")
+    parser.add_argument("--modonly", help="only plot the best fit models",
+                        action="store_true")
+    parser.add_argument("--prevobs", help="plot previous observations",
+                        action="store_true")
+    parser.add_argument("--dg_models", help="plot dust grain models",
+                        action="store_true")
+    parser.add_argument("-p", "--png", help="save figure as a png file",
+                        action="store_true")
+    parser.add_argument("-e", "--eps", help="save figure as an eps file",
+                        action="store_true")
+    parser.add_argument("--pdf", help="save figure as a pdf file",
+                        action="store_true")
+    args = parser.parse_args()
+
+    filename = args.filelist
+
+    f = open(filename, 'r')
+    file_lines = list(f)
+    extnames = []
+    extdatas = []
+    avs = []
+    for line in file_lines:
+        if (line.find('#') != 0) & (len(line) > 0):
+            name = line.rstrip()
+            extnames.append(name)
+            text = ExtData(filename='fits/%s' % name)
+            extdatas.append(text)
+            avs.append(text.columns['AV'][0])
+
+    fontsize = 18
+
+    font = {'size': fontsize}
+
+    matplotlib.rc('font', **font)
+
+    matplotlib.rc('lines', linewidth=1)
+    matplotlib.rc('axes', linewidth=2)
+    matplotlib.rc('xtick.major', width=2)
+    matplotlib.rc('xtick.minor', width=2)
+    matplotlib.rc('ytick.major', width=2)
+    matplotlib.rc('ytick.minor', width=2)
+
+    if args.alav:
+        figsize = (10, 8)
+    else:
+        figsize = (20, 10)
+    fig, ax = pyplot.subplots(nrows=1, ncols=2, figsize=figsize)
+
+    plot_all_ext(ax[1], kxrange=[1.0, 40.0], kyrange=[-6.0, -0.5])
+    plot_all_ext(ax[0], kxrange=[0.1, 0.35], kyrange=[1.0, 10.0])
 
     fig.tight_layout()
 
