@@ -233,6 +233,8 @@ if __name__ == "__main__":
                                  fontsize=fontsize,
                                  legend_key='IRS',
                                  legend_label='Average (this work)')
+            ave_extdata.save_ext_data(
+                args.filelist.replace('.dat', '_ave.fits'))
 
         ax.legend(fontsize=fontsize)
     else:
