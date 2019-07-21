@@ -9,6 +9,7 @@ import numpy as np
 import emcee
 import corner
 
+import astropy.units as u
 from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.utils.exceptions import AstropyWarning
 
@@ -302,13 +303,12 @@ if __name__ == "__main__":
     extdata = ExtData()
     extdata.calc_elv(redstarobs, compstarobs)
 
-    # fit the calculated extinction curve
     # get an observed extinction curve to fit
-    (x, y, y_unc) = extdata.get_fitdata(
+    (wave, y, y_unc) = extdata.get_fitdata(
         ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True
     )
-
-    print(x, y)
+    # remove units as fitting routines often cannot take numbers with units
+    x = wave.to(1.0 / u.micron, equivalencies=u.spectral()).value
 
     # determine the initial guess at the A(V) values
     #  just use the average at wavelengths > 5
@@ -397,7 +397,7 @@ if __name__ == "__main__":
     # save the extinction curve and fit
     warnings.simplefilter("ignore", category=AstropyWarning)
     out_fname = "fits/%s_%s_ext.fits" % (args.redstarname, args.compstarname)
-    extdata.save_ext_data(out_fname, p92_best_params=(clean_pnames, p92_fit.parameters))
+    extdata.save(out_fname, p92_best_params=(clean_pnames, p92_fit.parameters))
 
     # plotting setup for easier to read plots
     fontsize = 18
@@ -417,8 +417,8 @@ if __name__ == "__main__":
     ax2 = plt.axes([0.60, 0.35, 0.35, 0.35])
 
     # plot the bands and all spectra for this star
-    extdata.plot_ext(ax, color="k", alpha=0.5)
-    extdata.plot_ext(ax2, color="k", alpha=0.5)
+    extdata.plot(ax, color="k", alpha=0.5)
+    extdata.plot(ax2, color="k", alpha=0.5)
 
     # ax.plot(1./x, p92_init(x), 'p-', label='Initial guess', alpha=0.25)
     # ax2.plot(1./x, p92_init(x), 'p-', label='Initial guess', alpha=0.25)
