@@ -51,7 +51,6 @@ if __name__ == "__main__":
 
     starnames = [
         "hd096042",
-        "bd+63d1964",
         "hd149404",
         "hd169454",
         "hd229059",
@@ -74,7 +73,7 @@ if __name__ == "__main__":
         ax,
         fontsize,
         [35.0, 38.0],
-        [10.5, 1.5],
+        [10.5, 0.8],
         [45.0, 42.0],
         "Unusable for Extinction",
         "(ordered by wind srength)",

@@ -56,13 +56,14 @@ if __name__ == "__main__":
         starnames,
         ann_xvals=[6.0, 6.0] * u.micron,
         ann_wave_range=[5.0, 9.0] * u.micron,
+        ann_rot=2.5,
     )
 
     ann_set(
         ax,
         fontsize,
         [35.0, 38.0],
-        [4.9, 0.9],
+        [4.4, 0.9],
         [45.0, 42.0],
         "Main Sequence",
         "(ordered by spectral type)",
@@ -73,8 +74,8 @@ if __name__ == "__main__":
         "hd147701",
         "hd014956",
         "vicyg2",
-        "bd+63d1964",
         "hd112272",
+        "bd+63d1964",
         "hd192660",
         "hd229238",
         "vicyg8a",
@@ -82,16 +83,17 @@ if __name__ == "__main__":
     plot_mir_set(
         ax,
         starnames,
-        extra_off_val=4.5,
+        extra_off_val=4.0,
         ann_xvals=[6.0, 6.0] * u.micron,
         ann_wave_range=[5.0, 9.0] * u.micron,
+        ann_rot=2.5,
     )
 
     ann_set(
         ax,
         fontsize,
         [35.0, 38.0],
-        [9.4, 5.4],
+        [9.5, 4.9],
         [45.0, 42.0],
         "Giants and Supergiants",
         "(ordered by spectral type)",

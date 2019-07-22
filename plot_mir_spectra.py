@@ -24,6 +24,8 @@ def plot_mir_set(
     col_vals=["b", "g", "r", "m", "c", "y"],
     ann_xvals=[35.0, 42.0] * u.micron,
     ann_wave_range=[9.0, 15.0] * u.micron,
+    ann_rot=5.0,
+    ann_offset=0.2,
     fontsize=12,
     path="/home/kgordon/Python_git/extstar_data/",
     subpath="DAT_files/",
@@ -44,8 +46,8 @@ def plot_mir_set(
             annotate_wave_range=ann_wave_range,
             annotate_text=starnames[i] + " " + stardata.sptype,
             fontsize=fontsize,
-            annotate_rotation=5.0,
-            annotate_yoffset=0.1,
+            annotate_rotation=ann_rot,
+            annotate_yoffset=ann_offset,
         )
 
 
