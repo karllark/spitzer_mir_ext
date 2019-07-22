@@ -50,6 +50,7 @@ if __name__ == "__main__":
     #        'Main Sequence', '(ordered by spectral type)')
 
     starnames = [
+        "hd096042",
         "bd+63d1964",
         "hd149404",
         "hd169454",
@@ -75,7 +76,7 @@ if __name__ == "__main__":
         [35.0, 38.0],
         [10.5, 1.5],
         [45.0, 42.0],
-        "Giants and Supergiants",
+        "Unusable for Extinction",
         "(ordered by wind srength)",
     )
 
