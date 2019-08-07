@@ -336,8 +336,10 @@ if __name__ == "__main__":
     p92_init.FUV_n_0.fixed = True
     p92_init.NUV_b_0.fixed = True
     p92_init.SIL1_b_0.fixed = True
-    p92_init.SIL2_lambda_0.fixed = True
+    # p92_init.SIL2_lambda_0.fixed = True
+    p92_init.SIL2_lambda_0.bounds = [15.0, 25.0]
     p92_init.SIL2_b_0.fixed = True
+    # p92_init.FIR_amp_0 = 0.0
     # p92_init.FIR_amp_0.fixed = True
     p92_init.FIR_lambda_0.fixed = True
     p92_init.FIR_b_0.fixed = True
