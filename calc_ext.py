@@ -288,7 +288,6 @@ if __name__ == "__main__":
         "--threads", type=int, default=1, help="number of threads for EMCEE run"
     )
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
-    parser.add_argument("--eps", help="save figure as an eps file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
 
@@ -500,7 +499,7 @@ if __name__ == "__main__":
     # finish configuring the plot
     ax.set_yscale("linear")
     ax.set_xscale("log")
-    ax.set_xlabel("$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
+    ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
     ax.set_ylabel(extdata._get_ext_ytitle(extdata.type), fontsize=1.3 * fontsize)
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")
@@ -523,8 +522,6 @@ if __name__ == "__main__":
     outname = "%s_ext" % filebase
     if args.png:
         fig.savefig(outname + ".png")
-    elif args.eps:
-        fig.savefig(outname + ".eps")
     elif args.pdf:
         fig.savefig(outname + ".pdf")
     else:
