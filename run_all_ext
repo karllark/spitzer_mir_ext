@@ -4,10 +4,9 @@
 # V stars
 python calc_ext.py hd204827 hd036512 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py vicyg1 hd214680 --png --nburn=500 --nsteps=1000 --emcee --threads=10
-python calc_ext.py hd096042 hd031726 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py hd147889 hd064802 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py hd029309 hd064802 --png --nburn=500 --nsteps=1000 --emcee --threads=10
-python calc_ext.py hd147933 hd074273 --png --nburn=500 --nsteps=1000 --emcee --threads=10
+python calc_ext.py hd147933 hd064802 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py hd283809 hd064802 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py hd281159 hd064802 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 
@@ -21,5 +20,5 @@ python calc_ext.py vicyg8a hd188209 --png --nburn=500 --nsteps=1000 --emcee --th
 python calc_ext.py hd192660 hd204172 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py hd229238 hd204172 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py hd112272 hd204172 --png --nburn=500 --nsteps=1000 --emcee --threads=10
-python calc_ext.py vicyg2 hd165024 --png --nburn=500 --nsteps=1000 --emcee --threads=10
+python calc_ext.py vicyg2 hd214680 --png --nburn=500 --nsteps=1000 --emcee --threads=10
 python calc_ext.py hd014956 hd204172 --png --nburn=500 --nsteps=1000 --emcee --threads=10
