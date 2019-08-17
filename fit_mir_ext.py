@@ -1,195 +1,209 @@
 import matplotlib.pyplot as plt
 import matplotlib
+
 import numpy as np
 import argparse
 
 import astropy.units as u
+from astropy.modeling import Fittable1DModel, Parameter
 from astropy.modeling.fitting import LevMarLSQFitter
-from astropy.modeling.fitting import SherpaFitter
 
-from dust_extinction.dust_extinction import P92
+from measure_extinction.extdata import ExtData
+from dust_extinction.shapes import P92
+from dust_extinction.helpers import _get_x_in_wavenumbers, _test_valid_x_range
+from dust_extinction.conversions import AxAvToExv
 
-from extdata import ExtData
+# from pahfit.component_models import Drude1D
 
-from astropy.modeling import (Fittable1DModel, Parameter)
 
-class AlAvToElv(Fittable1DModel):
+class G20(Fittable1DModel):
     """
-    Model to convert from A(lambda)/A(V) to E(lambda-V)
+    Powerlaw plus Drude profiles for the silicate features for the
+    1 to 40 micron A(lambda)/A(V) extinction curve.
 
-    Paramters
-    ---------
-    Av : float
-      dust column in A(V) [mag]
+    Powerlaw portion based on Martin & Whittet (1990).
+
+    Parameters
+    ----------
+    scale: float
+        amplitude of the curve
+
+    alpha : float
+        power of powerlaw
+
+    TBD: parameters for silicate features
     """
-    inputs = ('alav',)
-    outputs = ('elv',)
 
-    Av = Parameter(description="A(V)",
-                   default=1.0, min=0.0)
+    inputs = ("x",)
+    outputs = ("axav",)
 
-    @staticmethod
-    def evaluate(alav, Av):
+    scale = Parameter(description="amplitude", default=0.5)
+    alpha = Parameter(description="alpha (power of powerlaw)", default=1.8)
+    sil1_amp = Parameter(default=0.05, min=0.01)
+    sil1_center = Parameter(default=10.0, bounds=(8.0, 12.0))
+    sil1_fwhm = Parameter(default=1.0, bounds=(0.0, 2.0))
+    sil2_amp = Parameter(default=0.1, min=0.01)
+    sil2_center = Parameter(default=20.0, bounds=(16.0, 24.0))
+    sil2_fwhm = Parameter(default=3.0, bounds=(0.0, 5.0))
+    fir_amp = Parameter(default=0.0, min=0.00, fixed=True)
+    fir_center = Parameter(default=25.0, bounds=(20.0, 30.0))
+    fir_fwhm = Parameter(default=10.0, min=5.0, max=20.0)
+
+    x_range = [1.0 / 40.0, 1.0]
+
+    def evaluate(
+        self,
+        in_x,
+        scale,
+        alpha,
+        sil1_amp,
+        sil1_center,
+        sil1_fwhm,
+        sil2_amp,
+        sil2_center,
+        sil2_fwhm,
+        fir_amp,
+        fir_center,
+        fir_fwhm,
+    ):
         """
-        AlAvToElv function
+        G20 function
 
-        Paramters
-        ---------
-        alav : np array (float)
-           E(lambda-V)/E(B-V) values
+        Parameters
+        ----------
+        in_x: float
+           expects either x in units of wavelengths or frequency
+           or assumes wavelengths in wavenumbers [1/micron]
 
         Returns
         -------
-        elv : np array (float)
-           E(lamda - V)
-        """
-        return (alav - 1.0)*Av
+        axav: np array (float)
+            A(x)/A(V) extinction curve [mag]
 
-    # use numerical derivaties (need to add analytic)
-    fit_deriv = None
-    
-class P92_Av(P92 | AlAvToElv):
-    """ evalute P92 on E(l-V) data including solving for A(V)"""
-    
+        Raises
+        ------
+        ValueError
+           Input x values outside of defined range
+        """
+        x = _get_x_in_wavenumbers(in_x)
+
+        # check that the wavenumbers are within the defined range
+        _test_valid_x_range(x, self.x_range, "G20")
+
+        # powerlaw
+        axav = scale * ((1.0 / x) ** (-1.0 * alpha))
+
+        # silicate feature drudes
+        wave = 1 / x
+        axav += (
+            sil1_amp
+            * ((sil1_fwhm / sil1_center) ** 2)
+            / (
+                (wave / sil1_center - sil1_center / wave) ** 2
+                + (sil1_fwhm / sil1_center) ** 2
+            )
+        )
+
+        axav += (
+            sil2_amp
+            * ((sil2_fwhm / sil2_center) ** 2)
+            / (
+                (wave / sil2_center - sil2_center / wave) ** 2
+                + (sil2_fwhm / sil2_center) ** 2
+            )
+        )
+
+        axav += (
+            fir_amp
+            * ((fir_fwhm / fir_center) ** 2)
+            / (
+                (wave / fir_center - fir_center / wave) ** 2
+                + (fir_fwhm / fir_center) ** 2
+            )
+        )
+
+        return axav
+
+
 if __name__ == "__main__":
 
     # commandline parser
     parser = argparse.ArgumentParser()
     parser.add_argument("file", help="file with the extinction curve to fit")
-    parser.add_argument("-p", "--png", help="save figure as a png file",
-                        action="store_true")
-    parser.add_argument("-e", "--eps", help="save figure as an eps file",
-                        action="store_true")
+    parser.add_argument(
+        "-p", "--png", help="save figure as a png file", action="store_true"
+    )
     parser.add_argument("--path", help="path for the extinction curves")
     args = parser.parse_args()
 
     if args.path:
-        locpath = args.path + '/'
+        locpath = args.path + "/"
     else:
-        locpath = ''
-    
-    # plot info
-    fontsize = 18
-    font = {'size'   : fontsize}
-    matplotlib.rc('font', **font)
-    matplotlib.rc('lines', linewidth=1)
-    matplotlib.rc('axes', linewidth=2)
-    matplotlib.rc('xtick.major', width=2)
-    matplotlib.rc('ytick.major', width=2)
+        locpath = ""
 
     # read in the observed E(l-V) extinction curve
-    obsext = ExtData()
-    obsext.read_ext_data(locpath+args.file)
+    obsext = ExtData(filename=locpath + args.file)
 
-    # get the photometric band data
-    xdata = np.array(obsext.ext_waves['BANDS'],dtype=np.float64)
-    ydata = np.array(obsext.ext_curve['BANDS'],dtype=np.float64)
-    ydata_unc = np.array(obsext.ext_curve_uncs['BANDS'],dtype=np.float64)
-    
-    # get the stis data and concatenate with existing data
-    stis_indxs, = np.where(obsext.ext_curve_uncs['STIS'] > 0.)
-    xdata = np.concatenate((xdata,obsext.ext_waves['STIS'][stis_indxs]))
-    ydata = np.concatenate((ydata,obsext.ext_curve['STIS'][stis_indxs]))
-    ydata_unc = np.concatenate((ydata_unc,
-                                obsext.ext_curve_uncs['STIS'][stis_indxs]))
+    # get an observed extinction curve to fit
+    (wave, y, y_unc) = obsext.get_fitdata(["BAND", "IRS"])
+    # remove units as fitting routines often cannot take numbers with units
+    x = wave.to(1.0 / u.micron, equivalencies=u.spectral()).value
 
-    # get the irs data and concatenate with existing data
-    irs_indxs, = np.where(obsext.ext_curve_uncs['IRS'] != 0.)
-    xdata = np.concatenate((xdata,obsext.ext_waves['IRS'][irs_indxs]))
-    ydata = np.concatenate((ydata,obsext.ext_curve['IRS'][irs_indxs]))
-    ydata_unc = np.concatenate((ydata_unc,
-                                obsext.ext_curve_uncs['IRS'][irs_indxs]))
-
-    # sort data
-    sindxs = np.argsort(xdata)
-    xdata = xdata[sindxs]
-    ydata = ydata[sindxs]
-    ydata_unc = ydata_unc[sindxs]
-
-    # check for zero uncertainty points
-    
-    
-    # add units to the data
-    x = xdata * u.micron
-    y = ydata
-    y_unc = ydata_unc
-    
     # determine the initial guess at the A(V) values
     #  just use the average at wavelengths > 5
     #  limit as lambda -> inf, E(lamda-V) -> -A(V)
-    indxs, = np.where(xdata > 5.0)
-    av_guess = -1.0*np.average(ydata[indxs])
+    indxs, = np.where(1.0 / x > 5.0)
+    av_guess = -1.0 * np.average(y[indxs])
+    if not np.isfinite(av_guess):
+        av_guess = 1.0
 
-    # initialize the Pei (1992) plus A(V) compositemodel
-    #    a few tweaks to the starting parameters helps find the solution
-    p92_init = P92_Av(BKG_amp_0=165.,
-                      FUV_amp_0=100.0,FUV_lambda_0=0.06,
-                      Av_1=av_guess)
+    # initialize the model
+    g20_init = G20() | AxAvToExv(Av=av_guess)
 
-    # print the initial model info
-    print('P92+A(V) model info')
-    print(p92_init)
-    
-    # toggle fit parameters to be fixed
-    #p92_init.FIR_amp_0.fixed = True
-
-    # specify and run the fit
+    # fit the extinction only using data between 1 and 40 micron
+    gvals = (1.0 < 1.0 / x) & (1.0 / x < 40.0)
     fit = LevMarLSQFitter()
-    p92_fit = fit(p92_init, 1./xdata, y, #maxiter=200, acc=1e-10,
-                  weights=1.0/y_unc)
-    
-    # message from the fitter (maxfev is maxiter)
-    print('fit message')
-    print(fit.fit_info['message'])
-    
-    # print the initial and final fit parameter values
-    #print(p92_fit.__dict__.keys())
-    print('initital parameters')
-    print(p92_init._parameters)
-    print('final parameters')
-    print(p92_fit._parameters)
+    g20_fit = fit(g20_init, x[gvals], y[gvals])  # , weights=1.0 / y_unc[gvals])
 
-    # run a different fitter
-    #sfit = SherpaFitter(statistic='chi2', optimizer='moncar',
-    #                    estmethod='confidence')    
-    #p92_sfit = sfit(p92_init, 1./xdata, y)
-    
+    print(g20_fit)
+
+    p92_init = P92() | AxAvToExv(Av=av_guess)
+    p92_fit = fit(p92_init, x[gvals], y[gvals], weights=1.0 / y_unc[gvals])
+    print(p92_fit)
+
     # setup the plot
-    fig, ax = plt.subplots(figsize=(12,8))
-    # create the inset subplot
-    ax2 = plt.axes([.50, .35, .35, .35])
+    fontsize = 18
+    font = {"size": fontsize}
+    matplotlib.rc("font", **font)
+    matplotlib.rc("lines", linewidth=1)
+    matplotlib.rc("axes", linewidth=2)
+    matplotlib.rc("xtick.major", width=2)
+    matplotlib.rc("xtick.minor", width=2)
+    matplotlib.rc("ytick.major", width=2)
+    matplotlib.rc("ytick.minor", width=2)
 
-    # plot the observed data
-    ax.plot(obsext.ext_waves['BANDS'],obsext.ext_curve['BANDS'],'bo')
-    ax2.plot(obsext.ext_waves['BANDS'],obsext.ext_curve['BANDS'],'bo')
+    fig, ax = plt.subplots(figsize=(12, 8))
 
-    ax.plot(obsext.ext_waves['STIS'][stis_indxs],
-            obsext.ext_curve['STIS'][stis_indxs])
-    ax2.plot(obsext.ext_waves['STIS'][stis_indxs],
-             obsext.ext_curve['STIS'][stis_indxs])
-    ax.plot(obsext.ext_waves['IRS'][irs_indxs],
-            obsext.ext_curve['IRS'][irs_indxs])
-    ax2.plot(obsext.ext_waves['IRS'][irs_indxs],
-             obsext.ext_curve['IRS'][irs_indxs])
+    obsext.plot(ax)
+    g20_fit_y = g20_fit(wave[gvals])
+    # ax.plot(wave[gvals], g20_init(wave[gvals]), "c-", label="Initial Guess")
+    ax.plot(wave[gvals], g20_fit_y, "r-", label="Best Fit")
+    ax.plot(
+        wave[gvals],
+        g20_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
+        "-",
+        label="-A(V)",
+    )
 
-    # generate x values to provide smooth model curves 
-    lam = np.logspace(-3.0, 3.0, num=1000)
-    x = (1.0/lam)/u.micron
-    ax.plot(1./x, p92_fit(x), label='fit')
-    ax2.plot(1./x, p92_fit(x), label='fit')
-    ax.plot(1./x, p92_init(x), label='init')
+    # ax.plot(wave[gvals], p92_init(wave[gvals]), "b-", label="P92 Initial Guess")
+    ax.plot(wave[gvals], p92_fit(wave[gvals]), "g-", label="P92 Best Fit")
 
-    # plot paramters to make nice figures
-    ax.set_xscale('log')
-    ax.set_xlim(0.1,40.0)
-    ax.set_ylim(-av_guess*1.1,15.0)
+    ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
+    ax.set_ylabel(r"$E(\lambda - V)$", fontsize=1.3 * fontsize)
 
-    ax.set_xlabel(r'$\lambda$ [$\mu m$]',fontsize=1.3*fontsize)
-    ax.set_ylabel(r'$E(\lambda - V)$',fontsize=1.3*fontsize)
+    ax.set_ylim(min(g20_fit_y) - 0.5, max(g20_fit_y) + 0.5)
+    ax.set_xlim(1.0, 40.0)
+    ax.set_xscale("log")
 
-    ax2.set_xlim(3.0,40.0)
-    ax2.set_ylim(-p92_fit.Av_1.value-0.1,-p92_fit.Av_1.value+0.5)
-    
-    ax.legend(loc='best')
+    ax.legend(loc="best")
     plt.show()
-    

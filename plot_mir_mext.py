@@ -40,9 +40,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "-p", "--png", help="save figure as a png file", action="store_true"
     )
-    parser.add_argument(
-        "-e", "--eps", help="save figure as an eps file", action="store_true"
-    )
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
 
@@ -82,7 +79,7 @@ if __name__ == "__main__":
 
     sindxs = np.argsort(avs)
 
-    kxrange = [1.0, 40.0]
+    kxrange = [1.0, 100.0]
     ann_xvals = [41.0, 50.0]
     spec_name = "IRS"
     norm_wave_range = [6.0, 10.0]
@@ -104,8 +101,42 @@ if __name__ == "__main__":
                 rebin_fac=args.rebin_fac,
                 fontsize=fontsize,
             )
-            # legend_key='IRS')
-            # annotate_key='IRS',
+
+            # label the curves
+            ltext = extdatas[k].red_file.replace("DAT_files/", "")
+            ltext = ltext.replace(".dat", "")
+
+            (wave, y, y_unc) = extdatas[k].get_fitdata(["BAND", "IRS"])
+            indxs, = np.where(wave.value > 5.0)
+            av_guess = -1.0 * np.average(y[indxs])
+
+            if ltext == "vicyg2":
+                av_guess -= 0.1
+            elif ltext == "hd147889":
+                av_guess += 0.13
+            elif ltext == "hd029309":
+                av_guess -= 0.05
+            elif ltext == "hd014956":
+                av_guess -= 0.15
+            elif ltext == "bd+63d1964":
+                av_guess -= 0.10
+            elif ltext == "hd281159":
+                av_guess += 0.10
+            elif ltext == "hd112272":
+                av_guess += 0.10
+            elif ltext == "hd204827":
+                av_guess += 0.13
+            elif ltext == "hd229238":
+                av_guess += 0.03
+            elif ltext == "hd147701":
+                av_guess += 0.05
+            ax.text(
+                40.0,
+                -1.0 * av_guess,
+                ltext,
+                color=col_vals[i % 6],
+                fontsize=0.8 * fontsize,
+            )
 
         # plot the best fit P92 model
         if args.alav:
@@ -176,7 +207,7 @@ if __name__ == "__main__":
     ax.set_xlim(kxrange)
     if args.alav:
         ax.set_ylim(0.0, 0.25)
-        ax.set_ylabel("$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
+        ax.set_ylabel(r"$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
         if args.prevobs:
             # Milky Way observed extinction from
             # Rieke & Lebofsky (1985)
@@ -348,14 +379,14 @@ if __name__ == "__main__":
                 rebin_fac=args.rebin_fac,
                 legend_label="Average (this work)",
             )
-            ave_extdata.save_ext_data(args.filelist.replace(".dat", "_ave.fits"))
+            ave_extdata.save(args.filelist.replace(".dat", "_ave.fits"))
 
         ax.legend(fontsize=fontsize)
     else:
-        ax.set_xlim(1.0, 40.0)
-        ax.set_ylim(-6, -0.5)
-        ax.set_ylabel("$E(\lambda - V)$", fontsize=1.3 * fontsize)
-        ax.legend(fontsize=12, ncol=4)
+        ax.set_xlim(1.0, 100.0)
+        ax.set_ylim(-6, -1.0)
+        ax.set_ylabel(r"$E(\lambda - V)$", fontsize=1.3 * fontsize)
+        # ax.legend(fontsize=12, ncol=4)
 
     ax.set_xlabel(r"$\lambda$ [$\mu m$]")
 
@@ -367,8 +398,6 @@ if __name__ == "__main__":
     save_str = "_mext"
     if args.png:
         fig.savefig(args.filelist.replace(".dat", save_str + ".png"))
-    elif args.eps:
-        fig.savefig(args.filelist.replace(".dat", save_str + ".eps"))
     elif args.pdf:
         fig.savefig(args.filelist.replace(".dat", save_str + ".pdf"))
     else:
