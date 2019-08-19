@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
 from astropy.table import Table
+import astropy.units as u
 
 from measure_extinction.extdata import ExtData
 
@@ -183,7 +184,7 @@ if __name__ == "__main__":
     # get G19
     G19 = ExtData()
     G19.read(avefilename)
-    G19_wave = G19.waves["BAND"]
+    G19_wave = G19.waves["BAND"].value
     if args.elkejk:
         G19_y, ji, ki = get_elkejk_from_alav(G19_wave, G19.exts["BAND"])
     else:
