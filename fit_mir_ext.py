@@ -173,6 +173,7 @@ if __name__ == "__main__":
 
     # setup the plot
     fontsize = 18
+    fontsize = 10
     font = {"size": fontsize}
     matplotlib.rc("font", **font)
     matplotlib.rc("lines", linewidth=1)
@@ -182,7 +183,7 @@ if __name__ == "__main__":
     matplotlib.rc("ytick.major", width=2)
     matplotlib.rc("ytick.minor", width=2)
 
-    fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(6, 4))
 
     obsext.plot(ax)
     g20_fit_y = g20_fit(wave[gvals])
@@ -206,4 +207,7 @@ if __name__ == "__main__":
     ax.set_xscale("log")
 
     ax.legend(loc="best")
+
+    plt.tight_layout()
+
     plt.show()

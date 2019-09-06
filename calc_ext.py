@@ -300,7 +300,7 @@ if __name__ == "__main__":
 
     # calculate the extinction curve
     extdata = ExtData()
-    extdata.calc_elv(redstarobs, compstarobs)
+    extdata.calc_elx(redstarobs, compstarobs)
 
     # get an observed extinction curve to fit
     (wave, y, y_unc) = extdata.get_fitdata(

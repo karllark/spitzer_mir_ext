@@ -1,0 +1,17 @@
+
+python fit_mir_ext.py fits/hd281159_hd064802_ext.fits
+python fit_mir_ext.py fits/hd283809_hd064802_ext.fits
+python fit_mir_ext.py fits/hd147933_hd064802_ext.fits
+python fit_mir_ext.py fits/hd029309_hd064802_ext.fits
+python fit_mir_ext.py fits/hd147889_hd064802_ext.fits
+python fit_mir_ext.py fits/hd204827_hd036512_ext.fits
+python fit_mir_ext.py fits/vicyg1_hd214680_ext.fits
+python fit_mir_ext.py fits/hd029647_hd195986_ext.fits
+python fit_mir_ext.py fits/hd147701_hd195986_ext.fits
+python fit_mir_ext.py fits/bd+63d1964_hd188209_ext.fits
+python fit_mir_ext.py fits/hd014956_hd204172_ext.fits
+python fit_mir_ext.py fits/hd112272_hd204172_ext.fits
+python fit_mir_ext.py fits/hd192660_hd204172_ext.fits
+python fit_mir_ext.py fits/hd229238_hd204172_ext.fits
+python fit_mir_ext.py fits/vicyg2_hd214680_ext.fits
+python fit_mir_ext.py fits/vicyg8a_hd188209_ext.fits
