@@ -18,6 +18,9 @@ from dust_extinction.conversions import AxAvToExv
 from measure_extinction.stardata import StarData
 from measure_extinction.extdata import ExtData
 
+from astropy.modeling import Fittable1DModel, Parameter
+from dust_extinction.helpers import _get_x_in_wavenumbers, _test_valid_x_range
+
 
 def tie_amps_SIL2_to_SIL1(model):
     """
@@ -37,6 +40,303 @@ class P92_Elv(P92 | AxAvToExv):
     """
     Evalute P92 on E(x-V) data including solving for A(V)
     """
+
+
+class G20(Fittable1DModel):
+    r"""
+    Gordon et al. (2020) model based on the Pei (1992) parameter shape model
+
+    Parameters
+    ----------
+    BKG_amp : float
+      background term amplitude
+    BKG_lambda : float
+      background term central wavelength
+    BKG_b : float
+      background term b coefficient
+    BKG_n : float
+      background term n coefficient [FIXED at n = 2]
+
+    FUV_amp : float
+      far-ultraviolet term amplitude
+    FUV_lambda : float
+      far-ultraviolet term central wavelength
+    FUV_width : float
+      far-ultraviolet term width
+
+    NUV_amp : float
+      near-ultraviolet (2175 A) term amplitude
+    NUV_lambda : float
+      near-ultraviolet (2175 A) term central wavelength
+    NUV_width : float
+      near-ultraviolet (2175 A) term width
+
+    SIL1_amp : float
+      1st silicate feature (~10 micron) term amplitude
+    SIL1_lambda : float
+      1st silicate feature (~10 micron) term central wavelength
+    SIL1_width : float
+      1st silicate feature (~10 micron) term width
+
+    SIL2_amp : float
+      2nd silicate feature (~20 micron) term amplitude
+    SIL2_lambda : float
+      2nd silicate feature (~20 micron) term central wavelength
+    SIL2_b : float
+      2nd silicate feature (~20 micron) term width
+
+    FIR_amp : float
+      far-infrared term amplitude
+    FIR_lambda : float
+      far-infrared term central wavelength
+    FIR_b : float
+      far-infrared term width
+
+    Notes
+    -----
+    From Gordon et al. (2020, in prep.) based on Pei (1992, ApJ, 395, 130)
+
+    Applicable from the extreme UV to far-IR
+
+    Example showing a G20 curve with components identified.
+
+    .. plot::
+        :include-source:
+
+        import numpy as np
+        import matplotlib.pyplot as plt
+        import astropy.units as u
+
+        from dust_extinction.shapes import G20
+
+        fig, ax = plt.subplots()
+
+        # generate the curves and plot them
+        lam = np.logspace(-3.0, 3.0, num=1000)
+        x = (1.0/lam)/u.micron
+
+        ext_model = P92()
+        ax.plot(1/x,ext_model(x),label='total')
+
+        ext_model = P92(FUV_amp=0., NUV_amp=0.0,
+                        SIL1_amp=0.0, SIL2_amp=0.0, FIR_amp=0.0)
+        ax.plot(1./x,ext_model(x),label='BKG only')
+
+        ext_model = P92(NUV_amp=0.0,
+                        SIL1_amp=0.0, SIL2_amp=0.0, FIR_amp=0.0)
+        ax.plot(1./x,ext_model(x),label='BKG+FUV only')
+
+        ext_model = P92(FUV_amp=0.,
+                        SIL1_amp=0.0, SIL2_amp=0.0, FIR_amp=0.0)
+        ax.plot(1./x,ext_model(x),label='BKG+NUV only')
+
+        ext_model = P92(FUV_amp=0., NUV_amp=0.0,
+                        SIL2_amp=0.0)
+        ax.plot(1./x,ext_model(x),label='BKG+FIR+SIL1 only')
+
+        ext_model = P92(FUV_amp=0., NUV_amp=0.0,
+                        SIL1_amp=0.0)
+        ax.plot(1./x,ext_model(x),label='BKG+FIR+SIL2 only')
+
+        ext_model = P92(FUV_amp=0., NUV_amp=0.0,
+                        SIL1_amp=0.0, SIL2_amp=0.0)
+        ax.plot(1./x,ext_model(x),label='BKG+FIR only')
+
+        ax.set_xscale('log')
+        ax.set_yscale('log')
+
+        ax.set_ylim(1e-3,10.)
+
+        ax.set_xlabel(r'$\lambda$ [$\mu$m]')
+        ax.set_ylabel(r'$A(x)/A(V)$')
+
+        ax.legend(loc='best')
+        plt.show()
+    """
+
+    inputs = ("x",)
+    outputs = ("axav",)
+
+    # constant for conversion from Ax/Ab to (more standard) Ax/Av
+    AbAv = 1.0 / 3.08 + 1.0
+
+    BKG_amp = Parameter(
+        description="BKG term: amplitude", default=165.0 * AbAv, min=0.0
+    )
+    BKG_lambda = Parameter(
+        description="BKG term: center wavelength", default=0.047, min=0.0
+    )
+    BKG_b = Parameter(description="BKG term: b coefficient", default=90.0)
+    BKG_n = Parameter(description="BKG term: n coefficient", default=2.0, fixed=True)
+
+    FUV_amp = Parameter(description="FUV term: amplitude", default=14.0 * AbAv, min=0.0)
+    FUV_lambda = Parameter(
+        description="FUV term: center wavelength", default=0.07, bounds=(0.06, 0.08)
+    )
+    FUV_width = Parameter(description="FUV term: width coefficient", default=1.0)
+
+    NUV_amp = Parameter(
+        description="NUV term: amplitude", default=0.045 * AbAv, min=0.0
+    )
+    NUV_lambda = Parameter(
+        description="NUV term: center wavelength", default=0.22, bounds=(0.20, 0.24)
+    )
+    NUV_width = Parameter(description="NUV term: width coefficient", default=1.0)
+
+    SIL1_amp = Parameter(
+        description="SIL1 term: amplitude", default=0.002 * AbAv, min=0.0
+    )
+    SIL1_lambda = Parameter(
+        description="SIL1 term: center wavelength", default=9.7, bounds=(7.0, 13.0)
+    )
+    SIL1_width = Parameter(description="SIL1 term: width coefficient", default=1.0)
+
+    SIL2_amp = Parameter(
+        description="SIL2 term: amplitude", default=0.002 * AbAv, min=0.0
+    )
+    SIL2_lambda = Parameter(
+        description="SIL2 term: center wavelength", default=18.0, bounds=(15.0, 23.0)
+    )
+    SIL2_width = Parameter(description="SIL2 term: width coefficient", default=1.0)
+
+    FIR_amp = Parameter(
+        description="FIR term: amplitude", default=0.012 * AbAv, min=0.0
+    )
+    FIR_lambda = Parameter(
+        description="FIR term: center wavelength", default=25.0, bounds=(20.0, 30.0)
+    )
+    FIR_width = Parameter(description="FIR term: width coefficient", default=1.0)
+
+    x_range = [1.0 / 1e3, 1.0 / 1e-3]
+
+    @staticmethod
+    def _g20_bkg_term(in_lambda, amplitude, cen_wave, b, n):
+        r"""
+        Function for calculating the G20 bkg term
+
+        .. math::
+
+           \frac{a}{(\lambda/cen_wave)^n + (cen_wave/\lambda)^n + b}
+
+        Parameters
+        ----------
+        in_lambda: vector of floats
+           wavelengths in same units as cen_wave
+
+        amplitude: float
+           amplitude
+
+        cen_wave: flaot
+           central wavelength
+
+        b : float
+           b coefficient
+
+        n : float
+           n coefficient
+        """
+        l_norm = in_lambda / cen_wave
+
+        return amplitude / (np.power(l_norm, n) + np.power(l_norm, -1 * n) + b)
+
+    @staticmethod
+    def _g20_drude_term(waves, amplitude, cen_wave, width):
+        r"""
+        Function for calculating a single G20 Drude term
+
+        .. math::
+
+           \frac{a}{(\lambda^{-1} - (\lambda_0^{-1})^2/\lambda^{-1})^2 + width^{-2}}
+
+        Parameters
+        ----------
+        waves: vector of floats
+           wavelengths
+
+        amplitude: float
+           amplitude
+
+        cen_wave: flaot
+           central wavelength
+
+        width : float
+            width in wavelength units
+        """
+
+        return (
+            amplitude
+            * ((width / cen_wave) ** 2)
+            / ((waves / cen_wave - cen_wave / waves) ** 2 + (width / cen_wave) ** 2)
+        )
+
+        # zz = ((1.0 / waves) - ((waves / cen_wave ** 2)) ** 2) + 1.0 / (width ** 2)
+        # return amplitude / zz
+
+    def evaluate(
+        self,
+        in_x,
+        BKG_amp,
+        BKG_lambda,
+        BKG_b,
+        BKG_n,
+        FUV_amp,
+        FUV_lambda,
+        FUV_width,
+        NUV_amp,
+        NUV_lambda,
+        NUV_width,
+        SIL1_amp,
+        SIL1_lambda,
+        SIL1_width,
+        SIL2_amp,
+        SIL2_lambda,
+        SIL2_width,
+        FIR_amp,
+        FIR_lambda,
+        FIR_width,
+    ):
+        """
+        G20 function
+
+        Parameters
+        ----------
+        in_x: float
+           expects either x in units of wavelengths or frequency
+           or assumes wavelengths in wavenumbers [1/micron]
+
+           internally wavenumbers are used
+
+        Returns
+        -------
+        axav: np array (float)
+            A(x)/A(V) extinction curve [mag]
+
+        Raises
+        ------
+        ValueError
+           Input x values outside of defined range
+        """
+        x = _get_x_in_wavenumbers(in_x)
+
+        # check that the wavenumbers are within the defined range
+        _test_valid_x_range(x, self.x_range, "G20")
+
+        # calculate the terms
+        lam = 1.0 / x
+        axav = (
+            self._g20_bkg_term(lam, BKG_amp, BKG_lambda, BKG_b, BKG_n)
+            + self._g20_drude_term(lam, FUV_amp, FUV_lambda, FUV_width)
+            + self._g20_drude_term(lam, NUV_amp, NUV_lambda, NUV_width)
+            + self._g20_drude_term(lam, SIL1_amp, SIL1_lambda, SIL1_width)
+            + self._g20_drude_term(lam, SIL2_amp, SIL2_lambda, SIL2_width)
+            + self._g20_drude_term(lam, FIR_amp, FIR_lambda, FIR_width)
+        )
+
+        # return A(x)/A(V)
+        return axav
+
+    # use numerical derivaties (need to add analytic)
+    fit_deriv = None
 
 
 def lnprob(params, x, y, uncs, model, param_names):
@@ -349,13 +649,59 @@ if __name__ == "__main__":
     # p92_init.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
     # p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
 
+    # initialize the G20 model
+    g20_init = G20(
+        BKG_amp=200.0, FUV_amp=2.0, FUV_lambda=0.06, FUV_width=0.15, NUV_amp=0.25
+    ) | AxAvToExv(Av=av_guess)
+
+    g20_init.BKG_b_0.fixed = True
+    g20_init.BKG_n_0.fixed = True
+    g20_init.FUV_lambda_0.fixed = True
+    g20_init.FUV_width_0.fixed = True
+    g20_init.FUV_amp_0.bounds = [1., None]
+    g20_init.NUV_width_0.bounds = [0.0, None]
+    g20_init.SIL1_width_0.bounds = [0.5, 3.0]
+    g20_init.SIL2_lambda_0.bounds = [15.0, 25.0]
+    g20_init.SIL2_amp_0.bounds = [3e-3, None]
+    g20_init.SIL2_width_0.fixed = True
+    g20_init.SIL2_width_0.bounds = [0.5, 3.0]
+    g20_init.FIR_lambda_0.fixed = True
+    g20_init.FIR_width_0.fixed = True
+    g20_init.Av_1.bounds = [0.1, None]
+
+    # test
+    p92_test = P92(
+        BKG_amp=0.0, FUV_amp=0.0, NUV_amp=1.0, SIL1_amp=0.0, SIL2_amp=0.0, FIR_amp=0.0
+    )
+    g20_test = G20(
+        BKG_amp=0.0, FUV_amp=0.0, NUV_amp=1.0, SIL1_amp=0.0, SIL2_amp=0.0, FIR_amp=0.0
+    )
+    test_x = [6.0, 4.6, 3.0]
+    print(p92_test(test_x), g20_test(test_x))
+    # exit()
+
+    print(p92_init.BKG_amp_0)
+    print(g20_init.BKG_amp_0)
+    print(p92_init.BKG_lambda_0)
+    print(g20_init.BKG_lambda_0)
+    print(p92_init.BKG_b_0)
+    print(g20_init.BKG_b_0)
+    print(p92_init.BKG_n_0)
+    print(g20_init.BKG_n_0)
+    # exit()
+
     # pick the fitter
     fit = LevMarLSQFitter()
 
     # fit the data to the P92 model using the fitter
     p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc)
+    g20_fit = fit(g20_init, x, y, weights=1.0 / y_unc, maxiter=1000)
+
+    print(g20_fit.param_names)
+    print(g20_fit.parameters)
 
     clean_pnames = [pname[:-2] for pname in p92_init.param_names]
+    clean_g20_pnames = [pname[:-2] for pname in g20_init.param_names]
 
     # do the feature width calculation
     terms = ["FUV", "NUV", "SIL1", "SIL2", "FIR"]
@@ -368,6 +714,13 @@ if __name__ == "__main__":
 
     for k, cur_pname in enumerate(clean_pnames):
         print("{:12} {:6.4e}".format(cur_pname, p92_fit.parameters[k]))
+
+    for k, cur_pname in enumerate(clean_g20_pnames):
+        print(
+            "{:12} {:6.4e} {:6.4e}".format(
+                cur_pname, g20_init.parameters[k], g20_fit.parameters[k]
+            )
+        )
 
     best_fit_Av = p92_fit.Av_1.value
 
@@ -454,6 +807,10 @@ if __name__ == "__main__":
     ax.plot(1.0 / x, p92_init(x), "r--", label="P92 Init")
     ax.plot(1.0 / x, p92_fit(x), "r-", label="P92 Best Fit")
     ax2.plot(1.0 / x, p92_fit(x), "r-")
+
+    ax.plot(1.0 / x, g20_init(x), "g--", label="G20 Init")
+    ax.plot(1.0 / x, g20_fit(x), "g-", label="G20 Best Fit")
+    ax2.plot(1.0 / x, g20_fit(x), "g-")
 
     # show components of best fitter
     p92_comps = p92_fit.copy()
