@@ -171,7 +171,7 @@ class P92_mod(Fittable1DModel):
         description="BKG term: amplitude", default=165.0 * AbAv, min=0.0
     )
     BKG_lambda = Parameter(description="BKG term: center wavelength", default=0.047)
-    BKG_width = Parameter(description="BKG term: width", default=0.452)
+    BKG_width = Parameter(description="BKG term: width", default=0.452, min=0.0)
 
     FUV_amp = Parameter(description="FUV term: amplitude", default=14.0 * AbAv, min=0.0)
     FUV_lambda = Parameter(
@@ -186,23 +186,23 @@ class P92_mod(Fittable1DModel):
     NUV_lambda = Parameter(
         description="NUV term: center wavelength", default=0.22, bounds=(0.20, 0.24)
     )
-    NUV_width = Parameter(description="NUV term: width", default=0.05)
+    NUV_width = Parameter(description="NUV term: width", default=0.05, min=0.0)
 
     SIL1_amp = Parameter(
-        description="SIL1 term: amplitude", default=0.002 * AbAv, min=0.0
+        description="SIL1 term: amplitude", default=0.002 * AbAv, bounds=(0.0, 0.01)
     )
     SIL1_lambda = Parameter(
         description="SIL1 term: center wavelength", default=9.7, bounds=(7.0, 13.0)
     )
-    SIL1_width = Parameter(description="SIL1 term: width", default=3.7)
+    SIL1_width = Parameter(description="SIL1 term: width", default=2.0, bounds=(0.0, 5.0))
 
     SIL2_amp = Parameter(
-        description="SIL2 term: amplitude", default=0.002 * AbAv, min=0.0
+        description="SIL2 term: amplitude", default=0.002 * AbAv, min=0.00
     )
     SIL2_lambda = Parameter(
         description="SIL2 term: center wavelength", default=18.0, bounds=(15.0, 21.0)
     )
-    SIL2_width = Parameter(description="SIL2 term: width", default=8.3)
+    SIL2_width = Parameter(description="SIL2 term: width", default=8.3, min=0.0)
 
     FIR_amp = Parameter(
         description="FIR term: amplitude", default=0.012 * AbAv, min=0.0
@@ -634,6 +634,12 @@ if __name__ == "__main__":
 
     p92_init.Av_1.bounds = [0.1, None]
 
+    # extra for HD 147933 (4 Nov 2019)
+    #p92_init.SIL1_amp_0.bounds = [0.005, None]
+    #p92_init.BKG_lambda_0.fixed = False
+    #p92_init.BKG_width_0.fixed = False
+    #p92_init.FUV_lambda_0.fixed = False
+
     # p92_init.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
     # p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
 
@@ -641,7 +647,7 @@ if __name__ == "__main__":
     fit = LevMarLSQFitter()
 
     # fit the data to the P92 model using the fitter
-    p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc)
+    p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc, maxiter=10000, epsilon=0.001)
 
     clean_pnames = [pname[:-2] for pname in p92_init.param_names]
 
