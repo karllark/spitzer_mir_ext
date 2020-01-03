@@ -602,6 +602,12 @@ if __name__ == "__main__":
     (wave, y, y_unc) = extdata.get_fitdata(
         ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True
     )
+    # remove data affected by Ly-alpha absorption/emission
+    # gindxs = wave > 1400 * u.Angstrom
+    gindxs = wave > 500 * u.Angstrom
+    wave = wave[gindxs]
+    y = y[gindxs]
+    y_unc = y_unc[gindxs]
     # remove units as fitting routines often cannot take numbers with units
     x = wave.to(1.0 / u.micron, equivalencies=u.spectral()).value
 
@@ -707,7 +713,8 @@ if __name__ == "__main__":
     )
 
     # plotting setup for easier to read plots
-    fontsize = 18
+    # fontsize = 18
+    fontsize = 10
     font = {"size": fontsize}
     matplotlib.rc("font", **font)
     matplotlib.rc("lines", linewidth=1)
@@ -718,7 +725,8 @@ if __name__ == "__main__":
     matplotlib.rc("ytick.minor", width=2)
 
     # setup the plot
-    fig, ax = plt.subplots(figsize=(12, 8))
+    # fig, ax = plt.subplots(figsize=(12, 8))
+    fig, ax = plt.subplots(figsize=(6, 4))
 
     # subplot
     ax2 = plt.axes([0.60, 0.35, 0.35, 0.35])

@@ -19,6 +19,7 @@ if __name__ == "__main__":
 
     first_line = True
     hstr = r"\colhead{name} & "
+    hstr2 = r" & "
 
     phead = {
         "AV": "{A(V)}",
@@ -33,6 +34,7 @@ if __name__ == "__main__":
         "SIL2_amp": "{SIL2 A}",
         "FIR_amp": "{FIR A}",
     }
+    mval = [1.0, 1.0, 1.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
 
     for line in file_lines:
         if (line.find("#") != 0) & (len(line) > 0):
@@ -43,13 +45,15 @@ if __name__ == "__main__":
             sname = name[:spos]
 
             pstr = f"{sname} & "
-            for ckey in edata.p92_p50_fit.keys():
+            for k, ckey in enumerate(edata.p92_p50_fit.keys()):
                 if first_line:
                     hstr += fr"\colhead{phead[ckey]} & "
+                    hstr2 += fr"\colhead{{{mval[k]:.1f}}} & "
                 val, punc, munc = edata.p92_p50_fit[ckey]
-                pstr += f"${val:.3f}^{{+{punc:.3f}}}_{{-{munc:.3f}}}$ & "
+                pstr += f"${mval[k]*val:.3f}^{{+{mval[k]*punc:.3f}}}_{{-{mval[k]*munc:.3f}}}$ & "
             if first_line:
                 first_line = False
                 print(f"\\tablehead{{{hstr[:-3]}}}")
+                print(f"\\tablehead{{{hstr2[:-3]}}}")
                 print(f"\\startdata")
             print(f"{pstr[:-3]} \\\\")
