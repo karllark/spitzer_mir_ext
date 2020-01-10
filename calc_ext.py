@@ -184,7 +184,7 @@ class P92_mod(Fittable1DModel):
         description="NUV term: amplitude", default=0.045 * AbAv, min=0.0
     )
     NUV_lambda = Parameter(
-        description="NUV term: center wavelength", default=0.22, bounds=(0.20, 0.24)
+        description="NUV term: center wavelength", default=0.2175, bounds=(0.2100, 0.2250)
     )
     NUV_width = Parameter(description="NUV term: width", default=0.05, min=0.0)
 

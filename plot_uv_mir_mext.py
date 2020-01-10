@@ -12,8 +12,9 @@ import matplotlib
 # from astropy.table import Table
 import astropy.units as u
 
-from calc_ext import P92_Elv
-from dust_extinction.shapes import P92
+# from calc_ext import P92_Elv
+# from dust_extinction.shapes import P92
+from calc_ext import P92_mod as P92
 from measure_extinction.extdata import ExtData, AverageExtData
 
 
@@ -61,24 +62,23 @@ def plot_all_ext(
             P92_best = P92(
                 BKG_amp=extdatas[k].p92_best_fit["BKG_AMP"],
                 BKG_lambda=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-                BKG_n=extdatas[k].p92_best_fit["BKG_N"],
-                BKG_b=extdatas[k].p92_best_fit["BKG_B"],
+                BKG_width=extdatas[k].p92_best_fit["BKG_WIDTH"],
                 FUV_amp=extdatas[k].p92_best_fit["FUV_AMP"],
                 FUV_lambda=extdatas[k].p92_best_fit["FUV_LAMBDA"],
                 FUV_n=extdatas[k].p92_best_fit["FUV_N"],
                 FUV_b=extdatas[k].p92_best_fit["FUV_B"],
                 NUV_amp=extdatas[k].p92_best_fit["NUV_AMP"],
                 NUV_lambda=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-                NUV_n=extdatas[k].p92_best_fit["NUV_N"],
-                NUV_b=extdatas[k].p92_best_fit["NUV_B"],
+                NUV_width=extdatas[k].p92_best_fit["NUV_WIDTH"],
                 SIL1_amp=extdatas[k].p92_best_fit["SIL1_AMP"],
                 SIL1_lambda=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-                SIL1_n=extdatas[k].p92_best_fit["SIL1_N"],
-                SIL1_b=extdatas[k].p92_best_fit["SIL1_B"],
+                SIL1_width=extdatas[k].p92_best_fit["SIL1_WIDTH"],
+                SIL2_amp=extdatas[k].p92_best_fit["SIL2_AMP"],
+                SIL2_lambda=extdatas[k].p92_best_fit["SIL2_LAMBDA"],
+                SIL2_width=extdatas[k].p92_best_fit["SIL2_WIDTH"],
                 FIR_amp=extdatas[k].p92_best_fit["FIR_AMP"],
                 FIR_lambda=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-                FIR_n=extdatas[k].p92_best_fit["FIR_N"],
-                FIR_b=extdatas[k].p92_best_fit["FIR_B"],
+                FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
             )
         else:
             P92_best = P92_Elv(

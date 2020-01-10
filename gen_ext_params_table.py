@@ -3,6 +3,7 @@
 # Program to generate the table of extinction parameters
 #
 import argparse
+import numpy as np
 
 from measure_extinction.extdata import ExtData
 
@@ -34,7 +35,11 @@ if __name__ == "__main__":
         "SIL2_amp": "{SIL2 A}",
         "FIR_amp": "{FIR A}",
     }
-    mval = [1.0, 1.0, 1.0, 100.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+    mval = [1.0, 1.0, 1.0, 100.0, 10.0, 10.0, 1000.0, 1.0, 1.0, 1000.0, 1000.0]
+    mval = np.full((len(phead)), 1.0)
+
+    okeys = ["AV", "SIL1_amp", "SIL1_lambda", "SIL1_width",
+             "SIL2_amp", "FIR_amp"]
 
     for line in file_lines:
         if (line.find("#") != 0) & (len(line) > 0):
@@ -45,7 +50,7 @@ if __name__ == "__main__":
             sname = name[:spos]
 
             pstr = f"{sname} & "
-            for k, ckey in enumerate(edata.p92_p50_fit.keys()):
+            for k, ckey in enumerate(okeys):
                 if first_line:
                     hstr += fr"\colhead{phead[ckey]} & "
                     hstr2 += fr"\colhead{{{mval[k]:.1f}}} & "

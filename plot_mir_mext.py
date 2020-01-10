@@ -11,7 +11,7 @@ import matplotlib
 
 from astropy.table import Table
 
-from calc_ext import P92_Elv
+# from calc_ext import P92_Elv
 from dust_extinction.shapes import P92
 from measure_extinction.extdata import ExtData, AverageExtData
 
