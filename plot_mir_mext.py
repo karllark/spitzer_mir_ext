@@ -139,55 +139,55 @@ if __name__ == "__main__":
                 fontsize=0.8 * fontsize,
             )
 
-        # plot the best fit P92 model
-        if args.alav:
-            P92_best = P92(
-                BKG_amp=extdatas[k].p92_best_fit["BKG_AMP"],
-                BKG_lambda=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-                BKG_width=extdatas[k].p92_best_fit["BKG_WIDTH"],
-                FUV_amp=extdatas[k].p92_best_fit["FUV_AMP"],
-                FUV_lambda=extdatas[k].p92_best_fit["FUV_LAMBDA"],
-                FUV_n=extdatas[k].p92_best_fit["FUV_N"],
-                FUV_b=extdatas[k].p92_best_fit["FUV_B"],
-                NUV_amp=extdatas[k].p92_best_fit["NUV_AMP"],
-                NUV_lambda=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-                NUV_width=extdatas[k].p92_best_fit["NUV_WIDTH"],
-                SIL1_amp=extdatas[k].p92_best_fit["SIL1_AMP"],
-                SIL1_lambda=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-                SIL1_width=extdatas[k].p92_best_fit["SIL1_WIDTH"],
-                SIL2_amp=extdatas[k].p92_best_fit["SIL2_AMP"],
-                SIL2_lambda=extdatas[k].p92_best_fit["SIL2_LAMBDA"],
-                SIL2_width=extdatas[k].p92_best_fit["SIL2_WIDTH"],
-                FIR_amp=extdatas[k].p92_best_fit["FIR_AMP"],
-                FIR_lambda=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-                FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
-            )
-        else:
-            P92_best = P92_Elv(
-                BKG_amp_0=extdatas[k].p92_best_fit["BKG_AMP"],
-                BKG_lambda_0=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-                BKG_n_0=extdatas[k].p92_best_fit["BKG_N"],
-                BKG_b_0=extdatas[k].p92_best_fit["BKG_B"],
-                FUV_amp_0=extdatas[k].p92_best_fit["FUV_AMP"],
-                FUV_lambda_0=extdatas[k].p92_best_fit["FUV_LAMBDA"],
-                FUV_n_0=extdatas[k].p92_best_fit["FUV_N"],
-                FUV_b_0=extdatas[k].p92_best_fit["FUV_B"],
-                NUV_amp_0=extdatas[k].p92_best_fit["NUV_AMP"],
-                NUV_lambda_0=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-                NUV_n_0=extdatas[k].p92_best_fit["NUV_N"],
-                NUV_b_0=extdatas[k].p92_best_fit["NUV_B"],
-                SIL1_amp_0=extdatas[k].p92_best_fit["SIL1_AMP"],
-                SIL1_lambda_0=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-                SIL1_n_0=extdatas[k].p92_best_fit["SIL1_N"],
-                SIL1_b_0=extdatas[k].p92_best_fit["SIL1_B"],
-                FIR_amp_0=extdatas[k].p92_best_fit["FIR_AMP"],
-                FIR_lambda_0=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-                FIR_n_0=extdatas[k].p92_best_fit["FIR_N"],
-                FIR_b_0=extdatas[k].p92_best_fit["FIR_B"],
-                Av_1=extdatas[k].columns["AV"][0],
-            )
-
         if args.models:
+            # plot the best fit P92 model
+            if args.alav:
+                P92_best = P92(
+                    BKG_amp=extdatas[k].p92_best_fit["BKG_AMP"],
+                    BKG_lambda=extdatas[k].p92_best_fit["BKG_LAMBDA"],
+                    BKG_width=extdatas[k].p92_best_fit["BKG_WIDTH"],
+                    FUV_amp=extdatas[k].p92_best_fit["FUV_AMP"],
+                    FUV_lambda=extdatas[k].p92_best_fit["FUV_LAMBDA"],
+                    FUV_n=extdatas[k].p92_best_fit["FUV_N"],
+                    FUV_b=extdatas[k].p92_best_fit["FUV_B"],
+                    NUV_amp=extdatas[k].p92_best_fit["NUV_AMP"],
+                    NUV_lambda=extdatas[k].p92_best_fit["NUV_LAMBDA"],
+                    NUV_width=extdatas[k].p92_best_fit["NUV_WIDTH"],
+                    SIL1_amp=extdatas[k].p92_best_fit["SIL1_AMP"],
+                    SIL1_lambda=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
+                    SIL1_width=extdatas[k].p92_best_fit["SIL1_WIDTH"],
+                    SIL2_amp=extdatas[k].p92_best_fit["SIL2_AMP"],
+                    SIL2_lambda=extdatas[k].p92_best_fit["SIL2_LAMBDA"],
+                    SIL2_width=extdatas[k].p92_best_fit["SIL2_WIDTH"],
+                    FIR_amp=extdatas[k].p92_best_fit["FIR_AMP"],
+                    FIR_lambda=extdatas[k].p92_best_fit["FIR_LAMBDA"],
+                    FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
+                )
+            else:
+                P92_best = P92_Elv(
+                    BKG_amp_0=extdatas[k].p92_best_fit["BKG_AMP"],
+                    BKG_lambda_0=extdatas[k].p92_best_fit["BKG_LAMBDA"],
+                    BKG_n_0=extdatas[k].p92_best_fit["BKG_N"],
+                    BKG_b_0=extdatas[k].p92_best_fit["BKG_B"],
+                    FUV_amp_0=extdatas[k].p92_best_fit["FUV_AMP"],
+                    FUV_lambda_0=extdatas[k].p92_best_fit["FUV_LAMBDA"],
+                    FUV_n_0=extdatas[k].p92_best_fit["FUV_N"],
+                    FUV_b_0=extdatas[k].p92_best_fit["FUV_B"],
+                    NUV_amp_0=extdatas[k].p92_best_fit["NUV_AMP"],
+                    NUV_lambda_0=extdatas[k].p92_best_fit["NUV_LAMBDA"],
+                    NUV_n_0=extdatas[k].p92_best_fit["NUV_N"],
+                    NUV_b_0=extdatas[k].p92_best_fit["NUV_B"],
+                    SIL1_amp_0=extdatas[k].p92_best_fit["SIL1_AMP"],
+                    SIL1_lambda_0=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
+                    SIL1_n_0=extdatas[k].p92_best_fit["SIL1_N"],
+                    SIL1_b_0=extdatas[k].p92_best_fit["SIL1_B"],
+                    FIR_amp_0=extdatas[k].p92_best_fit["FIR_AMP"],
+                    FIR_lambda_0=extdatas[k].p92_best_fit["FIR_LAMBDA"],
+                    FIR_n_0=extdatas[k].p92_best_fit["FIR_N"],
+                    FIR_b_0=extdatas[k].p92_best_fit["FIR_B"],
+                    Av_1=extdatas[k].columns["AV"][0],
+                )
+
             if args.alav:
                 ltext = None
             else:

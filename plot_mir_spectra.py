@@ -139,8 +139,8 @@ if __name__ == "__main__":
     ax.set_ylim(0.5, len(starnames) * 0.5 + 4.0)
     ax.set_xscale("log")
     ax.set_xlim(kxrange)
-    ax.set_xlabel("$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
-    ax.set_ylabel("$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize)
+    ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
+    ax.set_ylabel(r"$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize)
 
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")

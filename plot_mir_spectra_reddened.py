@@ -57,6 +57,7 @@ if __name__ == "__main__":
         ann_xvals=[6.0, 6.0] * u.micron,
         ann_wave_range=[5.0, 9.0] * u.micron,
         ann_rot=2.5,
+        ann_offset=0.1,
     )
 
     ann_set(
@@ -87,6 +88,7 @@ if __name__ == "__main__":
         ann_xvals=[6.0, 6.0] * u.micron,
         ann_wave_range=[5.0, 9.0] * u.micron,
         ann_rot=2.5,
+        ann_offset=0.1,
     )
 
     ann_set(

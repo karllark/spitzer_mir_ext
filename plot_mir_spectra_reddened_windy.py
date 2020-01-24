@@ -55,11 +55,11 @@ if __name__ == "__main__":
         "hd169454",
         "hd229059",
         "hd166734",
-        "vicyg5",
-        "hd034921",
         "hd197702",
         "hd206773",
+        "vicyg5",
         "hd152408",
+        "hd034921",
     ]
     plot_mir_set(
         ax,
@@ -67,6 +67,7 @@ if __name__ == "__main__":
         extra_off_val=0.0,
         ann_xvals=[9.0, 9.0],
         ann_wave_range=[6.0, 10.0] * u.micron,
+        ann_offset=0.1
     )
 
     ann_set(
@@ -83,8 +84,10 @@ if __name__ == "__main__":
     ax.set_ylim(0.5, 11.0)
     ax.set_xscale("log")
     ax.set_xlim(kxrange)
-    ax.set_xlabel("$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
-    ax.set_ylabel("$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize)
+    ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
+    ax.set_ylabel(
+        r"$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize
+    )
 
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")

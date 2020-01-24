@@ -46,6 +46,7 @@ if __name__ == "__main__":
     plot_mir_set(
         ax,
         starnames,
+        extra_off_val=0.0,
         ann_xvals=[6.0, 6.0],
         ann_wave_range=[6.0, 10.0] * u.micron,
         ann_rot=0.0,
@@ -58,8 +59,8 @@ if __name__ == "__main__":
         "hd165024",
         "hd064760",
         "hd204172",
-        "hd051283",
         "hd188209",
+        "hd051283",
     ]
     plot_mir_set(
         ax,
