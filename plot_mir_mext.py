@@ -12,7 +12,8 @@ import matplotlib
 from astropy.table import Table
 
 # from calc_ext import P92_Elv
-from dust_extinction.shapes import P92
+# from dust_extinction.shapes import P92
+from calc_ext import P92_mod as P92
 from measure_extinction.extdata import ExtData, AverageExtData
 
 if __name__ == "__main__":
@@ -96,7 +97,7 @@ if __name__ == "__main__":
             extdatas[k].plot(
                 ax,
                 color=col_vals[i % 6],
-                alav=args.alav,
+                alax=args.alav,
                 alpha=0.5,
                 rebin_fac=args.rebin_fac,
                 fontsize=fontsize,
@@ -143,24 +144,23 @@ if __name__ == "__main__":
             P92_best = P92(
                 BKG_amp=extdatas[k].p92_best_fit["BKG_AMP"],
                 BKG_lambda=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-                BKG_n=extdatas[k].p92_best_fit["BKG_N"],
-                BKG_b=extdatas[k].p92_best_fit["BKG_B"],
+                BKG_width=extdatas[k].p92_best_fit["BKG_WIDTH"],
                 FUV_amp=extdatas[k].p92_best_fit["FUV_AMP"],
                 FUV_lambda=extdatas[k].p92_best_fit["FUV_LAMBDA"],
                 FUV_n=extdatas[k].p92_best_fit["FUV_N"],
                 FUV_b=extdatas[k].p92_best_fit["FUV_B"],
                 NUV_amp=extdatas[k].p92_best_fit["NUV_AMP"],
                 NUV_lambda=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-                NUV_n=extdatas[k].p92_best_fit["NUV_N"],
-                NUV_b=extdatas[k].p92_best_fit["NUV_B"],
+                NUV_width=extdatas[k].p92_best_fit["NUV_WIDTH"],
                 SIL1_amp=extdatas[k].p92_best_fit["SIL1_AMP"],
                 SIL1_lambda=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-                SIL1_n=extdatas[k].p92_best_fit["SIL1_N"],
-                SIL1_b=extdatas[k].p92_best_fit["SIL1_B"],
+                SIL1_width=extdatas[k].p92_best_fit["SIL1_WIDTH"],
+                SIL2_amp=extdatas[k].p92_best_fit["SIL2_AMP"],
+                SIL2_lambda=extdatas[k].p92_best_fit["SIL2_LAMBDA"],
+                SIL2_width=extdatas[k].p92_best_fit["SIL2_WIDTH"],
                 FIR_amp=extdatas[k].p92_best_fit["FIR_AMP"],
                 FIR_lambda=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-                FIR_n=extdatas[k].p92_best_fit["FIR_N"],
-                FIR_b=extdatas[k].p92_best_fit["FIR_B"],
+                FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
             )
         else:
             P92_best = P92_Elv(
@@ -371,7 +371,7 @@ if __name__ == "__main__":
         # get the average extinction curve
         if args.ave:
             ave_extdata = AverageExtData(extdatas, alav=True)
-            ave_extdata.plot_ext(
+            ave_extdata.plot(
                 ax,
                 color="k",
                 fontsize=fontsize,
