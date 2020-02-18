@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+
+extargs="--png --nsteps=5000"
+# extargs="--png"
+fmfit="python -W ignore /home/kgordon/Python_git/modeling_mcmc/fit_uv_ext.py"
+
+
+# V stars
+$fmfit fits/hd204827_hd036512_ext.fits $extargs
+# $fmfit fits/vicyg1_hd214680_ext.fits $extargs
+$fmfit fits/hd147889_hd064802_ext.fits $extargs
+$fmfit fits/hd029309_hd064802_ext.fits $extargs
+$fmfit fits/hd283809_hd064802_ext.fits $extargs
+$fmfit fits/hd281159_hd064802_ext.fits $extargs
+
+# III stars
+$fmfit fits/hd147701_hd195986_ext.fits $extargs
+$fmfit fits/hd029647_hd195986_ext.fits $extargs
+$fmfit fits/bd+63d1964_hd188209_ext.fits $extargs
+
+# I stars
+# $fmfit fits/vicyg8a_hd188209_ext.fits $extargs
+$fmfit fits/hd192660_hd204172_ext.fits $extargs
+$fmfit fits/hd229238_hd204172_ext.fits $extargs
+$fmfit fits/hd112272_hd204172_ext.fits $extargs
+# $fmfit fits/vicyg2_hd214680_ext.fits $extargs
+$fmfit fits/hd014956_hd204172_ext.fits $extargs
