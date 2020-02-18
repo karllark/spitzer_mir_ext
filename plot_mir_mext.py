@@ -111,26 +111,16 @@ if __name__ == "__main__":
             indxs, = np.where(wave.value > 5.0)
             av_guess = -1.0 * np.average(y[indxs])
 
-            if ltext == "vicyg2":
-                av_guess -= 0.1
-            elif ltext == "hd147889":
-                av_guess += 0.13
-            elif ltext == "hd029309":
-                av_guess -= 0.05
-            elif ltext == "hd014956":
-                av_guess -= 0.15
-            elif ltext == "bd+63d1964":
-                av_guess -= 0.10
-            elif ltext == "hd281159":
-                av_guess += 0.10
+            if ltext == "vicyg8a":
+                av_guess += 0.1
             elif ltext == "hd112272":
-                av_guess += 0.10
-            elif ltext == "hd204827":
-                av_guess += 0.13
-            elif ltext == "hd229238":
-                av_guess += 0.03
+                av_guess += 0.12
+            elif ltext == "hd281159":
+                av_guess += 0.22
             elif ltext == "hd147701":
-                av_guess += 0.05
+                av_guess += 0.17
+            elif ltext == "hd229238":
+                av_guess += 0.1
             ax.text(
                 40.0,
                 -1.0 * av_guess,

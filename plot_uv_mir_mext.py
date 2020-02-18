@@ -1,9 +1,5 @@
-#!/usr/bin/env python
-#
-# Program to plot a list of extinction curves
-#
-from __future__ import absolute_import, division, print_function, unicode_literals
 import argparse
+import os.path
 
 import numpy as np
 import matplotlib.pyplot as pyplot
@@ -13,9 +9,9 @@ import matplotlib
 import astropy.units as u
 
 # from calc_ext import P92_Elv
-# from dust_extinction.shapes import P92
+from dust_extinction.shapes import FM90
 from calc_ext import P92_mod as P92
-from measure_extinction.extdata import ExtData, AverageExtData
+from measure_extinction.extdata import ExtData
 
 
 def plot_all_ext(
@@ -31,7 +27,8 @@ def plot_all_ext(
     col_vals = ["b", "g", "r", "m", "c", "y"]
     lin_vals = ["--", ":", "-."]
 
-    mod_x = np.logspace(-1.0, 2.0, 200) * u.micron
+    mod_x = np.logspace(0.0, 2.0, 200) * u.micron
+    mod_x_fm90 = np.logspace(-1.0, -0.5, 200) * u.micron
     for i in range(len(extnames)):
         k = sindxs[i]
 
@@ -58,51 +55,37 @@ def plot_all_ext(
             )
 
         # plot the best fit P92 model
-        if args.alav:
-            P92_best = P92(
-                BKG_amp=extdatas[k].p92_best_fit["BKG_AMP"],
-                BKG_lambda=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-                BKG_width=extdatas[k].p92_best_fit["BKG_WIDTH"],
-                FUV_amp=extdatas[k].p92_best_fit["FUV_AMP"],
-                FUV_lambda=extdatas[k].p92_best_fit["FUV_LAMBDA"],
-                FUV_n=extdatas[k].p92_best_fit["FUV_N"],
-                FUV_b=extdatas[k].p92_best_fit["FUV_B"],
-                NUV_amp=extdatas[k].p92_best_fit["NUV_AMP"],
-                NUV_lambda=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-                NUV_width=extdatas[k].p92_best_fit["NUV_WIDTH"],
-                SIL1_amp=extdatas[k].p92_best_fit["SIL1_AMP"],
-                SIL1_lambda=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-                SIL1_width=extdatas[k].p92_best_fit["SIL1_WIDTH"],
-                SIL2_amp=extdatas[k].p92_best_fit["SIL2_AMP"],
-                SIL2_lambda=extdatas[k].p92_best_fit["SIL2_LAMBDA"],
-                SIL2_width=extdatas[k].p92_best_fit["SIL2_WIDTH"],
-                FIR_amp=extdatas[k].p92_best_fit["FIR_AMP"],
-                FIR_lambda=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-                FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
-            )
-        else:
-            P92_best = P92_Elv(
-                BKG_amp_0=extdatas[k].p92_best_fit["BKG_AMP"],
-                BKG_lambda_0=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-                BKG_n_0=extdatas[k].p92_best_fit["BKG_N"],
-                BKG_b_0=extdatas[k].p92_best_fit["BKG_B"],
-                FUV_amp_0=extdatas[k].p92_best_fit["FUV_AMP"],
-                FUV_lambda_0=extdatas[k].p92_best_fit["FUV_LAMBDA"],
-                FUV_n_0=extdatas[k].p92_best_fit["FUV_N"],
-                FUV_b_0=extdatas[k].p92_best_fit["FUV_B"],
-                NUV_amp_0=extdatas[k].p92_best_fit["NUV_AMP"],
-                NUV_lambda_0=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-                NUV_n_0=extdatas[k].p92_best_fit["NUV_N"],
-                NUV_b_0=extdatas[k].p92_best_fit["NUV_B"],
-                SIL1_amp_0=extdatas[k].p92_best_fit["SIL1_AMP"],
-                SIL1_lambda_0=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-                SIL1_n_0=extdatas[k].p92_best_fit["SIL1_N"],
-                SIL1_b_0=extdatas[k].p92_best_fit["SIL1_B"],
-                FIR_amp_0=extdatas[k].p92_best_fit["FIR_AMP"],
-                FIR_lambda_0=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-                FIR_n_0=extdatas[k].p92_best_fit["FIR_N"],
-                FIR_b_0=extdatas[k].p92_best_fit["FIR_B"],
-                Av_1=extdatas[k].columns["AV"][0],
+        P92_best = P92(
+            BKG_amp=extdatas[k].p92_best_fit["BKG_AMP"],
+            BKG_lambda=extdatas[k].p92_best_fit["BKG_LAMBDA"],
+            BKG_width=extdatas[k].p92_best_fit["BKG_WIDTH"],
+            FUV_amp=extdatas[k].p92_best_fit["FUV_AMP"],
+            FUV_lambda=extdatas[k].p92_best_fit["FUV_LAMBDA"],
+            FUV_n=extdatas[k].p92_best_fit["FUV_N"],
+            FUV_b=extdatas[k].p92_best_fit["FUV_B"],
+            NUV_amp=extdatas[k].p92_best_fit["NUV_AMP"],
+            NUV_lambda=extdatas[k].p92_best_fit["NUV_LAMBDA"],
+            NUV_width=extdatas[k].p92_best_fit["NUV_WIDTH"],
+            SIL1_amp=extdatas[k].p92_best_fit["SIL1_AMP"],
+            SIL1_lambda=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
+            SIL1_width=extdatas[k].p92_best_fit["SIL1_WIDTH"],
+            SIL2_amp=extdatas[k].p92_best_fit["SIL2_AMP"],
+            SIL2_lambda=extdatas[k].p92_best_fit["SIL2_LAMBDA"],
+            SIL2_width=extdatas[k].p92_best_fit["SIL2_WIDTH"],
+            FIR_amp=extdatas[k].p92_best_fit["FIR_AMP"],
+            FIR_lambda=extdatas[k].p92_best_fit["FIR_LAMBDA"],
+            FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
+        )
+
+        # best fit FM90 model
+        if extdatas_fm90[k] is not None:
+            FM90_best = FM90(
+                C1=extdatas_fm90[k].fm90_best_fit["C1"],
+                C2=extdatas_fm90[k].fm90_best_fit["C2"],
+                C3=extdatas_fm90[k].fm90_best_fit["C3"],
+                C4=extdatas_fm90[k].fm90_best_fit["C4"],
+                xo=extdatas_fm90[k].fm90_best_fit["XO"],
+                gamma=extdatas_fm90[k].fm90_best_fit["GAMMA"]
             )
 
         if args.models:
@@ -119,6 +102,15 @@ def plot_all_ext(
                 alpha=0.5,
                 label=ltext,
             )
+            if extdatas_fm90[k] is not None:
+                ax.plot(
+                    mod_x_fm90,
+                    FM90_best(mod_x_fm90) / normval + i * yoffset_factor,
+                    lin_vals[i % 3],
+                    color=col_vals[i % 6],
+                    alpha=0.5,
+                    label=ltext,
+                )
 
     ax.set_yscale("linear")
     ax.set_xscale("linear")
@@ -147,19 +139,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rebin_fac", type=int, default=None, help="rebin factor for spectra"
     )
-    parser.add_argument("--alav", help="plot A(lambda)/A(V)", action="store_true")
+    parser.add_argument("--alav", help="plot A(lambda)/A(V)", default=True, action="store_true")
     parser.add_argument("--ave", help="plot the average", action="store_true")
     parser.add_argument(
         "--models", help="plot the best fit models", action="store_true"
     )
     parser.add_argument(
         "--modonly", help="only plot the best fit models", action="store_true"
-    )
-    parser.add_argument(
-        "--prevobs", help="plot previous observations", action="store_true"
-    )
-    parser.add_argument(
-        "--dg_models", help="plot dust grain models", action="store_true"
     )
     parser.add_argument(
         "-p", "--png", help="save figure as a png file", action="store_true"
@@ -173,6 +159,7 @@ if __name__ == "__main__":
     file_lines = list(f)
     extnames = []
     extdatas = []
+    extdatas_fm90 = []
     avs = []
 
     normtype = "IUE"
@@ -183,9 +170,16 @@ if __name__ == "__main__":
         if (line.find("#") != 0) & (len(line) > 0):
             name = line.rstrip()
             extnames.append(name)
-            text = ExtData(filename="fits/%s" % name)
+            bfilename = f"fits/{name}"
+            text = ExtData(filename=bfilename)
             extdatas.append(text)
             avs.append(text.columns["AV"][0])
+
+            if os.path.isfile(bfilename.replace(".fits", "_fm90.fits")):
+                textfm90 = ExtData(filename=bfilename.replace(".fits", "_fm90.fits"))
+                extdatas_fm90.append(textfm90)
+            else:
+                extdatas_fm90.append(None)
 
             # determine the extinction in the near-UV
             # useful for sorting to make a pretty plot

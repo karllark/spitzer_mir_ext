@@ -600,8 +600,9 @@ if __name__ == "__main__":
 
     # get an observed extinction curve to fit
     (wave, y, y_unc) = extdata.get_fitdata(
-        ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True
+        ["BAND", "IRS"], remove_uvwind_region=True, remove_lya_region=True
     )
+    # ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True
     # remove data affected by Ly-alpha absorption/emission
     # gindxs = wave > 1400 * u.Angstrom
     gindxs = wave > 500 * u.Angstrom
@@ -671,16 +672,16 @@ if __name__ == "__main__":
         fit_param_names = [
             "Av_1",
             "BKG_amp_0",
-            "FUV_amp_0",
-            "NUV_amp_0",
-            "NUV_lambda_0",
-            "NUV_width_0",
             "SIL1_amp_0",
             "SIL1_lambda_0",
             "SIL1_width_0",
             "SIL2_amp_0",
             "FIR_amp_0",
         ]
+        #    "FUV_amp_0",
+        #    "NUV_amp_0",
+        #    "NUV_lambda_0",
+        #    "NUV_width_0",
         emcee_results = p92_emcee(
             x,
             y,

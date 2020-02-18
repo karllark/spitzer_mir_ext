@@ -51,6 +51,7 @@ if __name__ == "__main__":
 
     starnames = [
         "hd096042",
+        "hd147933",
         "hd149404",
         "hd169454",
         "hd229059",
@@ -74,14 +75,14 @@ if __name__ == "__main__":
         ax,
         fontsize,
         [35.0, 38.0],
-        [10.5, 0.8],
+        [9.5, 0.8],
         [45.0, 42.0],
         "Unusable for Extinction",
         "(ordered by wind srength)",
     )
 
     ax.set_yscale("linear")
-    ax.set_ylim(0.5, 11.0)
+    ax.set_ylim(0.5, 10.0)
     ax.set_xscale("log")
     ax.set_xlim(kxrange)
     ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)

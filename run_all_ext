@@ -1,15 +1,14 @@
 #!/bin/bash
 #
 
-# extargs="--png --nburn=1000 --nsteps=1000 --emcee --threads=10"
-extargs="--png"
+extargs="--png --nburn=1000 --nsteps=1000 --emcee --threads=10"
+# extargs="--png"
 
 # V stars
 python calc_ext.py hd204827 hd036512 $extargs
 python calc_ext.py vicyg1 hd214680 $extargs
 python calc_ext.py hd147889 hd064802 $extargs
 python calc_ext.py hd029309 hd064802 $extargs
-python calc_ext.py hd147933 hd064802 $extargs
 python calc_ext.py hd283809 hd064802 $extargs
 python calc_ext.py hd281159 hd064802 $extargs
 
