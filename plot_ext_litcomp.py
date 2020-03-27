@@ -3,7 +3,6 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
-from astropy.table import Table
 
 # import astropy.units as u
 
@@ -72,13 +71,13 @@ if __name__ == "__main__":
 
     litmods = [RL85_MWAvg(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
     litdesc = [
-        "RL85_MWAvg: Rieke & Lebofsky (1985)",
-        "I05_MWAvg: Indebetouw et al. (2005)",
-        "CT06_MWGC: Chiar & Tielens (2006)",
-        "CT06_MWLocal: Chiar & Tielens (2006)",
-        "F11_MWGC: Fritz et al. (2011)",
+        "GalCenter: Rieke & Lebofsky (1985)",
+        "GalPlane: Indebetouw et al. (2005)",
+        "GalCenter: Chiar & Tielens (2006)",
+        "Local: Chiar & Tielens (2006)",
+        "GalCenter: Fritz et al. (2011)",
     ]
-    litfmt = ["bP", "gP", "c--", "c-.", "mP"]
+    litfmt = ["bs", "gP", "c--", "c:", "m^"]
     for k, cmod in enumerate(litmods):
         lit_wave = 1.0 / cmod.obsdata_x
         lit_axav = cmod.obsdata_axav
@@ -92,7 +91,8 @@ if __name__ == "__main__":
             label=litdesc[k],
             lw=3,
         )
-        ax[0].plot(lit_wave, lit_y, litfmt[k], alpha=0.25, lw=3)
+        if k == 1:
+            ax[0].plot(lit_wave, lit_y, litfmt[k], alpha=0.25, lw=3, label=litdesc[k])
 
     # Zasowski et al. 2009 (supercedes Indebetouw?)
     Z09_wave = np.array([1.22, 1.63, 2.22, 3.6, 4.5, 5.8, 8.0])
@@ -106,19 +106,19 @@ if __name__ == "__main__":
         Z09_y_l10,
         "rs",
         fillstyle="none",
-        markersize=10,
-        markeredgewidth=1.0,
+        markersize=8,
+        markeredgewidth=2.0,
         alpha=0.5,
-        label="GalPlane (l10-15); Zasowski et al. (2009)",
+        label="GalPlane (l=10-15): Zasowski et al. (2009)",
     )
     ax[0].plot(
         Z09_wave,
         Z09_y_l90,
         "rs",
-        markersize=10,
+        markersize=8,
         markeredgewidth=1.0,
         alpha=0.5,
-        label="GalPlane (l90); Zasowski et al. (2009)",
+        label="GalPlane (l=90): Zasowski et al. (2009)",
     )
 
     # Xue et al. 2016
@@ -142,7 +142,7 @@ if __name__ == "__main__":
         ]
     )
     X16_y = -1 * X16_eklejk
-    ax[0].plot(X16_wave, X16_y, "yP", label="GalPlane; Xue et al. (2016)")
+    ax[0].plot(X16_wave, X16_y, "yv", label="GalPlane: Xue et al. (2016)")
 
     # New measurements
     avefilename = "data/all_ext_18feb20_ave.fits"
@@ -166,27 +166,40 @@ if __name__ == "__main__":
     ax[1].errorbar(
         G20_wave,
         G20_ext / G20_ext[ki],
-        yerr=G20_ext_uncs,
+        yerr=G20_ext_uncs / G20_ext[ki],
         fmt="ko",
-        markersize=12,
+        markersize=10,
         markeredgewidth=1.0,
         alpha=0.5,
         label="this work (JHK, IRAC, IRS15, MIPS24)",
     )
 
     ax[0].plot(
-        G20_wave, G20_y, "ko", markersize=12, markeredgewidth=1.0, alpha=0.5,
+        G20_wave,
+        G20_y,
+        "ko",
+        markersize=10,
+        markeredgewidth=1.0,
+        alpha=0.5,
+        label="this work (JHK, IRAC, IRS15, MIPS24)",
     )
 
     # IRS
     ax[1].plot(
-        G20_IRS_wave, G20_IRS_ext / G20_ext[ki], "k-", label="this work (IRS)", lw=2, alpha=0.65
+        G20_IRS_wave,
+        G20_IRS_ext / G20_ext[ki],
+        "k-",
+        label="this work (IRS)",
+        lw=2,
+        alpha=0.65,
     )
 
     G20_IRS_y = G20_IRS_ext / (G20_ext[ji] - G20_ext[ki])
     G20_akejk = G20_ext[ki] / (G20_ext[ji] - G20_ext[ki])
     G20_IRS_y = G20_IRS_y - G20_akejk
-    ax[0].plot(G20_IRS_wave, G20_IRS_y, "k-", lw=2, alpha=0.65)
+    ax[0].plot(
+        G20_IRS_wave, G20_IRS_y, "k-", lw=2, alpha=0.65, label="this work (IRS)",
+    )
 
     for i in range(2):
         ax[i].set_yscale("linear")
@@ -199,7 +212,7 @@ if __name__ == "__main__":
 
     # finishing plot details
     ax[0].set_xlim(1.0, 40.0)
-    ax[0].set_ylim(-0.8, 1.1)
+    ax[0].set_ylim(-0.7, 1.1)
     ax[0].set_ylabel(r"$E(\lambda - K)/E(J - K)$", fontsize=1.3 * fontsize)
 
     ax[1].set_xlim(1.0, 40.0)
