@@ -7,10 +7,15 @@ This paper is Gordon, Misselt, et al. (in prep).
 Figures:
 
 1.
+
 2.
+
 3.
+
 4.
+
 5. UV+MIR extinction: plot_uv_mir_mext.py
+
 6. MIR ext literature comparision: plot_ext_litcomp.py
 
 
