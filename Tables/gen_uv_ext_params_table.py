@@ -22,41 +22,37 @@ if __name__ == "__main__":
     hstr2 = r" & "
 
     phead = {
-        "AV": "{A(V)}",
-        "BKG_AMP": "{BKG A}",
-        "FUV_AMP": "{FUV A}",
-        "NUV_AMP": "{NUV A}",
-        "NUV_LAMBDA": r"{NUV $\lambda_o$}",
-        "NUV_WIDTH": r"{NUV $\gamma$}",
-        "SIL1_AMP": "{SIL1 A}",
-        "SIL1_LAMBDA": r"{SIL1 $\lambda_o$}",
-        "SIL1_WIDTH": r"{SIL1 $\gamma$}",
-        "SIL2_AMP": "{SIL2 A}",
-        "FIR_AMP": "{FIR A}",
+        "C1": r"{$C1$}",
+        "C2": r"{$C2$}",
+        "C3": r"{$C3$}",
+        "C4": r"{$C4$}",
+        "XO": r"{$x_o$}",
+        "GAMMA": r"{$\gamma$}",
     }
     phead2 = {
-        "AV": "{[mag]}",
-        "SIL1_AMP": r"{$10^{-3}$ $A(\lambda)/A(V)$}",
-        "SIL1_LAMBDA": r"{[$\micron$]}",
-        "SIL1_WIDTH": r"{[$\micron$]}",
-        "SIL2_AMP": r"{$10^{-3}$ $A(\lambda)/A(V)$}",
-        "FIR_AMP": r"{$10^{-3}$ $A(\lambda)/A(V)$}",
+        "C1": r"{[$A(\lambda)/A(V)$]}",
+        "C2": r"{[$A(\lambda)/A(V)$]}",
+        "C3": r"{[$A(\lambda)/A(V)$]}",
+        "C4": r"{[$A(\lambda)/A(V)$]}",
+        "XO": r"{[$\micron$]}",
+        "GAMMA": r"{[$\micron$]}",
     }
     mval = {
-        "AV": 1,
-        "SIL1_AMP": 1e3,
-        "SIL1_LAMBDA": 1,
-        "SIL1_WIDTH": 1,
-        "SIL2_AMP": 1e3,
-        "FIR_AMP": 1e3,
+        "C1": 1,
+        "C2": 1,
+        "C3": 1,
+        "C4": 1,
+        "XO": 1,
+        "GAMMA": 1,
     }
 
-    okeys = ["AV", "SIL1_AMP", "SIL1_LAMBDA", "SIL1_WIDTH", "SIL2_AMP", "FIR_AMP"]
+    okeys = ["C1", "C2", "C3", "C4", "XO", "GAMMA"]
 
     for line in sorted(file_lines):
         if (line.find("#") != 0) & (len(line) > 0):
             name = line.rstrip()
-            edata = ExtData(filename=f"fits_good/{name}")
+            bfilename = f"fits_good/{name}"
+            edata = ExtData(filename=bfilename.replace(".fits", "_fm90.fits"))
 
             spos = name.find("_")
             sname = name[:spos].upper()
@@ -66,11 +62,7 @@ if __name__ == "__main__":
                 if first_line:
                     hstr += fr"\colhead{phead[ckey]} & "
                     hstr2 += fr"\colhead{phead2[ckey]} & "
-                    # hstr2 += fr"\colhead{{{mval[k]:.1f}}} & "
-                if ckey == "AV":
-                    val, punc, munc = edata.columns_p50_fit[ckey]
-                else:
-                    val, punc, munc = edata.p92_p50_fit[ckey]
+                val, punc, munc = edata.fm90_p50_fit[ckey]
                 cmval = float(mval[ckey])
                 pstr += f"${cmval*val:.3f}^{{+{cmval*punc:.3f}}}_{{-{cmval*munc:.3f}}}$ & "
             if first_line:

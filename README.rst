@@ -58,4 +58,6 @@ Tables
 
 3. Sightline properties: by hand
 
-4. IR extinction parameters:
+4. IR extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20.da
+
+5. UV extinction parameters: Tables/gen_uv_ext_params_table.py data/all_ext_18feb20_uv.dat
