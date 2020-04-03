@@ -12,11 +12,11 @@ Figures:
 
 3. MIR spectra windy stars: Figs/plot_mir_specra_reddened_windy.py
 
-4.
+4. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_18feb20.dat
 
-5. UV+MIR extinction: Figs/plot_uv_mir_mext.py
+5. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20.dat
 
-6. MIR ext literature comparision: Figs/plot_ext_litcomp.py
+6. MIR ext literature comparison: Figs/plot_ext_litcomp.py
 
 Tables:
 
@@ -24,7 +24,9 @@ Tables:
 
 2. Opt/NIR Data: idl/make_ir_ophot_table.pro
 
-3.
+3. Sightline properties: by hand
+
+4. IR extinction parameters:
 
 In Development!
 ---------------

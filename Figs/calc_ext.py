@@ -12,7 +12,7 @@ from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.utils.exceptions import AstropyWarning
 from astropy.modeling import Fittable1DModel, Parameter
 
-from dust_extinction.shapes import P92
+# from dust_extinction.shapes import P92
 from dust_extinction.conversions import AxAvToExv
 from dust_extinction.helpers import _get_x_in_wavenumbers, _test_valid_x_range
 from measure_extinction.stardata import StarData
@@ -20,7 +20,7 @@ from measure_extinction.extdata import ExtData
 
 
 class P92_mod(Fittable1DModel):
-    """
+    r"""
     P92 extinction model calculation
 
     Parameters
@@ -184,7 +184,9 @@ class P92_mod(Fittable1DModel):
         description="NUV term: amplitude", default=0.045 * AbAv, min=0.0
     )
     NUV_lambda = Parameter(
-        description="NUV term: center wavelength", default=0.2175, bounds=(0.2100, 0.2250)
+        description="NUV term: center wavelength",
+        default=0.2175,
+        bounds=(0.2100, 0.2250),
     )
     NUV_width = Parameter(description="NUV term: width", default=0.05, min=0.0)
 
@@ -194,7 +196,9 @@ class P92_mod(Fittable1DModel):
     SIL1_lambda = Parameter(
         description="SIL1 term: center wavelength", default=9.7, bounds=(7.0, 13.0)
     )
-    SIL1_width = Parameter(description="SIL1 term: width", default=2.0, bounds=(0.0, 5.0))
+    SIL1_width = Parameter(
+        description="SIL1 term: width", default=2.0, bounds=(0.0, 5.0)
+    )
 
     SIL2_amp = Parameter(
         description="SIL2 term: amplitude", default=0.002 * AbAv, min=0.00
@@ -216,7 +220,7 @@ class P92_mod(Fittable1DModel):
 
     @staticmethod
     def _p92_single_term(in_lambda, amplitude, cen_wave, b, n):
-        """
+        r"""
         Function for calculating a single P92 term
 
         .. math::
@@ -387,7 +391,7 @@ def get_best_fit_params(sampler):
         tmax_lnp = np.max(sampler.lnprobability[k])
         if tmax_lnp > max_lnp:
             max_lnp = tmax_lnp
-            indxs, = np.where(sampler.lnprobability[k] == tmax_lnp)
+            (indxs,) = np.where(sampler.lnprobability[k] == tmax_lnp)
             fit_params_best = sampler.chain[k, indxs[0], :]
     return fit_params_best
 
@@ -615,7 +619,7 @@ if __name__ == "__main__":
     # determine the initial guess at the A(V) values
     #  just use the average at wavelengths > 5
     #  limit as lambda -> inf, E(lamda-V) -> -A(V)
-    indxs, = np.where(1.0 / x > 5.0)
+    (indxs,) = np.where(1.0 / x > 5.0)
     av_guess = -1.0 * np.average(y[indxs])
     if not np.isfinite(av_guess):
         av_guess = 1.0
@@ -642,10 +646,10 @@ if __name__ == "__main__":
     p92_init.Av_1.bounds = [0.1, None]
 
     # extra for HD 147933 (4 Nov 2019)
-    #p92_init.SIL1_amp_0.bounds = [0.005, None]
-    #p92_init.BKG_lambda_0.fixed = False
-    #p92_init.BKG_width_0.fixed = False
-    #p92_init.FUV_lambda_0.fixed = False
+    # p92_init.SIL1_amp_0.bounds = [0.005, None]
+    # p92_init.BKG_lambda_0.fixed = False
+    # p92_init.BKG_width_0.fixed = False
+    # p92_init.FUV_lambda_0.fixed = False
 
     # p92_init.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
     # p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
@@ -828,7 +832,7 @@ if __name__ == "__main__":
     sp_xlim = [2.0, 35.0]
     ax2.set_xlim(sp_xlim)
     # ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
-    indxs, = np.where((x > 1.0 / sp_xlim[1]) & (x < 1.0 / sp_xlim[0]))
+    (indxs,) = np.where((x > 1.0 / sp_xlim[1]) & (x < 1.0 / sp_xlim[0]))
     ax2.set_ylim(
         min([min(p92_fit(x)[indxs]), -best_fit_Av]) - 0.1, max(p92_fit(x)[indxs]) + 0.1
     )

@@ -75,7 +75,7 @@ if __name__ == "__main__":
     if args.alav:
         figsize = (10, 8)
     else:
-        figsize = (10, 12)
+        figsize = (10, 10)
     fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=figsize)
 
     sindxs = np.argsort(avs)
@@ -85,8 +85,9 @@ if __name__ == "__main__":
     spec_name = "IRS"
     norm_wave_range = [6.0, 10.0]
     ann_wave_range = [15.0, 18.0]
-    col_vals = ["b", "g", "r", "m", "c", "y"]
+    col_vals = ["b", "g", "c"]  # , "r", "m", "c", "y"]
     lin_vals = ["--", ":", "-."]
+    n_cols = len(col_vals)
 
     mod_x = 1.0 / np.arange(1.0, 40.0, 0.1)
     for i in range(len(extnames)):
@@ -96,7 +97,7 @@ if __name__ == "__main__":
         if not args.modonly:
             extdatas[k].plot(
                 ax,
-                color=col_vals[i % 6],
+                color=col_vals[i % n_cols],
                 alax=args.alav,
                 alpha=0.5,
                 rebin_fac=args.rebin_fac,
@@ -108,7 +109,7 @@ if __name__ == "__main__":
             ltext = ltext.replace(".dat", "")
 
             (wave, y, y_unc) = extdatas[k].get_fitdata(["BAND", "IRS"])
-            indxs, = np.where(wave.value > 5.0)
+            (indxs,) = np.where(wave.value > 5.0)
             av_guess = -1.0 * np.average(y[indxs])
 
             if ltext == "vicyg8a":
@@ -125,7 +126,7 @@ if __name__ == "__main__":
                 40.0,
                 -1.0 * av_guess,
                 ltext,
-                color=col_vals[i % 6],
+                color=col_vals[i % n_cols],
                 fontsize=0.8 * fontsize,
             )
 
@@ -382,6 +383,9 @@ if __name__ == "__main__":
 
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")
+
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
 
     fig.tight_layout()
 
