@@ -5,4 +5,5 @@ __pycache__*
 *.pyc
 *.png
 fits/
+fits_good/
 *.tex
