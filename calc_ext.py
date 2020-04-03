@@ -161,8 +161,8 @@ class P92_mod(Fittable1DModel):
     # ['FUV_width', 'NUV_width', 'SIL1_width', 'SIL2_width', 'FIR_width']
     # [0.14696938456699066, 0.051719412985268637, 3.7049250106326643, 8.3409029232536902, 35.355339059327378]
 
-    inputs = ("x",)
-    outputs = ("axav",)
+    # inputs = ("x",)
+    # outputs = ("axav",)
 
     # constant for conversion from Ax/Ab to (more standard) Ax/Av
     AbAv = 1.0 / 3.08 + 1.0
