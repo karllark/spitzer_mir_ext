@@ -24,8 +24,9 @@ def plot_all_ext(
     sindxs = np.arange(len(avs))
 
     ann_wave_range = [5.0, 10.0] * u.micron
-    col_vals = ["b", "g", "r", "m", "c", "y"]
+    col_vals = ["b", "g"]  # , "r", "m", "c", "y"]
     lin_vals = ["--", ":", "-."]
+    n_cols = len(col_vals)
 
     mod_x = np.logspace(0.0, 2.0, 200) * u.micron
     mod_x_fm90 = np.logspace(-1.0, -0.5, 200) * u.micron
@@ -41,8 +42,8 @@ def plot_all_ext(
         if not args.modonly:
             extdatas[k].plot(
                 ax,
-                color=col_vals[i % 6],
-                alax=args.alav,
+                color=col_vals[i % n_cols],
+                alax=True,
                 normval=normval,
                 yoffset=i * yoffset_factor,
                 alpha=1.0,
@@ -89,41 +90,26 @@ def plot_all_ext(
             )
 
         if args.models:
-            if args.alav:
-                ltext = None
-            else:
-                ltext = extdatas[k].red_file.replace("DAT_files/", "")
-                ltext = ltext.replace(".dat", "")
             ax.plot(
                 mod_x,
                 P92_best(mod_x) / normval + i * yoffset_factor,
                 lin_vals[i % 3],
-                color=col_vals[i % 6],
+                color=col_vals[i % n_cols],
                 alpha=0.5,
-                label=ltext,
             )
             if extdatas_fm90[k] is not None:
                 ax.plot(
                     mod_x_fm90,
                     FM90_best(mod_x_fm90) / normval + i * yoffset_factor,
                     lin_vals[i % 3],
-                    color=col_vals[i % 6],
+                    color=col_vals[i % n_cols],
                     alpha=0.5,
-                    label=ltext,
                 )
 
     ax.set_yscale("linear")
     ax.set_xscale("linear")
     ax.set_xlim(kxrange)
-    if args.alav:
-        # ax.set_ylim(0.0, 0.25)
-        ax.set_ylabel(r"$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
-        # ax.legend(fontsize=fontsize)
-    else:
-        ax.set_xlim(kxrange)
-        ax.set_ylim(kyrange)
-        ax.set_ylabel(r"$E(\lambda - V)$", fontsize=1.3 * fontsize)
-        # ax.legend(fontsize=12, ncol=4)
+    ax.set_ylabel(r"$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
 
     ax.set_xlabel(r"$\lambda$ [$\mu m$]")
 
@@ -140,18 +126,12 @@ if __name__ == "__main__":
         "--rebin_fac", type=int, default=None, help="rebin factor for spectra"
     )
     parser.add_argument(
-        "--alav", help="plot A(lambda)/A(V)", default=True, action="store_true"
-    )
-    parser.add_argument("--ave", help="plot the average", action="store_true")
-    parser.add_argument(
         "--models", help="plot the best fit models", action="store_true"
     )
     parser.add_argument(
         "--modonly", help="only plot the best fit models", action="store_true"
     )
-    parser.add_argument(
-        "-p", "--png", help="save figure as a png file", action="store_true"
-    )
+    parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
 
@@ -172,16 +152,10 @@ if __name__ == "__main__":
         if (line.find("#") != 0) & (len(line) > 0):
             name = line.rstrip()
             extnames.append(name)
-            bfilename = f"fits/{name}"
+            bfilename = f"fits_good/{name}"
             text = ExtData(filename=bfilename)
             extdatas.append(text)
             avs.append(text.columns["AV"][0])
-
-            if os.path.isfile(bfilename.replace(".fits", "_fm90.fits")):
-                textfm90 = ExtData(filename=bfilename.replace(".fits", "_fm90.fits"))
-                extdatas_fm90.append(textfm90)
-            else:
-                extdatas_fm90.append(None)
 
             # determine the extinction in the near-UV
             # useful for sorting to make a pretty plot
@@ -213,9 +187,16 @@ if __name__ == "__main__":
     avs = []
 
     for extname in extnames:
-        text = ExtData(filename="fits/%s" % extname)
+        bfilename = f"fits_good/{extname}"
+        text = ExtData(filename=bfilename)
         extdatas.append(text)
         avs.append(text.columns["AV"][0])
+
+        if os.path.isfile(bfilename.replace(".fits", "_fm90.fits")):
+            textfm90 = ExtData(filename=bfilename.replace(".fits", "_fm90.fits"))
+            extdatas_fm90.append(textfm90)
+        else:
+            extdatas_fm90.append(None)
 
     fontsize = 18
 
@@ -230,10 +211,7 @@ if __name__ == "__main__":
     matplotlib.rc("ytick.major", width=2)
     matplotlib.rc("ytick.minor", width=2)
 
-    if args.alav:
-        figsize = (12, 10)
-    else:
-        figsize = (20, 10)
+    figsize = (12, 10)
     fig, ax = pyplot.subplots(nrows=1, ncols=2, figsize=figsize)
 
     plot_all_ext(
