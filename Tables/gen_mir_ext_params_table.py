@@ -3,7 +3,6 @@
 # Program to generate the table of extinction parameters
 #
 import argparse
-import numpy as np
 
 from measure_extinction.extdata import ExtData
 
@@ -35,33 +34,48 @@ if __name__ == "__main__":
         "SIL2_AMP": "{SIL2 A}",
         "FIR_AMP": "{FIR A}",
     }
-    mval = [1.0, 1.0, 1.0, 100.0, 10.0, 10.0, 1000.0, 1.0, 1.0, 1000.0, 1000.0]
-    mval = np.full((len(phead)), 1.0)
+    phead2 = {
+        "AV": "{[mag]}",
+        "SIL1_AMP": r"{$10^{-3}$ $A(\lambda)/A(V)$}",
+        "SIL1_LAMBDA": r"{[$\micron$]}",
+        "SIL1_WIDTH": r"{[$\micron$]}",
+        "SIL2_AMP": r"{$10^{-3}$ $A(\lambda)/A(V)$}",
+        "FIR_AMP": r"{$10^{-3}$ $A(\lambda)/A(V)$}",
+    }
+    mval = {
+        "AV": 1,
+        "SIL1_AMP": 1e3,
+        "SIL1_LAMBDA": 1,
+        "SIL1_WIDTH": 1,
+        "SIL2_AMP": 1e3,
+        "FIR_AMP": 133,
+    }
 
-    okeys = ["AV", "SIL1_AMP", "SIL1_LAMBDA", "SIL1_WIDTH",
-             "SIL2_AMP", "FIR_AMP"]
+    okeys = ["AV", "SIL1_AMP", "SIL1_LAMBDA", "SIL1_WIDTH", "SIL2_AMP", "FIR_AMP"]
 
-    for line in file_lines:
+    for line in sorted(file_lines):
         if (line.find("#") != 0) & (len(line) > 0):
             name = line.rstrip()
-            edata = ExtData(filename=f"fits/{name}")
+            edata = ExtData(filename=f"fits_good/{name}")
 
             spos = name.find("_")
-            sname = name[:spos]
+            sname = name[:spos].upper()
 
             pstr = f"{sname} & "
             for k, ckey in enumerate(okeys):
                 if first_line:
                     hstr += fr"\colhead{phead[ckey]} & "
-                    hstr2 += fr"\colhead{{{mval[k]:.1f}}} & "
+                    hstr2 += fr"\colhead{phead2[ckey]} & "
+                    # hstr2 += fr"\colhead{{{mval[k]:.1f}}} & "
                 if ckey == "AV":
                     val, punc, munc = edata.columns_p50_fit[ckey]
                 else:
                     val, punc, munc = edata.p92_p50_fit[ckey]
-                pstr += f"${mval[k]*val:.3f}^{{+{mval[k]*punc:.3f}}}_{{-{mval[k]*munc:.3f}}}$ & "
+                cmval = float(mval[ckey])
+                pstr += f"${cmval*val:.3f}^{{+{cmval*punc:.3f}}}_{{-{cmval*munc:.3f}}}$ & "
             if first_line:
                 first_line = False
-                print(f"\\tablehead{{{hstr[:-3]}}}")
-                print(f"\\tablehead{{{hstr2[:-3]}}}")
+                print(f"\\tablehead{{{hstr[:-3]}}} \\\\")
+                print(f"\\{{{hstr2[:-3]}}}")
                 print(f"\\startdata")
             print(f"{pstr[:-3]} \\\\")
