@@ -85,7 +85,7 @@ def plot_all_ext(
                 C3=extdatas_fm90[k].fm90_best_fit["C3"],
                 C4=extdatas_fm90[k].fm90_best_fit["C4"],
                 xo=extdatas_fm90[k].fm90_best_fit["XO"],
-                gamma=extdatas_fm90[k].fm90_best_fit["GAMMA"]
+                gamma=extdatas_fm90[k].fm90_best_fit["GAMMA"],
             )
 
         if args.models:
@@ -139,7 +139,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--rebin_fac", type=int, default=None, help="rebin factor for spectra"
     )
-    parser.add_argument("--alav", help="plot A(lambda)/A(V)", default=True, action="store_true")
+    parser.add_argument(
+        "--alav", help="plot A(lambda)/A(V)", default=True, action="store_true"
+    )
     parser.add_argument("--ave", help="plot the average", action="store_true")
     parser.add_argument(
         "--models", help="plot the best fit models", action="store_true"
@@ -184,7 +186,7 @@ if __name__ == "__main__":
             # determine the extinction in the near-UV
             # useful for sorting to make a pretty plot
             if "IUE" in text.exts.keys():
-                gindxs, = np.where(
+                (gindxs,) = np.where(
                     (text.npts[normtype] > 0)
                     & (
                         (text.waves[normtype] >= norm_wave_range[0])

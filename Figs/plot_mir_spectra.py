@@ -33,6 +33,7 @@ def plot_mir_set(
     """
     Plot a set of spectra
     """
+    n_col = len(col_vals)
     for i in range(len(starnames)):
         stardata = StarData(subpath + starnames[i] + ".dat", path=path, use_corfac=True)
 
@@ -41,7 +42,8 @@ def plot_mir_set(
             mlam4=True,
             norm_wave_range=norm_wave_range,
             yoffset=extra_off_val + 0.5 * i,
-            pcolor=col_vals[i % 6],
+            yoffset_type="add",
+            pcolor=col_vals[i % n_col],
             annotate_key="IRS",
             annotate_wave_range=ann_wave_range,
             annotate_text=starnames[i] + " " + stardata.sptype,
@@ -133,14 +135,16 @@ if __name__ == "__main__":
     col_vals = ["b", "g", "r", "m", "c", "y"]
     # col_vals = ['k', 'k', 'k', 'k', 'k', 'k']
 
-    plot_mir_set(ax, starnames)
+    plot_mir_set(ax, starnames, col_vals=col_vals)
 
     ax.set_yscale("linear")
     ax.set_ylim(0.5, len(starnames) * 0.5 + 4.0)
     ax.set_xscale("log")
     ax.set_xlim(kxrange)
     ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
-    ax.set_ylabel(r"$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize)
+    ax.set_ylabel(
+        r"$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize
+    )
 
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")

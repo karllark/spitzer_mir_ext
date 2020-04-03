@@ -39,7 +39,7 @@ if __name__ == "__main__":
     spec_name = "IRS"
     norm_wave_range = [6.0, 10.0]
     # ann_wave_range = [15.0, 18.0]
-    col_vals = ["b", "g", "r", "m", "c", "y"]
+    col_vals = ["b", "g"]  # , "r", "m", "c", "y"]
     # col_vals = ['k', 'k', 'k', 'k', 'k', 'k']
 
     starnames = [
@@ -57,12 +57,13 @@ if __name__ == "__main__":
         ann_wave_range=[5.0, 9.0] * u.micron,
         ann_rot=2.5,
         ann_offset=0.1,
+        col_vals=col_vals,
     )
 
     ann_set(
         ax,
         fontsize,
-        [35.0, 38.0],
+        [37.0, 40.0],
         [3.9, 0.9],
         [45.0, 42.0],
         "Main Sequence",
@@ -88,27 +89,33 @@ if __name__ == "__main__":
         ann_wave_range=[5.0, 9.0] * u.micron,
         ann_rot=2.5,
         ann_offset=0.1,
+        col_vals=col_vals,
     )
 
     ann_set(
         ax,
         fontsize,
-        [35.0, 38.0],
-        [9.0, 4.4],
+        [37.0, 40.0],
+        [9.25, 4.4],
         [45.0, 42.0],
         "Giants and Supergiants",
         "(ordered by spectral type)",
     )
 
     ax.set_yscale("linear")
-    ax.set_ylim(0.5, 9.5)
+    ax.set_ylim(0.5, 9.75)
     ax.set_xscale("log")
     ax.set_xlim(kxrange)
-    ax.set_xlabel("$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
-    ax.set_ylabel("$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize)
+    ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
+    ax.set_ylabel(
+        r"$\lambda^4 F(\lambda)/F(8 \mu m)$ + offset", fontsize=1.3 * fontsize
+    )
 
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")
+
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
 
     fig.tight_layout()
 

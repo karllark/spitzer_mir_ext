@@ -39,7 +39,7 @@ if __name__ == "__main__":
     spec_name = "IRS"
     norm_wave_range = [6.0, 10.0]
     # ann_wave_range = [15.0, 18.0]
-    col_vals = ["b", "g", "r", "m", "c", "y"]
+    col_vals = ["b", "g"]  # , "r", "m", "c", "y"]
     # col_vals = ['k', 'k', 'k', 'k', 'k', 'k']
 
     # starnames = []
@@ -52,15 +52,15 @@ if __name__ == "__main__":
     starnames = [
         "hd096042",
         "hd147933",
+        "hd197702",
         "hd149404",
         "hd169454",
         "hd229059",
         "hd166734",
-        "hd197702",
         "hd206773",
         "vicyg5",
-        "hd152408",
         "hd034921",
+        "hd152408",
     ]
     plot_mir_set(
         ax,
@@ -68,14 +68,15 @@ if __name__ == "__main__":
         extra_off_val=0.0,
         ann_xvals=[9.0, 9.0],
         ann_wave_range=[6.0, 10.0] * u.micron,
-        ann_offset=0.1
+        ann_offset=0.1,
+        col_vals=col_vals,
     )
 
     ann_set(
         ax,
         fontsize,
-        [35.0, 38.0],
-        [9.5, 0.8],
+        [37.0, 40.0],
+        [9.9, 0.8],
         [45.0, 42.0],
         "Unusable for Extinction",
         "(ordered by wind srength)",
@@ -92,6 +93,9 @@ if __name__ == "__main__":
 
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")
+
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
 
     fig.tight_layout()
 
