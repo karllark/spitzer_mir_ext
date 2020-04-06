@@ -5,7 +5,6 @@ import matplotlib
 import numpy as np
 
 import emcee
-import corner
 
 import astropy.units as u
 from astropy.modeling.fitting import LevMarLSQFitter
@@ -17,6 +16,8 @@ from dust_extinction.conversions import AxAvToExv
 from dust_extinction.helpers import _get_x_in_wavenumbers, _test_valid_x_range
 from measure_extinction.stardata import StarData
 from measure_extinction.extdata import ExtData
+
+from models_mcmc_extension import EmceeFitter, plot_emcee_results
 
 
 class P92_mod(Fittable1DModel):
@@ -537,35 +538,6 @@ def p92_emcee(
         return model_copy
 
 
-def plot_emcee_results(sampler, fit_param_names, filebase=""):
-    """
-    Plot the standard triangle and diagnostic walker plots
-    """
-
-    # plot the walker chains for all parameters
-    nwalkers, nsteps, ndim = sampler.chain.shape
-    fig, ax = plt.subplots(ndim, sharex=True, figsize=(13, 13))
-    walk_val = np.arange(nsteps)
-    for i in range(ndim):
-        for k in range(nwalkers):
-            ax[i].plot(walk_val, sampler.chain[k, :, i], "-")
-            ax[i].set_ylabel(fit_param_names[i])
-    fig.savefig("%s_walker_param_values.png" % filebase)
-    plt.close(fig)
-
-    # plot the 1D and 2D likelihood functions in a traditional triangle plot
-    samples = sampler.chain.reshape((-1, ndim))
-    fig = corner.corner(
-        samples,
-        labels=fit_param_names,
-        show_titles=True,
-        title_fmt=".3f",
-        use_math_text=True,
-    )
-    fig.savefig("%s_param_triangle.png" % filebase)
-    plt.close(fig)
-
-
 if __name__ == "__main__":
 
     # commandline parser
@@ -656,9 +628,14 @@ if __name__ == "__main__":
 
     # pick the fitter
     fit = LevMarLSQFitter()
+    nsteps = args.nsteps
+    fit2 = EmceeFitter(nsteps=nsteps)
 
     # fit the data to the P92 model using the fitter
-    p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc, maxiter=10000, epsilon=0.001)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc, maxiter=10000, epsilon=0.001)
+        p92_fit2 = fit2(p92_init, x, y, weights=1.0 / y_unc)
 
     clean_pnames = [pname[:-2] for pname in p92_init.param_names]
 
