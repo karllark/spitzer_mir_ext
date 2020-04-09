@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-extargs="--png --nburn=1000 --nsteps=1000 --emcee --threads=10"
+extargs="--png --burnfrac=0.5 --nsteps=2000"
 # extargs="--png"
 
 # V stars

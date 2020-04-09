@@ -40,7 +40,7 @@ class EmceeOpt(Optimization):
         max_lnp = -1e6
         nwalkers, nsteps = sampler.lnprobability.shape
         for k in range(nwalkers):
-            tmax_lnp = np.max(sampler.lnprobability[k])
+            tmax_lnp = np.nanmax(sampler.lnprobability[k])
             if tmax_lnp > max_lnp:
                 max_lnp = tmax_lnp
                 (indxs,) = np.where(sampler.lnprobability[k] == tmax_lnp)
@@ -70,6 +70,20 @@ class EmceeOpt(Optimization):
         nwalkers = 2 * ndim
         pos = initval + 1e-4 * np.random.randn(nwalkers, ndim)
 
+        # ensure all the walkers start within the bounds
+        model = fargs[0]
+        for cp in pos:
+            k = 0
+            for cname in model.param_names:
+                if not model.fixed:
+                    if model.bounds[cname][0] is not None:
+                        if cp[k] < model.bounds[cname][0]:
+                            cp[k] = model.bounds[cname][0]
+                    if model.bounds[cname][1] is not None:
+                        if cp[k] > model.bounds[cname][1]:
+                            cp[k] = model.bounds[cname][1]
+                    k += 1
+
         sampler = self.opt_method.EnsembleSampler(nwalkers, ndim, objfunc, args=fargs)
         sampler.run_mcmc(pos, nsteps, progress=True)
         samples = sampler.get_chain()
@@ -86,14 +100,17 @@ class EmceeFitter(Fitter):
     Use emcee and least squares statistic
     """
 
-    def __init__(self, nsteps=100):
+    def __init__(self, nsteps=100, burnfrac=0.1):
         super().__init__(optimizer=EmceeOpt, statistic=leastsquare)
         self.nsteps = nsteps
+        self.burnfrac = burnfrac
         self.fit_info = {}
 
-    def log_probability(self, fps, *args):
+    # add lnlike and lnprior and have log_probability just be the combo of the two
+    def log_prior(self, fps, *args):
         """
-        Get the log probability
+        Computes the natural log of the prior.
+        Currently only handles flat priors set using parameter bounds.
 
         Parameters
         ----------
@@ -104,19 +121,86 @@ class EmceeFitter(Fitter):
             other_args may include weights or any other quantities specific for
             a statistic
 
+        Returns
+        -------
+        log(prior) : float
+            natural log of the prior probability
+        """
+        # pameter bound priors = flat priors between two limits
+        #   EMCEE uses an explicit return of -np.inf to designate such bounds
+        # need to be handled explicitly to get good sampler chains
+        #   standard astropy modeling fitting results in chains not accurately
+        #   reflecting the bounds
+        model = args[0]
+        k = 0
+        for cname in model.param_names:
+            if not model.fixed[cname]:
+                if model.bounds[cname][0] is not None:
+                    if fps[k] < model.bounds[cname][0]:
+                        return -np.inf
+                if model.bounds[cname][1] is not None:
+                    if fps[k] > model.bounds[cname][1]:
+                        return -np.inf
+                k += 1
+
+        # no other priors, so return 0.0 = log(1.0)
+        return 0.0
+
+    def log_likelihood(self, fps, *args):
+        """
+        Computes the natural log of the likelihood.
+
+        Parameters
+        ----------
+        fps : list
+            parameters returned by the fitter
+        args : list
+            [model, [other_args], [input coordinates]]
+            other_args may include weights or any other quantities specific for
+            a statistic
+
+        Returns
+        -------
+        log(likelihood) : float
+            natural log of the likelihood probability
+        """
+        # assume the standard leastsquare
+        res = self.objective_function(fps, *args)
+
+        # convert to a log value - assumes chisqr/Gaussian unc model
+        return -0.5 * res
+
+    def log_probability(self, fps, *args):
+        """
+        Compute the natural log of the probability by combining the
+        likelihood and prior probabilties.
+
+        Parameters
+        ----------
+        fps : list
+            parameters returned by the fitter
+        args : list
+            [model, [other_args], [input coordinates]]
+            other_args may include weights or any other quantities specific for
+            a statistic
+
+        Returns
+        -------
+        log(prob) : float
+            natural log of the probability
+
         Notes
         -----
         The list of arguments (args) is set in the `__call__` method.
         Fitters may overwrite this method, e.g. when statistic functions
         require other arguments.
         """
-        # get standard leastsquare
-        res = self.objective_function(fps, *args)
+        lp = self.log_prior(fps, *args)
+        if not np.isfinite(lp):
+            return -np.inf
+        return lp + self.log_likelihood(fps, *args)
 
-        # convert to a log probability - assumes chisqr/Gaussian unc model
-        return -0.5 * res
-
-    def _set_uncs_and_posterior(self, model, burn_frac=0.1):
+    def _set_uncs_and_posterior(self, model):
         """
         Set the symmetric and asymmetric Gaussian uncertainties
         and sets the posteriors to astropy.unc distributions
@@ -126,9 +210,6 @@ class EmceeFitter(Fitter):
         model : astropy model
             model giving the result from the fitting
 
-        burn_frac : float
-            burn in fraction to ignore in unc calculations
-
         Returns
         -------
         model : astropy model
@@ -137,7 +218,7 @@ class EmceeFitter(Fitter):
         sampler = self.fit_info["sampler"]
         nwalkers, nsteps = sampler.lnprobability.shape
         # discard the 1st burn_frac (burn in)
-        flat_samples = sampler.get_chain(discard=int(burn_frac * nsteps), flat=True)
+        flat_samples = sampler.get_chain(discard=int(self.burnfrac * nsteps), flat=True)
         nflatsteps, ndim = flat_samples.shape
 
         nparams = len(model.parameters)
@@ -218,31 +299,41 @@ class EmceeFitter(Fitter):
 
         return model_copy
 
+    def plot_emcee_results(self, fitted_model, filebase=""):
+        """
+        Plot the standard triangle and diagnostic walker plots
+        """
+        # get the samples to use
+        sampler = self.fit_info["sampler"]
 
-def plot_emcee_results(sampler, fit_param_names, filebase=""):
-    """
-    Plot the standard triangle and diagnostic walker plots
-    """
+        # only the non fixed parameters were fit
+        fit_param_names = []
+        for pname in fitted_model.param_names:
+            if not fitted_model.fixed[pname]:
+                fit_param_names.append(pname)
 
-    # plot the walker chains for all parameters
-    nwalkers, nsteps, ndim = sampler.chain.shape
-    fig, ax = plt.subplots(ndim, sharex=True, figsize=(13, 13))
-    walk_val = np.arange(nsteps)
-    for i in range(ndim):
-        for k in range(nwalkers):
-            ax[i].plot(walk_val, sampler.chain[k, :, i], "-")
-            ax[i].set_ylabel(fit_param_names[i])
-    fig.savefig("%s_walker_param_values.png" % filebase)
-    plt.close(fig)
+        # plot the walker chains for all parameters
+        nwalkers, nsteps, ndim = sampler.chain.shape
+        fig, ax = plt.subplots(ndim, sharex=True, figsize=(13, 13))
+        walk_val = np.arange(nsteps)
+        for i in range(ndim):
+            for k in range(nwalkers):
+                ax[i].plot(walk_val, sampler.chain[k, :, i], "-")
+                ax[i].set_ylabel(fit_param_names[i])
+        fig.savefig("%s_walker_param_values.png" % filebase)
+        plt.close(fig)
 
-    # plot the 1D and 2D likelihood functions in a traditional triangle plot
-    samples = sampler.chain.reshape((-1, ndim))
-    fig = corner.corner(
-        samples,
-        labels=fit_param_names,
-        show_titles=True,
-        title_fmt=".3f",
-        use_math_text=True,
-    )
-    fig.savefig("%s_param_triangle.png" % filebase)
-    plt.close(fig)
+        # plot the 1D and 2D likelihood functions in a traditional triangle plot
+        nwalkers, nsteps = sampler.lnprobability.shape
+        # discard the 1st burn_frac (burn in)
+        flat_samples = sampler.get_chain(discard=int(self.burnfrac * nsteps), flat=True)
+        nflatsteps, ndim = flat_samples.shape
+        fig = corner.corner(
+            flat_samples,
+            labels=fit_param_names,
+            show_titles=True,
+            title_fmt=".3f",
+            use_math_text=True,
+        )
+        fig.savefig("%s_param_triangle.png" % filebase)
+        plt.close(fig)

@@ -7,7 +7,7 @@ from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.modeling.fitting import _fitter_to_model_params
 import astropy.units as u
 
-from models_mcmc_extension import EmceeFitter, plot_emcee_results
+from models_mcmc_extension import EmceeFitter
 
 from dust_extinction.shapes import FM90
 
@@ -70,24 +70,25 @@ if __name__ == "__main__":
         param = getattr(fm90_fit3, pname)
         if param.posterior is not None:
             print(
-                "posterior: ", pname, param.posterior.pdf_mean(), param.posterior.pdf_std()
+                "posterior: ",
+                pname,
+                param.posterior.pdf_mean(),
+                param.posterior.pdf_std(),
             )
         print("parameter: ", pname, param.value, param.unc)
 
     # setup the parameters for saving
     fm90_best_params = (fm90_fit.param_names, fm90_fit.parameters)
-    fm90_per_param_vals = zip(fm90_fit3.parameters, fm90_fit3.uncs_plus, fm90_fit3.uncs_minus)
+    fm90_per_param_vals = zip(
+        fm90_fit3.parameters, fm90_fit3.uncs_plus, fm90_fit3.uncs_minus
+    )
     fm90_per_params = (fm90_fit3.param_names, list(fm90_per_param_vals))
 
     # save extinction and fit parameters
     ext.save(ofile, fm90_best_params=fm90_best_params, fm90_per_params=fm90_per_params)
 
     # make the standard mcmc plots
-    plot_emcee_results(
-        fit3.fit_info["sampler"],
-        fm90_fit3.param_names,
-        filebase=ofile.replace(".fits", ""),
-    )
+    fit3.plot_emcee_results(fm90_fit3, filebase=ofile.replace(".fits", ""))
 
     # print(fit3.fit_info['perparams'])
 
