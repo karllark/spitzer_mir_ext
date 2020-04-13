@@ -22,6 +22,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--nsteps", type=int, default=1000, help="# of steps in MCMC chain"
     )
+    parser.add_argument(
+        "--burnfrac", type=float, default=0.1, help="fraction of MCMC chain to burn"
+    )
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
@@ -29,7 +32,7 @@ if __name__ == "__main__":
     # get a saved extnction curve
     file = args.extfile
     # file = '/home/kgordon/Python_git/spitzer_mir_ext/fits/hd147889_hd064802_ext.fits'
-    ofile = file.replace(".fits", "_fm90.fits")
+    ofile = file.replace(".fits", "_FM90.fits")
     ext = ExtData(filename=file)
     ext.trans_elv_alav(av=float(ext.columns["AV"][0]))
     gindxs = ext.npts["IUE"] > 0
@@ -45,7 +48,7 @@ if __name__ == "__main__":
     fit = LevMarLSQFitter()
     # fit2 = SPyMinimizeFitter()
     nsteps = args.nsteps
-    fit3 = EmceeFitter(nsteps=nsteps)
+    fit3 = EmceeFitter(nsteps=nsteps, burnfrac=args.burnfrac)
 
     # fit the data to the FM90 model using the fitter
     #   use the initialized model as the starting point

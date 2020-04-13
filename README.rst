@@ -30,7 +30,9 @@ including (TBD) the IRS/IUE/STIS spectra.  `dust_extinction` provides the
 fitting curves shapes (FM90, P92).  `measure_extinction` gives the routines
 to read the data and calculate extinction curves.
 
-Curves calculated and NIR/MIR portion fit with P92 shape using `run_all_ext`.
+Curves calculated with `run_all_ext`.
+(UV/Opt/)NIR/MIR portion fit with P92 shape using `fit_p92_all_ext`.
+UV portion fit with FM90 shape using `fit_fm90_all_ext`.
 
 UV portion fit with FM90 shape using `fit_fm90_all_ext`.
 
