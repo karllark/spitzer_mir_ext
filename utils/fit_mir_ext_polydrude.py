@@ -9,7 +9,6 @@ from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.modeling.models import Polynomial1D, Drude1D
 
 from dust_extinction.conversions import AxAvToExv
-from measure_extinction.stardata import StarData
 from measure_extinction.extdata import ExtData
 
 # from models_mcmc_extension import EmceeFitter
@@ -19,37 +18,22 @@ if __name__ == "__main__":
 
     # commandline parser
     parser = argparse.ArgumentParser()
-    parser.add_argument("redstarname", help="name of reddened star")
-    parser.add_argument("compstarname", help="name of comparision star")
+    parser.add_argument("extfile", help="file with extinction curve")
     parser.add_argument(
-        "--path",
-        help="base path to observed data",
-        default="/home/kgordon/Python_git/extstar_data/",
-    )
-    parser.add_argument("--emcee", help="run EMCEE fit", action="store_true")
-    parser.add_argument(
-        "--nburn", type=int, default=100, help="# of burn steps in MCMC chain"
+        "--burnfrac", type=float, default=0.1, help="fraction of MCMC chain to burn"
     )
     parser.add_argument(
-        "--nsteps", type=int, default=500, help="# of steps in MCMC chain"
-    )
-    parser.add_argument(
-        "--threads", type=int, default=1, help="number of threads for EMCEE run"
+        "--nsteps", type=int, default=100, help="# of steps in MCMC chain"
     )
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
 
-    # read in the observed data for both stars
-    redstarobs = StarData("DAT_files/%s.dat" % args.redstarname, path=args.path)
-    compstarobs = StarData("DAT_files/%s.dat" % args.compstarname, path=args.path)
-
-    # output filebase
-    filebase = "fits/%s_%s" % (args.redstarname, args.compstarname)
-
-    # calculate the extinction curve
-    extdata = ExtData()
-    extdata.calc_elx(redstarobs, compstarobs)
+    # get a saved extnction curve
+    file = args.extfile
+    # file = '/home/kgordon/Python_git/spitzer_mir_ext/fits/hd147889_hd064802_ext.fits'
+    ofile = file.replace(".fits", "_POLYDRUDE.fits")
+    extdata = ExtData(filename=file)
 
     # get an observed extinction curve to fit
     (wave, y, y_unc) = extdata.get_fitdata(
@@ -142,6 +126,9 @@ if __name__ == "__main__":
     ax.plot(1.0 / x, p92_fit(x), "r-", label="Best Fit")
     ax2.plot(1.0 / x, p92_fit(x), "r-")
 
+    ax.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-", label="-A(V)")
+    ax2.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-")
+
     # finish configuring the plot
     ax.set_yscale("linear")
     ax.set_xscale("log")
@@ -166,7 +153,7 @@ if __name__ == "__main__":
         fig.tight_layout()
 
     # plot or save to a file
-    outname = "%s_ext" % filebase
+    outname = ofile.replace(".fits", "")
     if args.png:
         fig.savefig(outname + ".png")
     elif args.pdf:

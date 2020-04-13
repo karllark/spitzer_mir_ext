@@ -56,7 +56,7 @@ if __name__ == "__main__":
     for line in sorted(file_lines):
         if (line.find("#") != 0) & (len(line) > 0):
             name = line.rstrip()
-            edata = ExtData(filename=f"fits_good/{name}")
+            edata = ExtData(filename=f"fits/{name}")
 
             spos = name.find("_")
             sname = name[:spos].upper()

@@ -50,9 +50,6 @@ if __name__ == "__main__":
     parser.add_argument(
         "--nsteps", type=int, default=100, help="# of steps in MCMC chain"
     )
-    parser.add_argument(
-        "--nthreads", type=int, default=1, help="number of threads for MCMC run"
-    )
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
@@ -137,7 +134,7 @@ if __name__ == "__main__":
     p92_per_params = (clean_pnames(p92_fit2.param_names), list(p92_per_param_vals))
 
     # save the extinction curve and fit
-    warnings.simplefilter("ignore", category=AstropyWarning)
+    # warnings.simplefilter("ignore", category=AstropyWarning)
     extdata.save(
         ofile, p92_best_params=p92_best_params, p92_per_params=p92_per_params
     )
