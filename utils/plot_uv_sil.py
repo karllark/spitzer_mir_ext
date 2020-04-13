@@ -53,31 +53,33 @@ if __name__ == "__main__":
     figsize = (8, 8)
     fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=figsize)
 
-    # sil_amp = extdatas[:].p92_best_fit['SIL1_AMP']
-    # print(sil_amp)
-    # exit()
-
     n_ext = len(extdatas)
     sil_amp = np.full((n_ext), 0.0)
+    sil_amp_unc = np.full((n_ext), 0.0)
     nuv_amp = np.full((n_ext), 0.0)
+    nuv_amp_unc = np.full((n_ext), 0.0)
     for k, cext in enumerate(extdatas):
         cext_fm90 = extdatas_fm90[k]
 
-        sil_amp = cext.p92_best_fit["SIL1_AMP"]
-        samp_unc = cext.p92_best_fit["SIL1_AMP_MUNC"]
-        sil_width = cext.p92_best_fit["SIL1_AMP"]
-        sil_amp[k] = (
-            math.pi
-            * cext.p92_best_fit["SIL1_AMP"]
-            / (2.0 * cext.p92_best_fit["SIL1_WIDTH"])
-        )
-        nuv_amp[k] = (
-            math.pi
-            * cext_fm90.fm90_best_fit["C3"]
-            / (2.0 * cext_fm90.fm90_best_fit["GAMMA"])
-        )
+        samp = cext.p92_p50_fit["SIL1_AMP"]
+        swidth = cext.p92_p50_fit["SIL1_WIDTH"]
+        sil_amp[k] = math.pi * samp[0] / (2.0 * swidth[0])
+        sil_amp_unc[k] = ((0.5 * (samp[1] + samp[2]) / samp[0]) ** 2
+                          + (0.5 * (swidth[1] + swidth[2]) / samp[0]) ** 2)
+        sil_amp_unc[k] *= sil_amp[k]
 
-    ax.plot(sil_amp, nuv_amp, "ko")
+        samp = cext_fm90.fm90_p50_fit["C3"]
+        swidth = cext_fm90.fm90_p50_fit["GAMMA"]
+        nuv_amp[k] = math.pi * samp[0] / (2.0 * swidth[0])
+        nuv_amp_unc[k] = ((0.5 * (samp[1] + samp[2]) / samp[0]) ** 2
+                          + (0.5 * (swidth[1] + swidth[2]) / samp[0]) ** 2)
+        nuv_amp_unc[k] *= nuv_amp[k]
+
+    # uncs are way over estimated as the amplitude and width are very well correlated
+    # update once the samples are available
+    print(sil_amp_unc)
+
+    ax.errorbar(sil_amp, nuv_amp, yerr=nuv_amp_unc, fmt="ko")
 
     ax.set_yscale("linear")
     ax.set_xscale("linear")
