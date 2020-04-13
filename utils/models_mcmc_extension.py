@@ -12,6 +12,7 @@ from astropy.modeling.optimizers import Optimization
 from astropy.modeling.statistic import leastsquare
 from astropy import uncertainty as astrounc
 
+import emcee
 import corner
 
 
@@ -26,8 +27,6 @@ class EmceeOpt(Optimization):
     supported_constraints = ["bounds", "fixed", "tied"]
 
     def __init__(self):
-        import emcee
-
         super().__init__(emcee)
         self.fit_info = {"perparams": None, "samples": None, "sampler": None}
 
@@ -48,7 +47,7 @@ class EmceeOpt(Optimization):
 
         return fit_params_best
 
-    def __call__(self, objfunc, initval, fargs, nsteps, pool=None, **kwargs):
+    def __call__(self, objfunc, initval, fargs, nsteps, save_samples=None, **kwargs):
         """
         Run the sampler.
 
@@ -84,8 +83,14 @@ class EmceeOpt(Optimization):
                             cp[k] = model.bounds[cname][1]
                     k += 1
 
+        # Set up the backend
+        if save_samples:
+            # Don't forget to clear it in case the file already exists
+            save_backend = emcee.backends.HDFBackend(save_samples)
+            save_backend.reset(nwalkers, ndim)
+
         sampler = self.opt_method.EnsembleSampler(
-            nwalkers, ndim, objfunc, pool=pool, args=fargs
+            nwalkers, ndim, objfunc, backend=save_backend, args=fargs
         )
         sampler.run_mcmc(pos, nsteps, progress=True)
         samples = sampler.get_chain()
@@ -102,12 +107,12 @@ class EmceeFitter(Fitter):
     Use emcee and least squares statistic
     """
 
-    def __init__(self, nsteps=100, burnfrac=0.1, pool=None):
+    def __init__(self, nsteps=100, burnfrac=0.1, save_samples=None):
         super().__init__(optimizer=EmceeOpt, statistic=leastsquare)
         self.nsteps = nsteps
         self.burnfrac = burnfrac
         self.fit_info = {}
-        self.pool = pool
+        self.save_samples = save_samples
 
     # add lnlike and lnprior and have log_probability just be the combo of the two
     def log_prior(self, fps, *args):
@@ -291,7 +296,12 @@ class EmceeFitter(Fitter):
         p0, _ = _model_to_fit_params(model_copy)
 
         fitparams, self.fit_info = self._opt_method(
-            self.log_probability, p0, farg, self.nsteps, pool=self.pool, **kwargs
+            self.log_probability,
+            p0,
+            farg,
+            self.nsteps,
+            save_samples=self.save_samples,
+            **kwargs
         )
 
         # set the output model parameters to the "best fit" parameters

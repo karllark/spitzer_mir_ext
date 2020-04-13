@@ -106,19 +106,18 @@ if __name__ == "__main__":
 
     p92_init.Av_1.bounds = [0.1, None]
 
-    # extra for HD 147933 (4 Nov 2019)
-    # p92_init.SIL1_amp_0.bounds = [0.005, None]
-    # p92_init.BKG_lambda_0.fixed = False
-    # p92_init.BKG_width_0.fixed = False
-    # p92_init.FUV_lambda_0.fixed = False
-
     # p92_init.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
     # p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
+
+    # Set up the backend to save the samples for the emcee runs
+    emcee_samples_file = ofile.replace(".fits", ".h5")
 
     # pick the fitter
     fit = LevMarLSQFitter()
     nsteps = args.nsteps
-    fit2 = EmceeFitter(nsteps=nsteps, burnfrac=args.burnfrac)
+    fit2 = EmceeFitter(
+        nsteps=nsteps, burnfrac=args.burnfrac, save_samples=emcee_samples_file
+    )
 
     # fit the data to the P92 model using the fitter
     with warnings.catch_warnings():
@@ -127,7 +126,7 @@ if __name__ == "__main__":
         p92_fit2 = fit2(p92_fit, x, y, weights=1.0 / y_unc)
 
     print(args.extfile)
-    print("autocorr tau = ", fit2.fit_info['sampler'].get_autocorr_time(quiet=True))
+    print("autocorr tau = ", fit2.fit_info["sampler"].get_autocorr_time(quiet=True))
 
     p92_best_params = (clean_pnames(p92_fit.param_names), p92_fit.parameters)
     p92_per_param_vals = zip(
@@ -138,7 +137,9 @@ if __name__ == "__main__":
     # save the extinction curve and fit
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=AstropyWarning)
-        extdata.save(ofile, p92_best_params=p92_best_params, p92_per_params=p92_per_params)
+        extdata.save(
+            ofile, p92_best_params=p92_best_params, p92_per_params=p92_per_params
+        )
 
     # make the standard mcmc plots
     fit2.plot_emcee_results(p92_fit2, filebase=ofile.replace(".fits", ""))

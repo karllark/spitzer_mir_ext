@@ -47,21 +47,24 @@ if __name__ == "__main__":
     # initialize the model
     fm90_init = FM90()
 
+    # Set up the backend to save the samples for the emcee runs
+    emcee_samples_file = ofile.replace(".fits", ".h5")
+
     # pick the fitter
     fit = LevMarLSQFitter()
-    # fit2 = SPyMinimizeFitter()
     nsteps = args.nsteps
-    fit3 = EmceeFitter(nsteps=nsteps, burnfrac=args.burnfrac)
+    fit3 = EmceeFitter(
+        nsteps=nsteps, burnfrac=args.burnfrac, save_samples=emcee_samples_file
+    )
 
     # fit the data to the FM90 model using the fitter
     #   use the initialized model as the starting point
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
         fm90_fit = fit(fm90_init, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs])
-        # fm90_fit2 = fit2(fm90_init, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs])
         fm90_fit3 = fit3(fm90_fit, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs])
 
-    print("autocorr tau = ", fit3.fit_info['sampler'].get_autocorr_time(quiet=True))
+    print("autocorr tau = ", fit3.fit_info["sampler"].get_autocorr_time(quiet=True))
 
     # setup the parameters for saving
     fm90_best_params = (fm90_fit.param_names, fm90_fit.parameters)
@@ -76,21 +79,15 @@ if __name__ == "__main__":
     # make the standard mcmc plots
     fit3.plot_emcee_results(fm90_fit3, filebase=ofile.replace(".fits", ""))
 
-    # print(fit3.fit_info['perparams'])
-
-    # print(fit3.fit_info['sampler'].get_autocorr_time())
-
     # plot the observed data, initial guess, and final fit
     fig, ax = plt.subplots()
 
     # remove pesky x without units warnings
     x /= u.micron
 
-    # ax.errorbar(x, y, yerr=y_unc[gindxs], fmt='ko', label='Observed Curve')
     # ax.plot(x[gindxs], fm90_init(x[gindxs]), label='Initial guess')
     ax.plot(x, y, label="Observed Curve")
     ax.plot(x[gindxs], fm90_fit3(x[gindxs]), label="emcee")
-    # ax.plot(x[gindxs], fm90_fit2(x[gindxs]), label="scipy.minimize")
     ax.plot(x[gindxs], fm90_fit(x[gindxs]), label="LevMarLSQ")
 
     # plot samples from the mcmc chaing
@@ -105,11 +102,9 @@ if __name__ == "__main__":
         plt.plot(x[gindxs], model_copy(x[gindxs]), "C1", alpha=0.05)
 
     ax.set_xlabel(r"$x$ [$\mu m^{-1}$]")
-    # ax.set_ylabel('$A(x)/A(V)$')
     ax.set_ylabel(r"$A(\lambda)/A(V)$")
 
     ax.set_title(file)
-    # ax.set_title('FM90 Fit to G09_MWAvg curve')
 
     ax.legend(loc="best")
     plt.tight_layout()
