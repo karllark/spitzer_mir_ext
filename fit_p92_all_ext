@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-extargs="--png --nsteps=2000 --burnfrac=0.5"
+extargs="--png --nsteps=5000 --burnfrac=0.4"
 # extargs="--png"
 fit="python utils/fit_ext_p92.py"
 

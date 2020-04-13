@@ -7,9 +7,8 @@ import numpy as np
 import astropy.units as u
 from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.modeling.fitting import _fitter_to_model_params
-from astropy.utils.exceptions import AstropyWarning
 
-# from dust_extinction.shapes import P92
+from astropy.utils.exceptions import AstropyWarning
 from dust_extinction.conversions import AxAvToExv
 from measure_extinction.extdata import ExtData
 
@@ -127,6 +126,9 @@ if __name__ == "__main__":
         p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc, maxiter=10000, epsilon=0.001)
         p92_fit2 = fit2(p92_fit, x, y, weights=1.0 / y_unc)
 
+    print(args.extfile)
+    print("autocorr tau = ", fit2.fit_info['sampler'].get_autocorr_time(quiet=True))
+
     p92_best_params = (clean_pnames(p92_fit.param_names), p92_fit.parameters)
     p92_per_param_vals = zip(
         p92_fit2.parameters, p92_fit2.uncs_plus, p92_fit2.uncs_minus
@@ -134,10 +136,9 @@ if __name__ == "__main__":
     p92_per_params = (clean_pnames(p92_fit2.param_names), list(p92_per_param_vals))
 
     # save the extinction curve and fit
-    # warnings.simplefilter("ignore", category=AstropyWarning)
-    extdata.save(
-        ofile, p92_best_params=p92_best_params, p92_per_params=p92_per_params
-    )
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=AstropyWarning)
+        extdata.save(ofile, p92_best_params=p92_best_params, p92_per_params=p92_per_params)
 
     # make the standard mcmc plots
     fit2.plot_emcee_results(p92_fit2, filebase=ofile.replace(".fits", ""))
@@ -180,12 +181,8 @@ if __name__ == "__main__":
         ax.plot(1.0 / x, model_copy(x), "C1", alpha=0.05)
         ax2.plot(1.0 / x, model_copy(x), "C1", alpha=0.05)
     # for the figure legend
-    ax.plot(
-        1.0 / x, model_copy(x), "C1", alpha=0.05, label="EMCEE Fits"
-    )
-    ax2.plot(
-        1.0 / x, model_copy(x), "C1", alpha=0.05, label="EMCEE Fits"
-    )
+    ax.plot(1.0 / x, model_copy(x), "C1", alpha=0.05, label="EMCEE Fits")
+    ax2.plot(1.0 / x, model_copy(x), "C1", alpha=0.05, label="EMCEE Fits")
 
     # ax.plot(1.0 / x, p92_init(x), "r--", label="P92 Init")
     ax.plot(1.0 / x, p92_fit(x), "r-", label="P92 Best Fit")

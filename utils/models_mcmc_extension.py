@@ -23,7 +23,7 @@ class EmceeOpt(Optimization):
     Interface to emcee sampler.
     """
 
-    supported_constraints = ['bounds', 'fixed', 'tied']
+    supported_constraints = ["bounds", "fixed", "tied"]
 
     def __init__(self):
         import emcee
@@ -48,7 +48,7 @@ class EmceeOpt(Optimization):
 
         return fit_params_best
 
-    def __call__(self, objfunc, initval, fargs, nsteps, **kwargs):
+    def __call__(self, objfunc, initval, fargs, nsteps, pool=None, **kwargs):
         """
         Run the sampler.
 
@@ -84,7 +84,9 @@ class EmceeOpt(Optimization):
                             cp[k] = model.bounds[cname][1]
                     k += 1
 
-        sampler = self.opt_method.EnsembleSampler(nwalkers, ndim, objfunc, args=fargs)
+        sampler = self.opt_method.EnsembleSampler(
+            nwalkers, ndim, objfunc, pool=pool, args=fargs
+        )
         sampler.run_mcmc(pos, nsteps, progress=True)
         samples = sampler.get_chain()
 
@@ -100,11 +102,12 @@ class EmceeFitter(Fitter):
     Use emcee and least squares statistic
     """
 
-    def __init__(self, nsteps=100, burnfrac=0.1):
+    def __init__(self, nsteps=100, burnfrac=0.1, pool=None):
         super().__init__(optimizer=EmceeOpt, statistic=leastsquare)
         self.nsteps = nsteps
         self.burnfrac = burnfrac
         self.fit_info = {}
+        self.pool = pool
 
     # add lnlike and lnprior and have log_probability just be the combo of the two
     def log_prior(self, fps, *args):
@@ -288,7 +291,7 @@ class EmceeFitter(Fitter):
         p0, _ = _model_to_fit_params(model_copy)
 
         fitparams, self.fit_info = self._opt_method(
-            self.log_probability, p0, farg, self.nsteps, **kwargs
+            self.log_probability, p0, farg, self.nsteps, pool=self.pool, **kwargs
         )
 
         # set the output model parameters to the "best fit" parameters

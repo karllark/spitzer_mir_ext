@@ -122,7 +122,7 @@ if __name__ == "__main__":
     extdata.plot(ax2, color="k", alpha=0.5)
 
     # ax.plot(1.0 / x, p92_init(x), "r--", label="P92 Init")
-    ax.plot(1.0 / x, ponly(x), 'b-', label="initial guess")
+    ax.plot(1.0 / x, ponly(x), "b-", label="initial guess")
     ax.plot(1.0 / x, p92_fit(x), "r-", label="Best Fit")
     ax2.plot(1.0 / x, p92_fit(x), "r-")
 

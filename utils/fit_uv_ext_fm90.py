@@ -3,6 +3,9 @@ import numpy as np
 import argparse
 import warnings
 
+# from multiprocessing import Pool
+# using a Pool does not work in this setup it seems
+
 from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.modeling.fitting import _fitter_to_model_params
 import astropy.units as u
@@ -58,27 +61,7 @@ if __name__ == "__main__":
         # fm90_fit2 = fit2(fm90_init, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs])
         fm90_fit3 = fit3(fm90_fit, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs])
 
-    # checking the uncertainties
-    print("Best Fit Parameters")
-    print(fm90_fit3.parameters)
-    print("Symmetric uncertainties")
-    print(fm90_fit3.uncs)
-    print("Plus uncertainties")
-    print(fm90_fit3.uncs_plus)
-    print("Minus uncertainties")
-    print(fm90_fit3.uncs_minus)
-
-    for i, pname in enumerate(fm90_fit3.param_names):
-        # now set uncertainties on the parameter objects themselves
-        param = getattr(fm90_fit3, pname)
-        if param.posterior is not None:
-            print(
-                "posterior: ",
-                pname,
-                param.posterior.pdf_mean(),
-                param.posterior.pdf_std(),
-            )
-        print("parameter: ", pname, param.value, param.unc)
+    print("autocorr tau = ", fit3.fit_info['sampler'].get_autocorr_time(quiet=True))
 
     # setup the parameters for saving
     fm90_best_params = (fm90_fit.param_names, fm90_fit.parameters)
