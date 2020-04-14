@@ -191,7 +191,9 @@ class P92_mod(Fittable1DModel):
     SIL2_lambda = Parameter(
         description="SIL2 term: center wavelength", default=18.0, bounds=(15.0, 21.0)
     )
-    SIL2_width = Parameter(description="SIL2 term: width", default=8.3, min=0.0)
+    SIL2_width = Parameter(
+        description="SIL2 term: width", default=8.3, bounds=(0.0, 5.0)
+    )
 
     FIR_amp = Parameter(
         description="FIR term: amplitude", default=0.012 * AbAv, min=0.0
