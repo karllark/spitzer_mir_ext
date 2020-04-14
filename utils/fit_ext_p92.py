@@ -119,11 +119,15 @@ if __name__ == "__main__":
         nsteps=nsteps, burnfrac=args.burnfrac, save_samples=emcee_samples_file
     )
 
+    # modify weights to make sure the 2175 A bump is fit
+    weights = 1.0 / y_unc
+    weights[(x > 4.0) & (x < 5.1)] *= 10.0
+
     # fit the data to the P92 model using the fitter
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
-        p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc, maxiter=10000, epsilon=0.001)
-        p92_fit2 = fit2(p92_fit, x, y, weights=1.0 / y_unc)
+        p92_fit = fit(p92_init, x, y, weights=weights, maxiter=10000, epsilon=0.001)
+        p92_fit2 = fit2(p92_fit, x, y, weights=weights)
 
     print(args.extfile)
     print("autocorr tau = ", fit2.fit_info["sampler"].get_autocorr_time(quiet=True))

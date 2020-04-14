@@ -42,7 +42,8 @@ if __name__ == "__main__":
     x = 1.0 / ext.waves["IUE"][gindxs].to(u.micron).value
     y = ext.exts["IUE"][gindxs]
     y_unc = ext.uncs["IUE"][gindxs]
-    gindxs = (x > 3.5) & (x < 8.0)
+    gindxs = (x > 3.3) & (x < 8.0)
+    # gindxs = ((x > 3.3) & (x < 8.1)) | ((x > 8.35) & (x < 8.6))
 
     # initialize the model
     fm90_init = FM90()
@@ -57,12 +58,17 @@ if __name__ == "__main__":
         nsteps=nsteps, burnfrac=args.burnfrac, save_samples=emcee_samples_file
     )
 
+    # modify weights to make sure the 2175 A bump is fit
+    weights = 1.0 / y_unc[gindxs]
+    # weights[(x[gindxs] < 5.9)] *= 4.0
+    weights[(x[gindxs] > 4.0) & (x[gindxs] < 5.1)] *= 10.0
+
     # fit the data to the FM90 model using the fitter
     #   use the initialized model as the starting point
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
-        fm90_fit = fit(fm90_init, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs])
-        fm90_fit3 = fit3(fm90_fit, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs])
+        fm90_fit = fit(fm90_init, x[gindxs], y[gindxs], weights=weights)
+        fm90_fit3 = fit3(fm90_fit, x[gindxs], y[gindxs], weights=weights)
 
     print("autocorr tau = ", fit3.fit_info["sampler"].get_autocorr_time(quiet=True))
 

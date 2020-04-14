@@ -176,13 +176,13 @@ class P92_mod(Fittable1DModel):
     NUV_width = Parameter(description="NUV term: width", default=0.05, min=0.0)
 
     SIL1_amp = Parameter(
-        description="SIL1 term: amplitude", default=0.002 * AbAv, bounds=(0.0, 0.01)
+        description="SIL1 term: amplitude", default=0.002 * AbAv, min=0.0
     )
     SIL1_lambda = Parameter(
         description="SIL1 term: center wavelength", default=9.7, bounds=(7.0, 13.0)
     )
     SIL1_width = Parameter(
-        description="SIL1 term: width", default=2.0, bounds=(0.0, 5.0)
+        description="SIL1 term: width", default=2.0, bounds=(0.0, 10.0)
     )
 
     SIL2_amp = Parameter(
