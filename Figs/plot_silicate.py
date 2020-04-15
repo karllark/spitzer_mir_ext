@@ -60,11 +60,18 @@ if __name__ == "__main__":
     fig, fax = pyplot.subplots(nrows=2, ncols=2, figsize=figsize)
     ax = [fax[0, 0], fax[0, 1], fax[1, 0], fax[1, 1]]
 
+    # Amplitude of the feature when x = x_o (FM90) or lambda = lambda_o (P92)
+    # FM90: I(x_o) = C3/(2*gamma**2)
+    # P92: I(lambda_o) = a_i/(2 + b_i) = a_i/(gamma_i**2/lambda_i**2)
+    # C3 = a_i * lambda_i**2 * 2.
+
     n_ext = len(extdatas)
     sil_amp = np.full((n_ext), 0.0)
     sil_amp_unc = np.full((n_ext), 0.0)
     sil_width = np.full((n_ext), 0.0)
     sil_width_unc = np.full((n_ext), 0.0)
+    sil_lambda = np.full((n_ext), 0.0)
+    sil_lambda_unc = np.full((n_ext), 0.0)
     sil_area = np.full((n_ext), 0.0)
     sil_area_unc = np.full((n_ext), 0.0)
     nuv_amp = np.full((n_ext), 0.0)
@@ -88,10 +95,13 @@ if __name__ == "__main__":
 
         samp = cext.p92_p50_fit["SIL1_AMP"]
         swidth = cext.p92_p50_fit["SIL1_WIDTH"]
+        slambda = cext.p92_p50_fit["SIL1_LAMBDA"]
         sil_amp[k] = samp[0]
         sil_amp_unc[k] = samp[1]
         sil_width[k] = swidth[0]
         sil_width_unc[k] = swidth[1]
+        sil_lambda[k] = slambda[0]
+        sil_lambda_unc[k] = slambda[1]
         sil_area[k] = math.pi * samp[0] / (2.0 * swidth[0])
         sil_area_unc[k] = (0.5 * (samp[1] + samp[2]) / samp[0]) ** 2 + (
             0.5 * (swidth[1] + swidth[2]) / samp[0]
@@ -110,6 +120,8 @@ if __name__ == "__main__":
 
     sil_area_unc = np.sqrt(sil_area_unc) * sil_area
     nuv_area_unc = np.sqrt(nuv_area_unc) * nuv_area
+
+    sil_ceninten = sil_amp / ((sil_width / sil_lambda) ** 2)
 
     rvs = avs / ebvs
     rvs_unc = (avs_unc / avs) ** 2 + (ebvs_unc / ebvs) ** 2
@@ -145,36 +157,41 @@ if __name__ == "__main__":
         fmt="ko",
         markerfacecolor="none",
     )
-    ax[0].set_xlabel(r"R(V) = A(V)/E(B-V)")
-    ax[0].set_ylabel(r"A(V)")
+    ax[0].set_xlabel(r"$R(V)$")
+    ax[0].set_ylabel(r"$A(V)$")
     ax[0].tick_params("both", length=10, width=2, which="major")
     ax[0].tick_params("both", length=5, width=1, which="minor")
 
     # R(V) versus silicate
     ax[1].errorbar(
         rvs[gindxs],
-        sil_area[gindxs],
+        sil_amp[gindxs],
         xerr=rvs_unc[gindxs],
-        yerr=sil_area_unc[gindxs],
+        yerr=sil_amp_unc[gindxs],
         fmt="ko",
     )
-    ax[1].set_xlabel(r"R(V) = A(V)/E(B-V)")
+    ax[1].set_xlabel(r"$R(V)$")
     ax[1].set_ylabel(r"Silicate 10 $\mu$m area")
     ax[1].tick_params("both", length=10, width=2, which="major")
     ax[1].tick_params("both", length=5, width=1, which="minor")
 
     # A(V) versus A(sil)/A(V)
+    CT06_tausil = np.array([0.78, 0.38, 0.63, 0.78])
+    CT06_av = np.array([12.42, 6.50, 11.03, 11.20])
+    ax[3].plot(CT06_av, CT06_tausil / (1.086 * CT06_av), "ko", label="CT06")
     ax[3].errorbar(
         avs[gindxs],
-        sil_amp[gindxs],
+        sil_ceninten[gindxs],
         xerr=avs_unc[gindxs],
-        yerr=sil_amp_unc[gindxs],
-        fmt="ko",
+        # yerr=sil_amp_unc[gindxs],
+        fmt="go",
+        label="this work",
     )
-    ax[3].set_xlabel(r"A(V)")
-    ax[3].set_ylabel(r"$A(sil)/A(V) \approx \tau(sil)/A(V)$")
+    ax[3].set_xlabel(r"$A(V)$")
+    ax[3].set_ylabel(r"$A(sil)/A(V)$")
     ax[3].tick_params("both", length=10, width=2, which="major")
     ax[3].tick_params("both", length=5, width=1, which="minor")
+    ax[3].legend()
 
     # silicate verus 2175
     uvindxs = (sil_area < 0.01) & (nuv_area > 0.0)
