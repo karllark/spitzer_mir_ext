@@ -49,7 +49,9 @@ Figures
 
 5. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20.dat --models
 
-6. MIR ext literature comparison: Figs/plot_ext_litcomp.py
+6. Silicate (10 um) versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
+
+7.. MIR ext literature comparison: Figs/plot_ext_litcomp.py
 
 Tables
 ------
