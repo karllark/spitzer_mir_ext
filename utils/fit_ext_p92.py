@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     # get an observed extinction curve to fit
     (wave, y, y_unc) = extdata.get_fitdata(
-        ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True
+        ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True,
     )
     # ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True
     # remove data affected by Ly-alpha absorption/emission
@@ -122,6 +122,9 @@ if __name__ == "__main__":
     # modify weights to make sure the 2175 A bump is fit
     weights = 1.0 / y_unc
     weights[(x > 4.0) & (x < 5.1)] *= 10.0
+
+    # modify weights to make sure the 10 um silicate feature is fit
+    weights[(x > 0.08) & (x < 0.12)] *= 10.0
 
     # fit the data to the P92 model using the fitter
     with warnings.catch_warnings():

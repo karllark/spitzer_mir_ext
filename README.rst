@@ -31,8 +31,8 @@ fitting curves shapes (FM90, P92).  `measure_extinction` gives the routines
 to read the data and calculate extinction curves.
 
 Curves calculated with `run_all_ext`.
+
 (UV/Opt/)NIR/MIR portion fit with P92 shape using `fit_p92_all_ext`.
-UV portion fit with FM90 shape using `fit_fm90_all_ext`.
 
 UV portion fit with FM90 shape using `fit_fm90_all_ext`.
 
@@ -47,7 +47,7 @@ Figures
 
 4. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_18feb20.dat
 
-5. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20.dat
+5. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20.dat --models
 
 6. MIR ext literature comparison: Figs/plot_ext_litcomp.py
 

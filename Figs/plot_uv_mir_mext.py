@@ -10,7 +10,7 @@ import astropy.units as u
 
 # from calc_ext import P92_Elv
 from dust_extinction.shapes import FM90
-from calc_ext import P92_mod as P92
+from utils.P92_mod import P92_mod as P92
 from measure_extinction.extdata import ExtData
 
 
@@ -57,36 +57,36 @@ def plot_all_ext(
 
         # plot the best fit P92 model
         P92_best = P92(
-            BKG_amp=extdatas[k].p92_best_fit["BKG_AMP"],
-            BKG_lambda=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-            BKG_width=extdatas[k].p92_best_fit["BKG_WIDTH"],
-            FUV_amp=extdatas[k].p92_best_fit["FUV_AMP"],
-            FUV_lambda=extdatas[k].p92_best_fit["FUV_LAMBDA"],
-            FUV_n=extdatas[k].p92_best_fit["FUV_N"],
-            FUV_b=extdatas[k].p92_best_fit["FUV_B"],
-            NUV_amp=extdatas[k].p92_best_fit["NUV_AMP"],
-            NUV_lambda=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-            NUV_width=extdatas[k].p92_best_fit["NUV_WIDTH"],
-            SIL1_amp=extdatas[k].p92_best_fit["SIL1_AMP"],
-            SIL1_lambda=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-            SIL1_width=extdatas[k].p92_best_fit["SIL1_WIDTH"],
-            SIL2_amp=extdatas[k].p92_best_fit["SIL2_AMP"],
-            SIL2_lambda=extdatas[k].p92_best_fit["SIL2_LAMBDA"],
-            SIL2_width=extdatas[k].p92_best_fit["SIL2_WIDTH"],
-            FIR_amp=extdatas[k].p92_best_fit["FIR_AMP"],
-            FIR_lambda=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-            FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
+            BKG_amp=extdatas[k].p92_p50_fit["BKG_AMP"][0],
+            BKG_lambda=extdatas[k].p92_p50_fit["BKG_LAMBDA"][0],
+            BKG_width=extdatas[k].p92_p50_fit["BKG_WIDTH"][0],
+            FUV_amp=extdatas[k].p92_p50_fit["FUV_AMP"][0],
+            FUV_lambda=extdatas[k].p92_p50_fit["FUV_LAMBDA"][0],
+            FUV_n=extdatas[k].p92_p50_fit["FUV_N"][0],
+            FUV_b=extdatas[k].p92_p50_fit["FUV_B"][0],
+            NUV_amp=extdatas[k].p92_p50_fit["NUV_AMP"][0],
+            NUV_lambda=extdatas[k].p92_p50_fit["NUV_LAMBDA"][0],
+            NUV_width=extdatas[k].p92_p50_fit["NUV_WIDTH"][0],
+            SIL1_amp=extdatas[k].p92_p50_fit["SIL1_AMP"][0],
+            SIL1_lambda=extdatas[k].p92_p50_fit["SIL1_LAMBDA"][0],
+            SIL1_width=extdatas[k].p92_p50_fit["SIL1_WIDTH"][0],
+            SIL2_amp=extdatas[k].p92_p50_fit["SIL2_AMP"][0],
+            SIL2_lambda=extdatas[k].p92_p50_fit["SIL2_LAMBDA"][0],
+            SIL2_width=extdatas[k].p92_p50_fit["SIL2_WIDTH"][0],
+            FIR_amp=extdatas[k].p92_p50_fit["FIR_AMP"][0],
+            FIR_lambda=extdatas[k].p92_p50_fit["FIR_LAMBDA"][0],
+            FIR_width=extdatas[k].p92_p50_fit["FIR_WIDTH"][0],
         )
 
         # best fit FM90 model
         if extdatas_fm90[k] is not None:
             FM90_best = FM90(
-                C1=extdatas_fm90[k].fm90_best_fit["C1"],
-                C2=extdatas_fm90[k].fm90_best_fit["C2"],
-                C3=extdatas_fm90[k].fm90_best_fit["C3"],
-                C4=extdatas_fm90[k].fm90_best_fit["C4"],
-                xo=extdatas_fm90[k].fm90_best_fit["XO"],
-                gamma=extdatas_fm90[k].fm90_best_fit["GAMMA"],
+                C1=extdatas_fm90[k].fm90_p50_fit["C1"][0],
+                C2=extdatas_fm90[k].fm90_p50_fit["C2"][0],
+                C3=extdatas_fm90[k].fm90_p50_fit["C3"][0],
+                C4=extdatas_fm90[k].fm90_p50_fit["C4"][0],
+                xo=extdatas_fm90[k].fm90_p50_fit["XO"][0],
+                gamma=extdatas_fm90[k].fm90_p50_fit["GAMMA"][0],
             )
 
         if args.models:
@@ -192,8 +192,9 @@ if __name__ == "__main__":
         extdatas.append(text)
         avs.append(text.columns["AV"][0])
 
-        if os.path.isfile(bfilename.replace(".fits", "_fm90.fits")):
-            textfm90 = ExtData(filename=bfilename.replace(".fits", "_fm90.fits"))
+        fm90_filename = bfilename.replace(".fits", "_FM90.fits")
+        if os.path.isfile(fm90_filename):
+            textfm90 = ExtData(filename=fm90_filename)
             extdatas_fm90.append(textfm90)
         else:
             extdatas_fm90.append(None)
