@@ -11,9 +11,15 @@ import matplotlib
 
 from astropy.table import Table
 
-# from calc_ext import P92_Elv
-# from dust_extinction.shapes import P92
-from calc_ext import P92_mod as P92
+from dust_extinction.averages import (
+    RL85_MWGC,
+    I05_MWAvg,
+    CT06_MWGC,
+    CT06_MWLoc,
+    F11_MWGC,
+)
+
+from utils.P92_mod import P92_mod as P92
 from measure_extinction.extdata import ExtData, AverageExtData
 
 if __name__ == "__main__":
@@ -155,29 +161,7 @@ if __name__ == "__main__":
                     FIR_width=extdatas[k].p92_best_fit["FIR_WIDTH"],
                 )
             else:
-                P92_best = P92_Elv(
-                    BKG_amp_0=extdatas[k].p92_best_fit["BKG_AMP"],
-                    BKG_lambda_0=extdatas[k].p92_best_fit["BKG_LAMBDA"],
-                    BKG_n_0=extdatas[k].p92_best_fit["BKG_N"],
-                    BKG_b_0=extdatas[k].p92_best_fit["BKG_B"],
-                    FUV_amp_0=extdatas[k].p92_best_fit["FUV_AMP"],
-                    FUV_lambda_0=extdatas[k].p92_best_fit["FUV_LAMBDA"],
-                    FUV_n_0=extdatas[k].p92_best_fit["FUV_N"],
-                    FUV_b_0=extdatas[k].p92_best_fit["FUV_B"],
-                    NUV_amp_0=extdatas[k].p92_best_fit["NUV_AMP"],
-                    NUV_lambda_0=extdatas[k].p92_best_fit["NUV_LAMBDA"],
-                    NUV_n_0=extdatas[k].p92_best_fit["NUV_N"],
-                    NUV_b_0=extdatas[k].p92_best_fit["NUV_B"],
-                    SIL1_amp_0=extdatas[k].p92_best_fit["SIL1_AMP"],
-                    SIL1_lambda_0=extdatas[k].p92_best_fit["SIL1_LAMBDA"],
-                    SIL1_n_0=extdatas[k].p92_best_fit["SIL1_N"],
-                    SIL1_b_0=extdatas[k].p92_best_fit["SIL1_B"],
-                    FIR_amp_0=extdatas[k].p92_best_fit["FIR_AMP"],
-                    FIR_lambda_0=extdatas[k].p92_best_fit["FIR_LAMBDA"],
-                    FIR_n_0=extdatas[k].p92_best_fit["FIR_N"],
-                    FIR_b_0=extdatas[k].p92_best_fit["FIR_B"],
-                    Av_1=extdatas[k].columns["AV"][0],
-                )
+                P92_best = None
 
             if args.alav:
                 ltext = None
@@ -188,7 +172,7 @@ if __name__ == "__main__":
                 1.0 / mod_x,
                 P92_best(mod_x),
                 lin_vals[i % 3],
-                color=col_vals[i % 6],
+                color=col_vals[i % n_cols],
                 alpha=0.5,
                 label=ltext,
             )
@@ -200,127 +184,22 @@ if __name__ == "__main__":
         ax.set_ylim(0.0, 0.25)
         ax.set_ylabel(r"$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
         if args.prevobs:
-            # Milky Way observed extinction from
-            # Rieke & Lebofsky (1985)
-            MW_x = 1.0 / np.array(
-                [
-                    13.0,
-                    12.5,
-                    12.0,
-                    11.5,
-                    11.0,
-                    10.5,
-                    10.0,
-                    9.5,
-                    9.0,
-                    8.5,
-                    8.0,
-                    4.8,
-                    3.5,
-                    2.22,
-                    1.65,
-                    1.25,
-                ]
-            )
-            MW_axav = np.array(
-                [
-                    0.027,
-                    0.030,
-                    0.037,
-                    0.047,
-                    0.060,
-                    0.074,
-                    0.083,
-                    0.087,
-                    0.074,
-                    0.043,
-                    0.020,
-                    0.023,
-                    0.058,
-                    0.112,
-                    0.175,
-                    0.282,
-                ]
-            )
-            ax.plot(
-                1.0 / MW_x, MW_axav, "bo", label="GalCenter; Rieke & Lebofsky (1985)"
-            )
+            litmods = [RL85_MWGC(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
+            litdesc = [
+                "GalCenter: Rieke & Lebofsky (1985)",
+                "GalPlane: Indebetouw et al. (2005)",
+                "GalCenter: Chiar & Tielens (2006)",
+                "Local: Chiar & Tielens (2006)",
+                "GalCenter: Fritz et al. (2011)",
+            ]
+            litfmt = ["bs", "gP", "c--", "c:", "m^"]
+            for k, cmod in enumerate(litmods):
+                lit_wave = 1.0 / cmod.obsdata_x
+                lit_axav = cmod.obsdata_axav
 
-            remy_wave = np.array([1.24, 1.664, 2.164, 3.545, 4.442, 5.675, 7.760])
-            remy_alak = np.array([2.50, 1.55, 1.00, 0.56, 0.43, 0.43, 0.43])
-            remy_alak_unc = np.array([0.15, 0.08, 0.0, 0.06, 0.08, 0.10, 0.10])
-            avak = 8.5
-            remy_alav = remy_alak / avak
-            remy_alav_unc = remy_alak_unc / avak
-            # ax.errorbar(remy_wave, remy_alav, yerr=remy_alav_unc,
-            #             fmt='go', label='Indebetouw et al. (2005)')
-            ax.plot(
-                remy_wave, remy_alav, "go", label="GalPlane; Indebetouw et al. (2005)"
-            )
-
-            lutz_wave = np.array(
-                [
-                    2.622,
-                    2.748,
-                    2.852,
-                    3.017,
-                    3.282,
-                    3.742,
-                    3.996,
-                    4.347,
-                    5.097,
-                    5.865,
-                    6.749,
-                    7.411,
-                    8.609,
-                    12.28,
-                    18.72,
-                ]
-            )
-            lutz_alav = np.array(
-                [
-                    0.07519,
-                    0.06481,
-                    0.07513,
-                    0.08142,
-                    0.06922,
-                    0.05500,
-                    0.05070,
-                    0.05205,
-                    0.04859,
-                    0.05054,
-                    0.04532,
-                    0.04349,
-                    0.07962,
-                    0.05445,
-                    0.05499,
-                ]
-            )
-            # ax.plot(lutz_wave, lutz_alav, 'mo', label='GalCenter; Lutz (1999)')
-
-            a = Table.read(
-                "data/fritz11_galcenter.dat", format="ascii.commented_header"
-            )
-            ax.plot(
-                a["wave"],
-                0.12 * a["ext"] / 2.62,
-                "mo",
-                label="GalCenter; Fritz et al. (2011)",
-            )
-
-            a = Table.read(
-                "data/pixie_dust_chiar_2005_modified.dat",
-                format="ascii.commented_header",
-            )
-            # table in A(l)/A(K) units
-            # ax.plot(a['wave'], 0.12*a['galcen'], 'co',
-            #        label='Chiar & Tielens (2005)')
-            ax.plot(
-                a["wave"],
-                0.12 * a["local"],
-                "co",
-                label="GalCenter; Chiar & Tielens (2005)",
-            )
+                ax.plot(
+                    lit_wave, lit_axav, litfmt[k], alpha=0.25, label=litdesc[k], lw=3,
+                )
 
         if args.dg_models:
             a = Table.read(

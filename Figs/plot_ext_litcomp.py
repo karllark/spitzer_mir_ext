@@ -8,7 +8,7 @@ import matplotlib
 
 # from dust_extinction.shapes import P92
 from dust_extinction.averages import (
-    RL85_MWAvg,
+    RL85_MWGC,
     I05_MWAvg,
     CT06_MWGC,
     CT06_MWLoc,
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     figsize = (14, 6)
     fig, ax = pyplot.subplots(nrows=1, ncols=2, figsize=figsize)
 
-    litmods = [RL85_MWAvg(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
+    litmods = [RL85_MWGC(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
     litdesc = [
         "GalCenter: Rieke & Lebofsky (1985)",
         "GalPlane: Indebetouw et al. (2005)",
@@ -125,27 +125,17 @@ if __name__ == "__main__":
     X16_wave = np.array(
         [3.4, 4.6, 12.0, 22.0, 8.23, 3.6, 4.5, 5.8, 8.0, 24.0, 1.25, 2.22]
     )
+    # fmt: off
     X16_eklejk = np.array(
-        [
-            0.238,
-            0.312,
-            0.269,
-            0.370,
-            0.273,
-            0.260,
-            0.313,
-            0.355,
-            0.334,
-            0.428,
-            -1.0,
-            0.0,
-        ]
+        [0.238, 0.312, 0.269, 0.370, 0.273, 0.260, 0.313,
+         0.355, 0.334, 0.428, -1.0, 0.0]
     )
+    # fmt: on
     X16_y = -1 * X16_eklejk
     ax[0].plot(X16_wave, X16_y, "yv", label="GalPlane: Xue et al. (2016)")
 
     # New measurements
-    avefilename = "../data/all_ext_18feb20_ave.fits"
+    avefilename = "data/all_ext_18feb20_ave.fits"
 
     # get G20_MWAvg
     G20 = ExtData()

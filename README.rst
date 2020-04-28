@@ -51,7 +51,7 @@ Figures
 
 6. Silicate (10 um) versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
 
-7.. MIR ext literature comparison: Figs/plot_ext_litcomp.py
+7. MIR ext literature comparison: Figs/plot_ext_litcomp.py
 
 Tables
 ------
