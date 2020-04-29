@@ -51,7 +51,7 @@ if __name__ == "__main__":
     sil_area = np.full((n_ext), 0.0)
     sil_area_unc = np.full((n_ext), 0.0)
     sil_ceninten = np.full((n_ext), 0.0)
-    sil_ceninten_unc = np.full((n_ext), 0.0)
+    sil_ceninten_unc = np.full((2, n_ext), 0.0)
     nuv_amp = np.full((n_ext), 0.0)
     nuv_amp_unc = np.full((n_ext), 0.0)
     nuv_lambda = np.full((n_ext), 0.0)
@@ -61,13 +61,13 @@ if __name__ == "__main__":
     nuv_area = np.full((n_ext), 0.0)
     nuv_area_unc = np.full((n_ext), 0.0)
     nuv_ceninten = np.full((n_ext), 0.0)
-    nuv_ceninten_unc = np.full((n_ext), 0.0)
+    nuv_ceninten_unc = np.full((2, n_ext), 0.0)
     avs = np.full((n_ext), 0.0)
-    avs_unc = np.full((n_ext), 0.0)
+    avs_unc = np.full((2, n_ext), 0.0)
     ebvs = np.full((n_ext), 0.0)
     ebvs_unc = np.full((n_ext), 0.0)
     rvs = np.full((n_ext), 0.0)
-    rvs_unc = np.full((n_ext), 0.0)
+    rvs_unc = np.full((2, n_ext), 0.0)
 
     for k, cname in enumerate(extfnames):
 
@@ -81,8 +81,10 @@ if __name__ == "__main__":
         samples = reader.get_chain(discard=int(mcmc_burnfrac * nsteps), flat=True)
 
         avs_dist = unc.Distribution(samples[:, -1])
-        avs[k] = avs_dist.pdf_mean()
-        avs_unc[k] = avs_dist.pdf_std()
+        av_per = avs_dist.pdf_percentiles([16.0, 50.0, 84.0])
+        avs[k] = av_per[1]
+        avs_unc[1, k] = av_per[2] - av_per[1]
+        avs_unc[0, k] = av_per[1] - av_per[0]
         # print(avs_dist.pdf_percentiles([33., 50., 87.]))
 
         (indxs,) = np.where(
@@ -98,8 +100,10 @@ if __name__ == "__main__":
         ebvs_unc[k] = ebvs_dist.pdf_std()
 
         rvs_dist = avs_dist / ebvs_dist
-        rvs[k] = rvs_dist.pdf_mean()
-        rvs_unc[k] = rvs_dist.pdf_std()
+        rv_per = rvs_dist.pdf_percentiles([16.0, 50.0, 84.0])
+        rvs[k] = rv_per[1]
+        rvs_unc[1, k] = rv_per[2] - rv_per[1]
+        rvs_unc[0, k] = rv_per[1] - rv_per[0]
 
         # print(np.corrcoef(np.stack([avs_dist.distribution, rvs_dist.distribution])))
 
@@ -115,8 +119,10 @@ if __name__ == "__main__":
         sil_lambda_unc[k] = sillam_dist.pdf_std()
 
         silceninten_dist = silamp_dist / ((silwid_dist / sillam_dist) ** 2)
-        sil_ceninten[k] = silceninten_dist.pdf_mean()
-        sil_ceninten_unc[k] = silceninten_dist.pdf_std()
+        sil_ci_per = silceninten_dist.pdf_percentiles([16.0, 50.0, 84.0])
+        sil_ceninten[k] = sil_ci_per[1]
+        sil_ceninten_unc[1, k] = sil_ci_per[2] - sil_ci_per[1]
+        sil_ceninten_unc[0, k] = sil_ci_per[1] - sil_ci_per[0]
 
         # using C3 = a_i * lambda_i**2 * 2 to be able to use the FM area formula
         silarea_dist = math.pi * silamp_dist * (sillam_dist ** 2) / silwid_dist
@@ -144,8 +150,10 @@ if __name__ == "__main__":
             nuv_lambda_unc[k] = nuvlam_dist.pdf_std()
 
             nuvceninten_dist = nuvamp_dist / (nuvwid_dist ** 2)
-            nuv_ceninten[k] = nuvceninten_dist.pdf_mean()
-            nuv_ceninten_unc[k] = nuvceninten_dist.pdf_std()
+            nuv_ci_per = nuvceninten_dist.pdf_percentiles([16.0, 50.0, 84.0])
+            nuv_ceninten[k] = nuv_ci_per[1]
+            nuv_ceninten_unc[1, k] = nuv_ci_per[2] - nuv_ci_per[1]
+            nuv_ceninten_unc[0, k] = nuv_ci_per[1] - nuv_ci_per[0]
 
             # using C3 = a_i * lambda_i**2 * 2 to be able to use the FM area formula
             nuvarea_dist = math.pi * nuvamp_dist / (2.0 * nuvwid_dist)
@@ -189,13 +197,13 @@ if __name__ == "__main__":
 
     # R(V) versus A(V)
     ax[0].errorbar(
-        rvs[gindxs], avs[gindxs], xerr=rvs_unc[gindxs], yerr=avs_unc[gindxs], fmt="go"
+        rvs[gindxs], avs[gindxs], xerr=rvs_unc[:, gindxs], yerr=avs_unc[:, gindxs], fmt="go"
     )
     ax[0].errorbar(
         rvs[bindxs],
         avs[bindxs],
-        xerr=rvs_unc[bindxs],
-        yerr=avs_unc[bindxs],
+        xerr=rvs_unc[:, bindxs],
+        yerr=avs_unc[:, bindxs],
         fmt="go",
         markerfacecolor="none",
     )
@@ -208,8 +216,8 @@ if __name__ == "__main__":
     ax[1].errorbar(
         rvs[gindxs],
         sil_ceninten[gindxs],
-        xerr=rvs_unc[gindxs],
-        yerr=sil_ceninten_unc[gindxs],
+        xerr=rvs_unc[:, gindxs],
+        yerr=sil_ceninten_unc[:, gindxs],
         fmt="go",
     )
     ax[1].set_xlabel(r"$R(V)$")
@@ -271,8 +279,8 @@ if __name__ == "__main__":
     ax[3].errorbar(
         avs[gindxs],
         sil_ceninten[gindxs],
-        xerr=avs_unc[gindxs],
-        yerr=sil_ceninten_unc[gindxs],
+        xerr=avs_unc[:, gindxs],
+        yerr=sil_ceninten_unc[:, gindxs],
         fmt="go",
         label="this work",
     )
@@ -288,8 +296,8 @@ if __name__ == "__main__":
     ax[2].errorbar(
         nuv_ceninten[uvindxs],
         sil_ceninten[uvindxs],
-        xerr=nuv_ceninten_unc[uvindxs],
-        yerr=sil_ceninten_unc[uvindxs],
+        xerr=nuv_ceninten_unc[:, uvindxs],
+        yerr=sil_ceninten_unc[:, uvindxs],
         fmt="go",
     )
     ax[2].set_xlabel(r"$A(2175)/A(V)$")
