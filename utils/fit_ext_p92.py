@@ -83,31 +83,41 @@ if __name__ == "__main__":
 
     # initialize the model
     #    a few tweaks to the starting parameters helps find the solution
-    p92_init = P92_mod(BKG_amp=200.0, FUV_amp=100.0, FUV_lambda=0.06) | AxAvToExv(
-        Av=av_guess
-    )
+    if extdata.type == "elx":
+        p92_init = P92_mod(BKG_amp=200.0, FUV_amp=100.0, FUV_lambda=0.06) | AxAvToExv(
+            Av=av_guess
+        )
+    else:
+        p92_init = P92_mod(BKG_amp=200.0, FUV_amp=100.0, FUV_lambda=0.06)
 
     # fix a number of the parameters
     #   mainly to avoid fitting parameters that are constrained at
     #   wavelengths where the observed data for this case does not exist
-    p92_init.BKG_lambda_0.fixed = True
-    p92_init.BKG_width_0.fixed = True
-    # p92_init.FUV_amp_0.fixed = True
-    p92_init.FUV_lambda_0.fixed = True
-    p92_init.FUV_b_0.fixed = True
-    p92_init.FUV_n_0.fixed = True
-    # p92_init.NUV_amp_0.fixed = True
-    # p92_init.NUV_lambda_0.fixed = True
-    # p92_init.NUV_width_0.fixed = True
-    p92_init.SIL2_lambda_0.fixed = True
-    p92_init.SIL2_width_0.fixed = True
-    p92_init.FIR_lambda_0.fixed = True
-    p92_init.FIR_width_0.fixed = True
+    print(extdata.type)
+    if extdata.type == "elx":
+        p92_only = p92_init[0]
+    else:
+        p92_only = p92_init
 
-    p92_init.Av_1.bounds = [0.1, None]
+    p92_only.BKG_lambda.fixed = True
+    p92_only.BKG_width.fixed = True
+    # p92_only.FUV_amp_0.fixed = True
+    p92_only.FUV_lambda.fixed = True
+    p92_only.FUV_b.fixed = True
+    p92_only.FUV_n.fixed = True
+    # p92_only.NUV_amp_0.fixed = True
+    # p92_only.NUV_lambda_0.fixed = True
+    # p92_only.NUV_width_0.fixed = True
+    p92_only.SIL2_lambda.fixed = True
+    p92_only.SIL2_width.fixed = True
+    p92_only.FIR_lambda.fixed = True
+    p92_only.FIR_width.fixed = True
 
-    # p92_init.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
-    # p92_init.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
+    if extdata.type == "elx":
+        p92_init.Av_1.bounds = [0.1, None]
+
+    # p92_only.SIL2_amp_0.tied = tie_amps_SIL2_to_SIL1
+    # p92_only.FIR_amp_0.tied = tie_amps_FIR_to_SIL1
 
     # Set up the backend to save the samples for the emcee runs
     emcee_samples_file = ofile.replace(".fits", ".h5")
@@ -151,7 +161,8 @@ if __name__ == "__main__":
     # make the standard mcmc plots
     fit2.plot_emcee_results(p92_fit2, filebase=ofile.replace(".fits", ""))
 
-    best_fit_Av = p92_fit.Av_1.value
+    if extdata.type == "elx":
+        best_fit_Av = p92_fit.Av_1.value
     x /= u.micron
 
     # plotting setup for easier to read plots
@@ -206,8 +217,9 @@ if __name__ == "__main__":
     ax.plot(1.0 / x, p92_comps(x), "k-", alpha=0.5)
     ax2.plot(1.0 / x, p92_comps(x), "k-", alpha=0.5)
 
-    ax.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-", label="-A(V)")
-    ax2.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-")
+    if extdata.type == "elx":
+        ax.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-", label="-A(V)")
+        ax2.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-")
 
     p92_comps = p92_fit.copy()
     p92_comps.NUV_amp_0 = 0.0
@@ -263,9 +275,10 @@ if __name__ == "__main__":
     ax2.set_xlim(sp_xlim)
     # ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
     (indxs,) = np.where((x.value > 1.0 / sp_xlim[1]) & (x.value < 1.0 / sp_xlim[0]))
-    ax2.set_ylim(
-        min([min(p92_fit(x)[indxs]), -best_fit_Av]) - 0.1, max(p92_fit(x)[indxs]) + 0.1
-    )
+    if extdata.type == "elx":
+        ax2.set_ylim(
+            min([min(p92_fit(x)[indxs]), -best_fit_Av]) - 0.1, max(p92_fit(x)[indxs]) + 0.1
+        )
 
     # use the whitespace better
     with warnings.catch_warnings():

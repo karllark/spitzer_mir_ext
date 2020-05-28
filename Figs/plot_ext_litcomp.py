@@ -135,7 +135,7 @@ if __name__ == "__main__":
     ax[0].plot(X16_wave, X16_y, "yv", label="GalPlane: Xue et al. (2016)")
 
     # New measurements
-    avefilename = "data/all_ext_18feb20_ave.fits"
+    avefilename = "data/all_ext_18feb20_diffuse_ave.fits"
 
     # get G20_MWAvg
     G20 = ExtData()
