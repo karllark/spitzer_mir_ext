@@ -8,7 +8,7 @@ import astropy.units as u
 from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.modeling.models import Polynomial1D, Drude1D
 
-from dust_extinction.conversions import AxAvToExv
+# from dust_extinction.conversions import AxAvToExv
 from measure_extinction.extdata import ExtData
 
 # from models_mcmc_extension import EmceeFitter
@@ -46,10 +46,6 @@ if __name__ == "__main__":
     #  just use the average at wavelengths > 5
     #  limit as lambda -> inf, E(lamda-V) -> -A(V)
     (indxs,) = np.where(1.0 / x > 5.0)
-    av_guess = -1.0 * np.average(y[indxs])
-    if not np.isfinite(av_guess):
-        av_guess = 1.0
-    print(av_guess)
 
     # initialize the model
     #    a few tweaks to the starting parameters helps find the solution
@@ -61,7 +57,7 @@ if __name__ == "__main__":
             fwhm=0.01,
             bounds={
                 "amplitude": [0.0, None],
-                "x_0": [1.0 / 12.0, 1.0 / 8.0],
+                "x_0": [1.0 / 10.5, 1.0 / 9.0],
                 "fwhm": [0.0001, 0.5],
             },
         )
@@ -77,30 +73,28 @@ if __name__ == "__main__":
         )
         #    + Gaussian1D(amplitude=1.0, mean=4.6, stddev=1.0,
         #        bounds={"amplitude": [0.0, 10.0], "mean": [4.5, 4.7], "stddev": [0.5, 1.5]})
-    )   #  | AxAvToExv(Av=av_guess)
+    )
 
-    ponly.c0_0 = -1.0 * av_guess
-    ponly.c0_0.bounds = (None, -1.0 * av_guess)
-    ponly.c1_0 = 0.005
-    ponly.c2_0 = -0.1
-    ponly.c3_0 = 0.5
-    ponly.c4_0 = -0.2
-    ponly.c5_0 = 0.03
+    ponly[0].c0 = 0.001
+    ponly[0].c0.bounds = (0.0, None)
+    ponly[0].c1 = 0.05
+    ponly[0].c2 = -0.1
+    ponly[0].c3 = 0.5
+    ponly[0].c4 = -0.2
+    ponly[0].c5 = 0.03
 
     # pick the fitter
     fit = LevMarLSQFitter()
 
     # fit the data to the P92 model using the fitter
     # p92_fit = fit(p92_init, x, y, weights=1.0 / y_unc, maxiter=1000)
+    (gindxs,) = np.where(1.0 / x < 40.0)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
-        p92_fit = fit(ponly, x, y, weights=1.0 / y_unc, maxiter=1000, epsilon=0.001)
+        p92_fit = fit(ponly, x[gindxs], y[gindxs], weights=1.0 / y_unc[gindxs], maxiter=1000, epsilon=0.001)
 
     for k, cur_pname in enumerate(p92_fit.param_names):
         print("{:12} {:6.4e}".format(cur_pname, p92_fit.parameters[k]))
-
-    best_fit_Av = -1.0 * p92_fit.parameters[0]
-    print(best_fit_Av)
 
     # plotting setup for easier to read plots
     fontsize = 18
@@ -128,9 +122,6 @@ if __name__ == "__main__":
     ax.plot(1.0 / x, p92_fit(x), "r-", label="Best Fit")
     ax2.plot(1.0 / x, p92_fit(x), "r-")
 
-    ax.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-", label="-A(V)")
-    ax2.plot(1.0 / x, best_fit_Av * np.full((len(x)), -1.0), "-")
-
     # finish configuring the plot
     ax.set_yscale("linear")
     ax.set_xscale("log")
@@ -141,13 +132,15 @@ if __name__ == "__main__":
     ax.legend()
 
     # finish configuring the subplot
-    sp_xlim = [2.0, 35.0]
+    sp_xlim = [1.0, 35.0]
     ax2.set_xlim(sp_xlim)
     # ax2.set_ylim(-best_fit_Av-0.1, -best_fit_Av+0.5)
     (indxs,) = np.where((x > 1.0 / sp_xlim[1]) & (x < 1.0 / sp_xlim[0]))
-    ax2.set_ylim(
-        min([min(p92_fit(x)[indxs]), -best_fit_Av]) - 0.1, max(p92_fit(x)[indxs]) + 0.1
-    )
+    # ax2.set_ylim(
+    #    min([min(p92_fit(x)[indxs]), -best_fit_Av]) - 0.1, max(p92_fit(x)[indxs]) + 0.1
+    # )
+    ax2.set_yscale("log")
+    ax2.set_ylim(0.01, 0.4)
 
     # use the whitespace better
     with warnings.catch_warnings():

@@ -74,13 +74,15 @@ class EmceeOpt(Optimization):
         for cp in pos:
             k = 0
             for cname in model.param_names:
-                if not model.fixed:
+                if not model.fixed[cname]:
                     if model.bounds[cname][0] is not None:
                         if cp[k] < model.bounds[cname][0]:
                             cp[k] = model.bounds[cname][0]
                     if model.bounds[cname][1] is not None:
                         if cp[k] > model.bounds[cname][1]:
                             cp[k] = model.bounds[cname][1]
+                    # only non-fixed parameters are in initval
+                    # so only increment k when non-fixed
                     k += 1
 
         # Set up the backend

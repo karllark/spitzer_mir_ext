@@ -7,7 +7,7 @@ from matplotlib.ticker import ScalarFormatter
 
 import astropy.units as u
 
-from dust_extinction.shapes import P92
+from utils.P92_mod import P92_mod as P92
 from dust_extinction.parameter_averages import F19
 
 from measure_extinction.extdata import ExtData
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
     # New measurements
     avefilenames = [
-        "data/all_ext_18feb20_diffuse_ave.fits",
+        "data/all_ext_18feb20_diffuse_ave_P92.fits",
         # "fits/hd283809_hd064802_ext_P92_FM90.fits",
         # "fits/hd029647_hd195986_ext_P92_FM90.fits",
     ]
@@ -114,6 +114,32 @@ if __name__ == "__main__":
             alpha=0.85,
         )
 
+        P92_best = P92(
+            BKG_amp=G20.p92_p50_fit["BKG_AMP"][0],
+            BKG_lambda=G20.p92_p50_fit["BKG_LAMBDA"][0],
+            BKG_width=G20.p92_p50_fit["BKG_WIDTH"][0],
+            FUV_amp=G20.p92_p50_fit["FUV_AMP"][0],
+            FUV_lambda=G20.p92_p50_fit["FUV_LAMBDA"][0],
+            FUV_n=G20.p92_p50_fit["FUV_N"][0],
+            FUV_b=G20.p92_p50_fit["FUV_B"][0],
+            NUV_amp=G20.p92_p50_fit["NUV_AMP"][0],
+            NUV_lambda=G20.p92_p50_fit["NUV_LAMBDA"][0],
+            NUV_width=G20.p92_p50_fit["NUV_WIDTH"][0],
+            SIL1_amp=G20.p92_p50_fit["SIL1_AMP"][0],
+            SIL1_lambda=G20.p92_p50_fit["SIL1_LAMBDA"][0],
+            SIL1_width=G20.p92_p50_fit["SIL1_WIDTH"][0],
+            SIL2_amp=G20.p92_p50_fit["SIL2_AMP"][0],
+            SIL2_lambda=G20.p92_p50_fit["SIL2_LAMBDA"][0],
+            SIL2_width=G20.p92_p50_fit["SIL2_WIDTH"][0],
+            FIR_amp=G20.p92_p50_fit["FIR_AMP"][0],
+            FIR_lambda=G20.p92_p50_fit["FIR_LAMBDA"][0],
+            FIR_width=G20.p92_p50_fit["FIR_WIDTH"][0],
+        )
+        mod_x = np.logspace(np.log10(1.0), np.log10(40.0), num=1000) * u.micron
+        ax[1].plot(
+            mod_x, P92_best(mod_x), "k" + pline[i], lw=2, alpha=0.65, label="P92 Fit"
+        )
+
     for i in range(2):
         ax[i].set_yscale("linear")
         ax[i].set_xlabel(r"$\lambda$ [$\mu m$]")
@@ -130,9 +156,10 @@ if __name__ == "__main__":
     ax[0].xaxis.set_major_formatter(ScalarFormatter())
     ax[0].xaxis.set_minor_formatter(ScalarFormatter())
 
+    ax[1].set_yscale("log")
     ax[1].set_xscale("log")
     ax[1].set_xlim(1.0, 40.0)
-    ax[1].set_ylim(0.0, 0.4)
+    ax[1].set_ylim(0.01, 0.4)
     ax[1].yaxis.tick_right()
     ax[1].yaxis.set_label_position("right")
     ax[1].xaxis.set_major_formatter(ScalarFormatter())

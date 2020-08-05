@@ -13,6 +13,8 @@ from dust_extinction.shapes import P92
 from dust_extinction.helpers import _get_x_in_wavenumbers, _test_valid_x_range
 from dust_extinction.conversions import AxAvToExv
 
+from models_mcmc_extension import EmceeFitter
+
 # from pahfit.component_models import Drude1D
 
 
@@ -41,8 +43,8 @@ class G20(Fittable1DModel):
     alpha = Parameter(description="alpha (power of powerlaw)", default=1.8)
     sil1_amp = Parameter(default=0.05, min=0.01)
     sil1_center = Parameter(default=10.0, bounds=(8.0, 12.0))
-    sil1_fwhm = Parameter(default=1.0, bounds=(0.0, 2.0))
-    sil2_amp = Parameter(default=0.1, min=0.01)
+    sil1_fwhm = Parameter(default=0.0, bounds=(0.0, 2.0))
+    sil2_amp = Parameter(default=0.1, min=0.001)
     sil2_center = Parameter(default=20.0, bounds=(16.0, 24.0))
     sil2_fwhm = Parameter(default=3.0, bounds=(0.0, 5.0))
     fir_amp = Parameter(default=0.0, min=0.00, fixed=True)
@@ -167,10 +169,6 @@ if __name__ == "__main__":
 
     print(g20_fit)
 
-    p92_init = P92() | AxAvToExv(Av=av_guess)
-    p92_fit = fit(p92_init, x[gvals], y[gvals], weights=1.0 / y_unc[gvals])
-    print(p92_fit)
-
     # setup the plot
     fontsize = 18
     fontsize = 10
@@ -183,7 +181,7 @@ if __name__ == "__main__":
     matplotlib.rc("ytick.major", width=2)
     matplotlib.rc("ytick.minor", width=2)
 
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=(12, 8))
 
     obsext.plot(ax)
     g20_fit_y = g20_fit(wave[gvals])
@@ -195,9 +193,6 @@ if __name__ == "__main__":
         "-",
         label="-A(V)",
     )
-
-    # ax.plot(wave[gvals], p92_init(wave[gvals]), "b-", label="P92 Initial Guess")
-    ax.plot(wave[gvals], p92_fit(wave[gvals]), "g-", label="P92 Best Fit")
 
     ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
     ax.set_ylabel(r"$E(\lambda - V)$", fontsize=1.3 * fontsize)

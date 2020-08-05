@@ -90,6 +90,7 @@ def plot_all_ext(
             )
 
         if args.models:
+            print(normval)
             ax.plot(
                 mod_x,
                 P92_best(mod_x) / normval + i * yoffset_factor,

@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     # get an observed extinction curve to fit
     (wave, y, y_unc) = extdata.get_fitdata(
-        ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True,
+        ["BAND", "IRS"], remove_uvwind_region=True, remove_lya_region=True, remove_irsblue=True
     )
     # ["BAND", "IUE", "IRS"], remove_uvwind_region=True, remove_lya_region=True
     # remove data affected by Ly-alpha absorption/emission
@@ -104,13 +104,13 @@ if __name__ == "__main__":
 
     p92_only.BKG_lambda.fixed = True
     p92_only.BKG_width.fixed = True
-    # p92_only.FUV_amp_0.fixed = True
+    p92_only.FUV_amp.fixed = True
     p92_only.FUV_lambda.fixed = True
     p92_only.FUV_b.fixed = True
     p92_only.FUV_n.fixed = True
-    # p92_only.NUV_amp_0.fixed = True
-    # p92_only.NUV_lambda_0.fixed = True
-    # p92_only.NUV_width_0.fixed = True
+    p92_only.NUV_amp.fixed = True
+    p92_only.NUV_lambda.fixed = True
+    p92_only.NUV_width.fixed = True
     p92_only.SIL2_lambda.fixed = True
     p92_only.SIL2_width.fixed = True
     p92_only.FIR_lambda.fixed = True
