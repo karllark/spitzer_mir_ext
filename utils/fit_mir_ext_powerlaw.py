@@ -6,199 +6,28 @@ import argparse
 import warnings
 
 import astropy.units as u
-from astropy.modeling import Fittable1DModel, Parameter
 
 # from astropy.modeling.models import PowerLaw1D, Drude1D
 from astropy.modeling.fitting import LevMarLSQFitter
+from astropy.modeling.fitting import _fitter_to_model_params
 
 from measure_extinction.extdata import ExtData
-from dust_extinction.helpers import _get_x_in_wavenumbers, _test_valid_x_range
 from dust_extinction.conversions import AxAvToExv
 
 from models_mcmc_extension import EmceeFitter
 
+from G21 import G20, G20_drude_asym
 
-def drude(x, scale, x_o, gamma_o):
+
+def clean_pnames(pnames):
     """
-    Drude to play with
+    function to clean of the _? part of the names due to making a CompoundModel
     """
-    y = (
-        scale
-        * ((gamma_o / x_o) ** 2)
-        / ((x / x_o - x_o / x) ** 2 + (gamma_o / x_o) ** 2)
-    )
-    return y
-
-
-def drude_asym(x, scale, x_o, gamma_o, asym):
-    """
-    Drude to play with
-    """
-    gamma = 2.0 * gamma_o / (1.0 + np.exp(asym * (x - x_o)))
-    y = scale * ((gamma / x_o) ** 2) / ((x / x_o - x_o / x) ** 2 + (gamma / x_o) ** 2)
-    return y
-
-
-class G20(Fittable1DModel):
-    """
-    Powerlaw plus Drude profiles for the silicate features for the
-    1 to 40 micron A(lambda)/A(V) extinction curve.
-
-    Powerlaw portion based on Martin & Whittet (1990).
-
-    Parameters
-    ----------
-    scale: float
-        amplitude of the curve
-
-    alpha : float
-        power of powerlaw
-
-    TBD: parameters for silicate features
-    """
-
-    # inputs = ("x",)
-    # outputs = ("axav",)
-
-    scale = Parameter(description="amplitude", default=0.5)
-    alpha = Parameter(description="alpha (power of powerlaw)", default=1.8)
-    sil1_amp = Parameter(default=0.05, min=0.01)
-    sil1_center = Parameter(default=10.0, bounds=(8.0, 12.0))
-    sil1_fwhm = Parameter(default=2.0, bounds=(0.01, 5.0))
-    sil2_amp = Parameter(default=0.1, min=0.001)
-    sil2_center = Parameter(default=20.0, bounds=(16.0, 24.0))
-    sil2_fwhm = Parameter(default=3.0, bounds=(0.01, 10.0))
-
-    x_range = [1.0 / 40.0, 1.0]
-
-    def evaluate(
-        self,
-        in_x,
-        scale,
-        alpha,
-        sil1_amp,
-        sil1_center,
-        sil1_fwhm,
-        sil2_amp,
-        sil2_center,
-        sil2_fwhm,
-    ):
-        """
-        G20 function
-
-        Parameters
-        ----------
-        in_x: float
-           expects either x in units of wavelengths or frequency
-           or assumes wavelengths in wavenumbers [1/micron]
-
-        Returns
-        -------
-        axav: np array (float)
-            A(x)/A(V) extinction curve [mag]
-
-        Raises
-        ------
-        ValueError
-           Input x values outside of defined range
-        """
-        x = _get_x_in_wavenumbers(in_x)
-
-        # check that the wavenumbers are within the defined range
-        _test_valid_x_range(x, self.x_range, "G20")
-
-        # powerlaw
-        axav = scale * ((1.0 / x) ** (-1.0 * alpha))
-
-        # silicate feature drudes
-        wave = 1 / x
-        axav += drude(wave, sil1_amp, sil1_center, sil1_fwhm)
-        axav += drude(wave, sil2_amp, sil2_center, sil2_fwhm)
-
-        return axav
-
-
-class G20_drude_asym(Fittable1DModel):
-    """
-    Powerlaw plus Drude profiles for the silicate features for the
-    1 to 40 micron A(lambda)/A(V) extinction curve.
-
-    Powerlaw portion based on Martin & Whittet (1990).
-
-    Parameters
-    ----------
-    scale: float
-        amplitude of the curve
-
-    alpha : float
-        power of powerlaw
-
-    TBD: parameters for silicate features
-    """
-
-    # inputs = ("x",)
-    # outputs = ("axav",)
-
-    scale = Parameter(description="amplitude", default=0.5)
-    alpha = Parameter(description="alpha (power of powerlaw)", default=1.8)
-    sil1_amp = Parameter(default=0.05, min=0.01)
-    sil1_center = Parameter(default=10.0, bounds=(8.0, 12.0))
-    sil1_fwhm = Parameter(default=2.0, bounds=(0.01, 10.0))
-    sil1_asym = Parameter(default=0.0)
-    sil2_amp = Parameter(default=0.1, min=0.001)
-    sil2_center = Parameter(default=20.0, bounds=(16.0, 24.0))
-    sil2_fwhm = Parameter(default=3.0, bounds=(0.0, 10.0))
-    sil2_asym = Parameter(default=0.0)
-
-    x_range = [1.0 / 40.0, 1.0]
-
-    def evaluate(
-        self,
-        in_x,
-        scale,
-        alpha,
-        sil1_amp,
-        sil1_center,
-        sil1_fwhm,
-        sil1_asym,
-        sil2_amp,
-        sil2_center,
-        sil2_fwhm,
-        sil2_asym,
-    ):
-        """
-        G20 function
-
-        Parameters
-        ----------
-        in_x: float
-           expects either x in units of wavelengths or frequency
-           or assumes wavelengths in wavenumbers [1/micron]
-
-        Returns
-        -------
-        axav: np array (float)
-            A(x)/A(V) extinction curve [mag]
-
-        Raises
-        ------
-        ValueError
-           Input x values outside of defined range
-        """
-        x = _get_x_in_wavenumbers(in_x)
-
-        # check that the wavenumbers are within the defined range
-        _test_valid_x_range(x, self.x_range, "G20")
-
-        # powerlaw
-        axav = scale * ((1.0 / x) ** (-1.0 * alpha))
-
-        # silicate feature drudes
-        wave = 1 / x
-        axav += drude_asym(wave, sil1_amp, sil1_center, sil1_fwhm, sil1_asym)
-        axav += drude_asym(wave, sil2_amp, sil2_center, sil2_fwhm, sil2_asym)
-
-        return axav
+    if pnames[0][-1] in ["0", "1"]:
+        clean_pnames = [cpname[:-2] for cpname in pnames]
+        return clean_pnames
+    else:
+        return pnames
 
 
 if __name__ == "__main__":
@@ -206,6 +35,12 @@ if __name__ == "__main__":
     # commandline parser
     parser = argparse.ArgumentParser()
     parser.add_argument("file", help="file with the extinction curve to fit")
+    parser.add_argument(
+        "--burnfrac", type=float, default=0.1, help="fraction of MCMC chain to burn"
+    )
+    parser.add_argument(
+        "--nsteps", type=int, default=100, help="# of steps in MCMC chain"
+    )
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     parser.add_argument("--path", help="path for the extinction curves")
@@ -243,9 +78,19 @@ if __name__ == "__main__":
         g20_init = G20()
         g20_asym_init = G20_drude_asym()
 
+    # g20_asym_init[0].sil1_amp.fixed = True
+
     # fit the extinction only using data between 1 and 40 micron
     gvals = (1.0 < 1.0 / x) & (1.0 / x < 40.0)
     fit = LevMarLSQFitter()
+
+    nsteps = args.nsteps
+    emcee_samples_file = ofile.replace(".fits", ".h5")
+    fit2 = EmceeFitter(
+        nsteps=nsteps, burnfrac=args.burnfrac, save_samples=emcee_samples_file
+    )
+
+    weights = 1.0 / y_unc[gvals]
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
@@ -253,8 +98,8 @@ if __name__ == "__main__":
             g20_init,
             x[gvals],
             y[gvals],
-            # weights=1.0 / y_unc[gvals],
-            maxiter=10000,
+            weights=weights,
+            # maxiter=10000,
             # epsilon=0.001,
         )
 
@@ -262,13 +107,30 @@ if __name__ == "__main__":
             g20_asym_init,
             x[gvals],
             y[gvals],
-            # weights=1.0 / y_unc[gvals],
-            maxiter=10000,
+            weights=weights,
+            # maxiter=10000,
             # epsilon=0.1,
         )
-        print(g20_fit.parameters)
-        print(g20_asym_fit.param_names)
-        print(g20_asym_fit.parameters)
+        # print(g20_fit.parameters)
+        # print(g20_asym_fit.param_names)
+        # print(g20_asym_fit.parameters)
+
+        g20_asym_fit2 = fit2(g20_asym_fit, x[gvals], y[gvals], weights=weights)
+
+    # make the standard mcmc plots
+    fit2.plot_emcee_results(g20_asym_fit2, filebase=ofile.replace(".fits", ""))
+
+    # save the extinction curve and fit
+    best_params = (clean_pnames(g20_asym_fit.param_names), g20_asym_fit.parameters)
+    per_param_vals = zip(
+        g20_asym_fit2.parameters, g20_asym_fit2.uncs_plus, g20_asym_fit2.uncs_minus
+    )
+    per_params = (clean_pnames(g20_asym_fit2.param_names), list(per_param_vals))
+
+    with warnings.catch_warnings():
+        # warnings.simplefilter("ignore", category=AstropyWarning)
+        g21_params = {"type": "G21", "best": best_params, "per": per_params}
+        obsext.save(ofile, save_params=g21_params)
 
     # setup the plot
     fontsize = 18
@@ -312,14 +174,42 @@ if __name__ == "__main__":
 
     ax[1].set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)
 
+    # plot samples from the mcmc chaing
+    flat_samples = fit2.fit_info["sampler"].get_chain(
+        discard=int(0.1 * nsteps), flat=True
+    )
+    inds = np.random.randint(len(flat_samples), size=100)
+    model_copy = g20_asym_fit2.copy()
+    for ind in inds:
+        sample = flat_samples[ind]
+        _fitter_to_model_params(model_copy, sample)
+        ax[0].plot(wave[gvals], model_copy(wave[gvals]), "C1", alpha=0.05)
+    # for the figure legend
+    ax[0].plot(wave[gvals], model_copy(wave[gvals]), "C1", label="EMCEE Fits")
+
     mmy = np.array([min(g20_fit_y), max(g20_fit_y)])
     if obsext.type == "elx":
-        mmy[0] = min([mmy[0], -1.0 * g20_fit.Av_1.value, -1.0 * g20_asym_fit.Av_1.value])
+        mmy[0] = min(
+            [mmy[0], -1.0 * g20_fit.Av_1.value, -1.0 * g20_asym_fit.Av_1.value]
+        )
     mmd = 0.1 * (mmy[1] - mmy[0])
     ax[0].set_ylim(mmy + np.array([-1.0, 1.0]) * mmd)
     ax[0].set_xlim(1.0, 40.0)
     ax[0].set_xscale("log")
     ax[0].set_title(file)
+
+    g21_comps = g20_asym_fit.copy()
+    g21_comps.sil1_amp_0 = 0.0
+    ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
+
+    g21_comps = g20_asym_fit.copy()
+    g21_comps.sil2_amp_0 = 0.0
+    ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
+
+    g21_comps = g20_asym_fit.copy()
+    g21_comps.sil1_amp_0 = 0.0
+    g21_comps.sil2_amp_0 = 0.0
+    ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
 
     ax[0].legend(loc="best")
 

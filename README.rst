@@ -32,9 +32,12 @@ to read the data and calculate extinction curves.
 
 Curves calculated with `run_all_ext`.
 
-(UV/Opt/)NIR/MIR portion fit with P92 shape using `fit_p92_all_ext`.
+(UV/Opt/)NIR/MIR portion fit with P92 shape using `fit_plasymdrude_all_ext`.
 
 UV portion fit with FM90 shape using `fit_fm90_all_ext`.
+
+Average extinction curve made using
+`Figs/plot_mir_mext --alav --ave data/all_ext_18feb20_diffuse.dat`.
 
 Figures
 -------

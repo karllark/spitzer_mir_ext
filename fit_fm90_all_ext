@@ -1,29 +1,29 @@
 #!/bin/bash
 #
 
-extargs="--png --nsteps=10000 --burnfrac=0.4"
+extargs="--png --nsteps=1000 --burnfrac=0.4"
 # extargs="--png"
 fmfit="python utils/fit_uv_ext_fm90.py"
 
 rm -f fits/*FM90.h5
 
 # V stars
-$fmfit fits/hd204827_hd036512_ext_P92.fits $extargs
-# $fmfit fits/vicyg1_hd214680_ext_P92.fits $extargs
-$fmfit fits/hd147889_hd064802_ext_P92.fits $extargs
-$fmfit fits/hd029309_hd064802_ext_P92.fits $extargs
-$fmfit fits/hd283809_hd064802_ext_P92.fits $extargs
-$fmfit fits/hd281159_hd064802_ext_P92.fits $extargs
+$fmfit fits/hd204827_hd036512_ext_POWLAW2DRUDE.fits $extargs
+# $fmfit fits/vicyg1_hd214680_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd147889_hd064802_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd029309_hd064802_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd283809_hd064802_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd281159_hd064802_ext_POWLAW2DRUDE.fits $extargs
 
 # III stars
-$fmfit fits/hd147701_hd195986_ext_P92.fits $extargs
-$fmfit fits/hd029647_hd195986_ext_P92.fits $extargs
-$fmfit fits/bd+63d1964_hd188209_ext_P92.fits $extargs
+$fmfit fits/hd147701_hd195986_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd029647_hd195986_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/bd+63d1964_hd188209_ext_POWLAW2DRUDE.fits $extargs
 
 # I stars
-# $fmfit fits/vicyg8a_hd188209_ext_P92.fits $extargs
-$fmfit fits/hd192660_hd204172_ext_P92.fits $extargs
-$fmfit fits/hd229238_hd204172_ext_P92.fits $extargs
-$fmfit fits/hd112272_hd204172_ext_P92.fits $extargs
-# $fmfit fits/vicyg2_hd214680_ext_P92.fits $extargs
-$fmfit fits/hd014956_hd204172_ext_P92.fits $extargs
+# $fmfit fits/vicyg8a_hd188209_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd192660_hd204172_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd229238_hd204172_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd112272_hd204172_ext_POWLAW2DRUDE.fits $extargs
+# $fmfit fits/vicyg2_hd214680_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd014956_hd204172_ext_POWLAW2DRUDE.fits $extargs
