@@ -74,6 +74,12 @@ if __name__ == "__main__":
         g20_init = G20() | AxAvToExv(Av=av_guess)
         g20_asym_init = G20_drude_asym() | AxAvToExv(Av=av_guess)
         # g20_init = G20_x() | AxAvToExv(Av=av_guess)
+
+        if max(1.0 / x) <= 26.0:
+            # g20_asym_init[0].sil2_amp.fixed = True
+            g20_asym_init[0].sil2_center.fixed = True
+            g20_asym_init[0].sil2_fwhm.fixed = True
+            g20_asym_init[0].sil2_asym.fixed = True
     elif obsext.type == "alav":
         g20_init = G20()
         g20_asym_init = G20_drude_asym()
@@ -199,16 +205,26 @@ if __name__ == "__main__":
     ax[0].set_title(file)
 
     g21_comps = g20_asym_fit.copy()
-    g21_comps.sil1_amp_0 = 0.0
+    if obsext.type == "elx":
+        g21_comps[0].sil1_amp = 0.0
+    else:
+        g21_comps.sil1_amp = 0.0
     ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
 
     g21_comps = g20_asym_fit.copy()
-    g21_comps.sil2_amp_0 = 0.0
+    if obsext.type == "elx":
+        g21_comps[0].sil2_amp = 0.0
+    else:
+        g21_comps.sil2_amp = 0.0
     ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
 
     g21_comps = g20_asym_fit.copy()
-    g21_comps.sil1_amp_0 = 0.0
-    g21_comps.sil2_amp_0 = 0.0
+    if obsext.type == "elx":
+        g21_comps[0].sil1_amp = 0.0
+        g21_comps[0].sil2_amp = 0.0
+    else:
+        g21_comps.sil1_amp = 0.0
+        g21_comps.sil2_amp = 0.0
     ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
 
     ax[0].legend(loc="best")

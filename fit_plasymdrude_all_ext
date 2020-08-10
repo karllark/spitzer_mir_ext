@@ -2,7 +2,7 @@
 #
 
 # extargs="--png --nsteps=10000 --burnfrac=0.4"
-extargs="--png --nsteps=5000 --burnfrac=0.4"
+extargs="--png --nsteps=10000 --burnfrac=0.4"
 # extargs="--png"
 fit="python utils/fit_mir_ext_powerlaw.py"
 

@@ -128,14 +128,14 @@ class G20_drude_asym(Fittable1DModel):
 
     scale = Parameter(description="amplitude", default=0.5)
     alpha = Parameter(description="alpha (power of powerlaw)", default=1.8)
-    sil1_amp = Parameter(default=0.05, min=0.01)
-    sil1_center = Parameter(default=10.0, bounds=(8.0, 12.0))
-    sil1_fwhm = Parameter(default=2.0, bounds=(0.01, 10.0))
-    sil1_asym = Parameter(default=0.0, bounds=(-2.0, 2.0))
-    sil2_amp = Parameter(default=0.1, min=0.001)
-    sil2_center = Parameter(default=20.0, bounds=(16.0, 24.0))
-    sil2_fwhm = Parameter(default=3.0, bounds=(0.0, 10.0))
-    sil2_asym = Parameter(default=0.0, bounds=(-2.0, 2.0))
+    sil1_amp = Parameter(default=0.068, bounds=(0.01, 0.3))
+    sil1_center = Parameter(default=9.84, bounds=(8.0, 12.0))
+    sil1_fwhm = Parameter(default=2.43, bounds=(1.0, 10.0))
+    sil1_asym = Parameter(default=-0.29, bounds=(-2.0, 2.0))
+    sil2_amp = Parameter(default=0.025, bounds=(0.001, 0.3))
+    sil2_center = Parameter(default=19.54, bounds=(16.0, 24.0))
+    sil2_fwhm = Parameter(default=10.0, bounds=(3.0, 10.0))
+    sil2_asym = Parameter(default=-0.33, bounds=(-2.0, 2.0))
 
     x_range = [1.0 / 40.0, 1.0]
 
