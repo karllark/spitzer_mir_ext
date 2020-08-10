@@ -5,6 +5,7 @@
 import argparse
 
 import emcee
+
 # from astropy import uncertainty as unc
 
 from measure_extinction.extdata import ExtData
@@ -14,6 +15,9 @@ if __name__ == "__main__":
     # commandline parser
     parser = argparse.ArgumentParser()
     parser.add_argument("filelist", help="file with list of stars to use")
+    parser.add_argument(
+        "--sil", action="store_true", help="file with list of stars to use"
+    )
     args = parser.parse_args()
 
     filename = args.filelist
@@ -36,44 +40,62 @@ if __name__ == "__main__":
     hstr = r"\colhead{name} & "
     hstr2 = r" & "
 
-    phead = {
-        "AV": "{A(V)}",
-        "SIL1_AMP": "{SIL1 A}",
-        "SIL1_CENTER": r"{SIL1 $\lambda_o$}",
-        "SIL1_FWHM": r"{SIL1 $\gamma$}",
-        "SIL1_ASYM": "{SIL1 e}",
-        "SIL2_AMP": "{SIL2 A}",
-        "SIL2_CENTER": r"{SIL2 $\lambda_o$}",
-        "SIL2_FWHM": r"{SIL2 $\gamma$}",
-        "SIL2_ASYM": "{SIL2 e}",
-    }
-    phead2 = {
-        "AV": "{[mag]}",
-        "SIL1_AMP": r"{$10^{-2}$ $A(\lambda)/A(V)$}",
-        "SIL1_CENTER": r"{[$\micron$]}",
-        "SIL1_FWHM": r"{[$\micron$]}",
-        "SIL1_ASYM": r"{}",
-        "SIL2_AMP": r"{$10^{-2}$ $A(\lambda)/A(V)$}",
-        "SIL2_CENTER": r"{[$\micron$]}",
-        "SIL2_FWHM": r"{[$\micron$]}",
-        "SIL2_ASYM": r"{}",
-    }
-    mval = {
-        "AV": 1,
-        "SIL1_AMP": 1e2,
-        "SIL1_CENTER": 1,
-        "SIL1_FWHM": 1,
-        "SIL1_ASYM": 1,
-        "SIL2_AMP": 1e2,
-        "SIL2_CENTER": 1,
-        "SIL2_FWHM": 1,
-        "SIL2_ASYM": 1,
-    }
+    if args.sil:
+        phead = {
+            "SIL1_AMP": r"{$S_1 \times 100$}",
+            "SIL1_CENTER": r"{$\lambda_{o1}$}",
+            "SIL1_FWHM": r"{$\gamma_{o1}$}",
+            "SIL1_ASYM": r"{$a_1$}",
+            "SIL2_AMP": r"{$S_2 \times 100$}",
+            "SIL2_CENTER": r"{$\lambda_{o2}$}",
+            "SIL2_FWHM": r"{$\gamma_{o2}$}",
+            "SIL2_ASYM": r"{$a_2$}",
+        }
+        phead2 = {
+            "SIL1_AMP": r"{$A(\lambda)/A(V)$}",
+            "SIL1_CENTER": r"{[$\micron$]}",
+            "SIL1_FWHM": r"{[$\micron$]}",
+            "SIL1_ASYM": r"{}",
+            "SIL2_AMP": r"{$A(\lambda)/A(V)$}",
+            "SIL2_CENTER": r"{[$\micron$]}",
+            "SIL2_FWHM": r"{[$\micron$]}",
+            "SIL2_ASYM": r"{}",
+        }
+        mval = {
+            "SIL1_AMP": 1e2,
+            "SIL1_CENTER": 1,
+            "SIL1_FWHM": 1,
+            "SIL1_ASYM": 1,
+            "SIL2_AMP": 1e2,
+            "SIL2_CENTER": 1,
+            "SIL2_FWHM": 1,
+            "SIL2_ASYM": 1,
+        }
 
-    # fmt: off
-    okeys = ["AV", "SIL1_AMP", "SIL1_CENTER", "SIL1_FWHM", "SIL1_ASYM",
-             "SIL2_AMP", "SIL2_CENTER", "SIL2_FWHM", "SIL2_ASYM"]
-    # fmt: on
+        # fmt: off
+        okeys = ["SIL1_AMP", "SIL1_CENTER", "SIL1_FWHM", "SIL1_ASYM",
+                 "SIL2_AMP", "SIL2_CENTER", "SIL2_FWHM", "SIL2_ASYM"]
+        # fmt: on
+
+    else:
+
+        phead = {
+            "AV": r"{$A(V)$}",
+            "SCALE": r"{$B$}",
+            "ALPHA": r"{$\alpha$}"
+        }
+        phead2 = {
+            "AV": "{[mag]}",
+            "SCALE": r"{$A(\lambda)/A(V)$}",
+            "ALPHA": {}
+        }
+        mval = {
+            "AV": 1,
+            "SCALE": 1,
+            "ALPHA": 1
+        }
+
+        okeys = ["AV", "SCALE", "ALPHA"]
 
     mcmc_burnfrac = 0.4
     for k, bfile in enumerate(files):
@@ -101,9 +123,19 @@ if __name__ == "__main__":
             else:
                 val, punc, munc = edata.g21_p50_fit[ckey]
             cmval = float(mval[ckey])
-            pstr += (
-                f"${cmval*val:.2f}^{{+{cmval*punc:.2f}}}_{{-{cmval*munc:.2f}}}$ & "
-            )
+            if (punc == 0.0) & (munc == 0.0):
+                pstr += (
+                    f"${cmval*val:.2f}$ & "
+                )
+            else:
+                if sname == "DIFFUS":
+                    pstr += (
+                        f"${cmval*val:.3f}^{{+{cmval*punc:.3f}}}_{{-{cmval*munc:.3f}}}$ & "
+                    )
+                else:
+                    pstr += (
+                        f"${cmval*val:.2f}^{{+{cmval*punc:.2f}}}_{{-{cmval*munc:.2f}}}$ & "
+                    )
         if first_line:
             first_line = False
             print(f"\\tablehead{{{hstr[:-3]}}} \\\\")
