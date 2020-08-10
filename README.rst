@@ -37,7 +37,7 @@ Curves calculated with `run_all_ext`.
 UV portion fit with FM90 shape using `fit_fm90_all_ext`.
 
 Average extinction curve made using
-`Figs/plot_mir_mext --alav --ave data/all_ext_18feb20_diffuse.dat`.
+`Figs/plot_mir_mext.py --alav --ave data/all_ext_18feb20_diffuse.dat`.
 
 Figures
 -------

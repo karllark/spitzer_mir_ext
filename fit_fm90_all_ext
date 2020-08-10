@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-extargs="--png --nsteps=1000 --burnfrac=0.4"
+extargs="--png --nsteps=10000 --burnfrac=0.4"
 # extargs="--png"
 fmfit="python utils/fit_uv_ext_fm90.py"
 

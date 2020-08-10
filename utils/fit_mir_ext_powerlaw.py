@@ -75,7 +75,13 @@ if __name__ == "__main__":
         g20_asym_init = G20_drude_asym() | AxAvToExv(Av=av_guess)
         # g20_init = G20_x() | AxAvToExv(Av=av_guess)
 
-        if max(1.0 / x) <= 26.0:
+        if max(1.0 / x) <= 20.0:
+            print("fix amp")
+            g20_asym_init[0].sil2_amp.fixed = True
+            g20_asym_init[0].sil2_center.fixed = True
+            g20_asym_init[0].sil2_fwhm.fixed = True
+            g20_asym_init[0].sil2_asym.fixed = True
+        elif max(1.0 / x) <= 26.0:
             # g20_asym_init[0].sil2_amp.fixed = True
             g20_asym_init[0].sil2_center.fixed = True
             g20_asym_init[0].sil2_fwhm.fixed = True

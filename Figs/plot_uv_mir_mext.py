@@ -101,11 +101,22 @@ def plot_all_ext(
                         sil1_center=extdatas[k].g21_best_fit["SIL1_CENTER"],
                         sil1_fwhm=extdatas[k].g21_best_fit["SIL1_FWHM"],
                         sil1_asym=extdatas[k].g21_best_fit["SIL1_ASYM"],
-                        # sil2_amp=0.0,
                         sil2_amp=extdatas[k].g21_best_fit["SIL2_AMP"],
                         sil2_center=extdatas[k].g21_best_fit["SIL2_CENTER"],
                         sil2_fwhm=extdatas[k].g21_best_fit["SIL2_FWHM"],
                         sil2_asym=extdatas[k].g21_best_fit["SIL2_ASYM"],
+                    )
+                    G21_p50 = G21(
+                        scale=extdatas[k].g21_p50_fit["SCALE"][0],
+                        alpha=extdatas[k].g21_p50_fit["ALPHA"][0],
+                        sil1_amp=extdatas[k].g21_p50_fit["SIL1_AMP"][0],
+                        sil1_center=extdatas[k].g21_p50_fit["SIL1_CENTER"][0],
+                        sil1_fwhm=extdatas[k].g21_p50_fit["SIL1_FWHM"][0],
+                        sil1_asym=extdatas[k].g21_p50_fit["SIL1_ASYM"][0],
+                        sil2_amp=extdatas[k].g21_p50_fit["SIL2_AMP"][0],
+                        sil2_center=extdatas[k].g21_p50_fit["SIL2_CENTER"][0],
+                        sil2_fwhm=extdatas[k].g21_p50_fit["SIL2_FWHM"][0],
+                        sil2_asym=extdatas[k].g21_p50_fit["SIL2_ASYM"][0],
                     )
 
                 ax.plot(
@@ -129,11 +140,20 @@ def plot_all_ext(
                             gamma=extdatas_fm90[k].fm90_best_fit["GAMMA"],
                         )
 
+                        FM90_p50 = FM90(
+                            C1=extdatas_fm90[k].fm90_p50_fit["C1"][0],
+                            C2=extdatas_fm90[k].fm90_p50_fit["C2"][0],
+                            C3=extdatas_fm90[k].fm90_p50_fit["C3"][0],
+                            C4=extdatas_fm90[k].fm90_p50_fit["C4"][0],
+                            xo=extdatas_fm90[k].fm90_p50_fit["XO"][0],
+                            gamma=extdatas_fm90[k].fm90_p50_fit["GAMMA"][0],
+                        )
+
                         ax.plot(
                             mod_x_fm90,
-                            FM90_best(mod_x_fm90) / normval + i * yoffset_factor,
+                            FM90_p50(mod_x_fm90) / normval + i * yoffset_factor,
                             lin_vals[i % 3],
-                            color=col_vals[i % n_cols],
+                            color="k",  # col_vals[i % n_cols],
                             alpha=0.5,
                         )
 
@@ -210,7 +230,7 @@ if __name__ == "__main__":
             normvals.append(1.0)
 
     # print(normvals)
-    # normvals = np.array(normvals)
+    normvals = np.array(normvals)
     # sindxs = np.flip(np.argsort(normvals))
     # normvals = normvals[sindxs]
     # extnames = np.array(extnames)[sindxs]
