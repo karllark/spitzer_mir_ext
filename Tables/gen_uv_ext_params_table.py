@@ -34,8 +34,8 @@ if __name__ == "__main__":
         "C2": r"{[$A(\lambda)/A(V)$]}",
         "C3": r"{[$A(\lambda)/A(V)$]}",
         "C4": r"{[$A(\lambda)/A(V)$]}",
-        "XO": r"{[$\micron$]}",
-        "GAMMA": r"{[$\micron$]}",
+        "XO": r"{[$\micron^{-1}$]}",
+        "GAMMA": r"{[$\micron^{-1}$]}",
     }
     mval = {
         "C1": 1,
