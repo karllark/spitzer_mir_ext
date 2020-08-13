@@ -48,6 +48,13 @@ if __name__ == "__main__":
     # initialize the model
     fm90_init = FM90()
 
+    fm90_init.C1.bounds = (0., 3.)
+    fm90_init.C2.bounds = (-0.1, 0.6)
+    fm90_init.C3.bounds = (0., 2.5)
+    fm90_init.C4.bounds = (0., 1.)
+    fm90_init.xo.bounds = (4.5, 4.9)
+    fm90_init.gamma.bounds = (0.6, 1.5)
+
     # Set up the backend to save the samples for the emcee runs
     emcee_samples_file = ofile.replace(".fits", ".h5")
 
