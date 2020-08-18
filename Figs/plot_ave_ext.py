@@ -4,14 +4,17 @@ import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
 from matplotlib.ticker import ScalarFormatter
+from matplotlib.lines import Line2D
 
 import astropy.units as u
+from astropy.table import QTable
 
-from utils.P92_mod import P92_mod as P92
 from dust_extinction.parameter_averages import F19
-
+from dust_extinction.shapes import FM90
+from measure_extinction.merge_obsspec import _wavegrid
 from measure_extinction.extdata import ExtData
 
+from utils.G21 import G20_drude_asym as G21
 
 if __name__ == "__main__":
 
@@ -41,11 +44,11 @@ if __name__ == "__main__":
     mod_x = np.logspace(np.log10(0.115), np.log10(2.5), num=1000) * u.micron
     F19_Rv = F19(Rv=3.1)
     for cax in ax:
-        cax.plot(mod_x, F19_Rv(mod_x), "k--", lw=2, alpha=0.65, label="F19 R(V) = 3.1")
+        cax.plot(mod_x, F19_Rv(mod_x), "k:", lw=2, alpha=0.65, label="F19 R(V) = 3.1")
 
     # New measurements
     avefilenames = [
-        "data/all_ext_18feb20_diffuse_ave_P92.fits",
+        "data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits",
         # "fits/hd283809_hd064802_ext_P92_FM90.fits",
         # "fits/hd029647_hd195986_ext_P92_FM90.fits",
     ]
@@ -55,90 +58,198 @@ if __name__ == "__main__":
     plabel = ["diffuse", "HD283809", "HD029647"]
 
     for i, avefilename in enumerate(avefilenames):
-        G20 = ExtData()
-        G20.read(avefilename)
-        G20_wave = G20.waves["BAND"].value
+        # IR Fit
+        obsext = ExtData()
+        obsext.read(avefilename)
 
-        G20_ext = G20.exts["BAND"]
-        G20_ext_uncs = G20.uncs["BAND"]
+        # UV fit
+        obsext2 = ExtData()
+        obsext2.read(avefilename.replace("POWLAW2DRUDE", "FM90"))
 
-        gindxs_IRS = np.where(G20.npts["IRS"] > 0)
-        G20_IRS_wave = G20.waves["IRS"][gindxs_IRS].value
-        G20_IRS_ext = G20.exts["IRS"][gindxs_IRS]
-        G20_IRS_uncs = G20.uncs["IRS"][gindxs_IRS]
+        obsext_wave = obsext.waves["BAND"].value
 
-        gindxs_IUE = np.where(G20.npts["IUE"] > 0)
-        G20_IUE_wave = G20.waves["IUE"][gindxs_IUE].value
-        G20_IUE_ext = G20.exts["IUE"][gindxs_IUE]
-        G20_IUE_uncs = G20.uncs["IUE"][gindxs_IUE]
+        obsext_ext = obsext.exts["BAND"]
+        obsext_ext_uncs = obsext.uncs["BAND"]
+
+        gindxs_IRS = np.where(obsext.npts["IRS"] > 0)
+        obsext_IRS_wave = obsext.waves["IRS"][gindxs_IRS].value
+        obsext_IRS_ext = obsext.exts["IRS"][gindxs_IRS]
+        obsext_IRS_uncs = obsext.uncs["IRS"][gindxs_IRS]
+
+        gindxs_IUE = np.where(obsext2.npts["IUE"] > 0)
+        obsext_IUE_wave = obsext2.waves["IUE"][gindxs_IUE].value
+        obsext_IUE_ext = obsext2.exts["IUE"][gindxs_IUE]
+        obsext_IUE_uncs = obsext2.uncs["IUE"][gindxs_IUE]
 
         ax[1].errorbar(
-            G20_wave,
-            G20_ext,
-            yerr=G20_ext_uncs,
+            obsext_wave,
+            obsext_ext,
+            yerr=obsext_ext_uncs,
             fmt=pcol[i] + psym[i],
             markersize=10,
             markeredgewidth=1.0,
             alpha=0.5,
-            label=plabel[i],  # + " (JHK, IRAC, IRS15, MIPS24)",
         )
 
         # IRS
         ax[1].plot(
-            G20_IRS_wave,
-            G20_IRS_ext,
-            pcol[i] + pline[i],
-            # label=plabel[i] + " (IRS)",
-            lw=2,
-            alpha=0.65,
+            obsext_IRS_wave, obsext_IRS_ext, pcol[i] + pline[i], lw=2, alpha=0.65,
         )
 
+        # rebin IRS
+        wrange = [5.0, 36.0]
+        res = 25
+        full_wave, full_wave_min, full_wave_max = _wavegrid(res, wrange)
+        n_waves = len(full_wave)
+        full_flux = np.zeros((n_waves), dtype=float)
+        full_unc = np.zeros((n_waves), dtype=float)
+        full_npts = np.zeros((n_waves), dtype=int)
+
+        cwaves = obsext_IRS_wave
+        cfluxes = obsext_IRS_ext
+        cuncs = obsext_IRS_uncs
+        for k in range(n_waves):
+            (indxs,) = np.where(
+                (cwaves >= full_wave_min[k]) & (cwaves < full_wave_max[k])
+            )
+            if len(indxs) > 0:
+                # weights = 1.0 / np.square(cuncs[indxs])
+                weights = 1.0
+                full_flux[k] += np.sum(weights * cfluxes[indxs])
+                full_unc[k] += np.sum(1.0 / np.square(cuncs[indxs]))
+                full_npts[k] += len(indxs)
+
+        findxs = full_npts > 0
+        full_flux[findxs] /= full_npts[findxs]
+        full_unc[findxs] = np.sqrt(1.0 / full_unc[findxs])
+
+        ax[1].errorbar(
+            full_wave[findxs],
+            full_flux[findxs],
+            yerr=full_unc[findxs],
+            fmt="bo",  # pcol[i] + psym[i],
+            markersize=5,
+            markeredgewidth=1.0,
+            alpha=1.0,
+        )
+
+        # Opt photometry
         ax[0].errorbar(
-            G20_wave,
-            G20_ext,
-            yerr=G20_ext_uncs,
+            obsext_wave,
+            obsext_ext,
+            yerr=obsext_ext_uncs,
             fmt=pcol[i] + psym[i],
             markersize=10,
             markeredgewidth=1.0,
             alpha=0.5,
-            label=plabel[i],  # + " (UBV)",
         )
 
         # IUE
         ax[0].plot(
-            G20_IUE_wave,
-            G20_IUE_ext,
-            pcol[i] + pline[i],
-            # label=plabel[i] + " (IUE/STIS)",
-            lw=2,
-            alpha=0.85,
+            obsext_IUE_wave, obsext_IUE_ext, pcol[i] + pline[i], lw=2, alpha=0.85,
         )
 
-        P92_best = P92(
-            BKG_amp=G20.p92_p50_fit["BKG_AMP"][0],
-            BKG_lambda=G20.p92_p50_fit["BKG_LAMBDA"][0],
-            BKG_width=G20.p92_p50_fit["BKG_WIDTH"][0],
-            FUV_amp=G20.p92_p50_fit["FUV_AMP"][0],
-            FUV_lambda=G20.p92_p50_fit["FUV_LAMBDA"][0],
-            FUV_n=G20.p92_p50_fit["FUV_N"][0],
-            FUV_b=G20.p92_p50_fit["FUV_B"][0],
-            NUV_amp=G20.p92_p50_fit["NUV_AMP"][0],
-            NUV_lambda=G20.p92_p50_fit["NUV_LAMBDA"][0],
-            NUV_width=G20.p92_p50_fit["NUV_WIDTH"][0],
-            SIL1_amp=G20.p92_p50_fit["SIL1_AMP"][0],
-            SIL1_lambda=G20.p92_p50_fit["SIL1_LAMBDA"][0],
-            SIL1_width=G20.p92_p50_fit["SIL1_WIDTH"][0],
-            SIL2_amp=G20.p92_p50_fit["SIL2_AMP"][0],
-            SIL2_lambda=G20.p92_p50_fit["SIL2_LAMBDA"][0],
-            SIL2_width=G20.p92_p50_fit["SIL2_WIDTH"][0],
-            FIR_amp=G20.p92_p50_fit["FIR_AMP"][0],
-            FIR_lambda=G20.p92_p50_fit["FIR_LAMBDA"][0],
-            FIR_width=G20.p92_p50_fit["FIR_WIDTH"][0],
+        G21_best = G21(
+            scale=obsext.g21_best_fit["SCALE"],
+            alpha=obsext.g21_best_fit["ALPHA"],
+            sil1_amp=obsext.g21_best_fit["SIL1_AMP"],
+            sil1_center=obsext.g21_best_fit["SIL1_CENTER"],
+            sil1_fwhm=obsext.g21_best_fit["SIL1_FWHM"],
+            sil1_asym=obsext.g21_best_fit["SIL1_ASYM"],
+            sil2_amp=obsext.g21_best_fit["SIL2_AMP"],
+            sil2_center=obsext.g21_best_fit["SIL2_CENTER"],
+            sil2_fwhm=obsext.g21_best_fit["SIL2_FWHM"],
+            sil2_asym=obsext.g21_best_fit["SIL2_ASYM"],
         )
-        mod_x = np.logspace(np.log10(1.0), np.log10(40.0), num=1000) * u.micron
+        G21_p50 = G21(
+            scale=obsext.g21_p50_fit["SCALE"][0],
+            alpha=obsext.g21_p50_fit["ALPHA"][0],
+            sil1_amp=obsext.g21_p50_fit["SIL1_AMP"][0],
+            sil1_center=obsext.g21_p50_fit["SIL1_CENTER"][0],
+            sil1_fwhm=obsext.g21_p50_fit["SIL1_FWHM"][0],
+            sil1_asym=obsext.g21_p50_fit["SIL1_ASYM"][0],
+            sil2_amp=obsext.g21_p50_fit["SIL2_AMP"][0],
+            sil2_center=obsext.g21_p50_fit["SIL2_CENTER"][0],
+            sil2_fwhm=obsext.g21_p50_fit["SIL2_FWHM"][0],
+            sil2_asym=obsext.g21_p50_fit["SIL2_ASYM"][0],
+        )
+
+        mod_x = np.logspace(np.log10(1.0), np.log10(39.0), num=1000) * u.micron
         ax[1].plot(
-            mod_x, P92_best(mod_x), "k" + pline[i], lw=2, alpha=0.65, label="P92 Fit"
+            mod_x, G21_p50(mod_x), "k" + pline[i], lw=2, alpha=0.65, label="G21 Fit"
         )
+
+        g21_comps = G21_p50.copy()
+        g21_comps.sil1_amp = 0.0
+        ax[1].plot(mod_x, g21_comps(mod_x), "k--", alpha=0.5)
+
+        g21_comps = G21_p50.copy()
+        g21_comps.sil2_amp = 0.0
+        ax[1].plot(mod_x, g21_comps(mod_x), "k--", alpha=0.5)
+
+        g21_comps = G21_p50.copy()
+        g21_comps.sil1_amp = 0.0
+        g21_comps.sil2_amp = 0.0
+        ax[1].plot(mod_x, g21_comps(mod_x), "k--", alpha=0.5)
+
+        # write ext to table
+        gphot = obsext_wave > 1.0
+        rebintab = QTable()
+        twaves = np.concatenate([obsext_wave[gphot], full_wave[findxs]]) * u.micron
+        text = np.concatenate([obsext_ext[gphot], full_flux[findxs]])
+        tunc = np.concatenate([obsext_ext_uncs[gphot], full_unc[findxs]])
+        nt = len(twaves)
+        rebintab["wave1"] = twaves[0 : nt // 2]
+        rebintab["ext1"] = text[0 : nt // 2]
+        rebintab["unc1"] = tunc[0 : nt // 2]
+        rebintab["fit1"] = G21_p50(rebintab["wave1"])
+        rebintab["wave2"] = twaves[nt // 2 : nt]
+        rebintab["ext2"] = text[nt // 2 : nt]
+        rebintab["unc2"] = tunc[nt // 2 : nt]
+        rebintab["fit2"] = G21_p50(rebintab["wave2"])
+        rebintab.write(
+            "test.tex",
+            formats={
+                "wave1": "%4.2f",
+                "ext1": "%4.4f",
+                "unc1": "%4.4f",
+                "fit1": "%4.4f",
+                "wave2": "%4.2f",
+                "ext2": "%4.4f",
+                "unc2": "%4.4f",
+                "fit2": "%4.4f",
+            },
+            overwrite=True,
+        )
+
+        # UV
+        FM90_p50 = FM90(
+            C1=obsext2.fm90_p50_fit["C1"][0],
+            C2=obsext2.fm90_p50_fit["C2"][0],
+            C3=obsext2.fm90_p50_fit["C3"][0],
+            C4=obsext2.fm90_p50_fit["C4"][0],
+            xo=obsext2.fm90_p50_fit["XO"][0],
+            gamma=obsext2.fm90_p50_fit["GAMMA"][0],
+        )
+
+        mod_x = np.logspace(np.log10(0.1), np.log10(0.3), num=1000) * u.micron
+
+        ax[0].plot(
+            mod_x, FM90_p50(mod_x), "k" + pline[i], lw=2, alpha=0.65, label="FM90 Fit"
+        )
+
+        fm90_comps = FM90_p50.copy()
+        fm90_comps.C3 = 0.0
+        ax[0].plot(mod_x, fm90_comps(mod_x), "k--", alpha=0.5)
+
+        fm90_comps = FM90_p50.copy()
+        fm90_comps.C4 = 0.0
+        ax[0].plot(mod_x, fm90_comps(mod_x), "k--", alpha=0.5)
+
+        fm90_comps = FM90_p50.copy()
+        fm90_comps.C3 = 0.0
+        fm90_comps.C4 = 0.0
+        ax[0].plot(mod_x, fm90_comps(mod_x), "k--", alpha=0.5)
 
     for i in range(2):
         ax[i].set_yscale("linear")
@@ -147,7 +258,7 @@ if __name__ == "__main__":
         ax[i].tick_params("both", length=5, width=1, which="minor")
         ax[i].set_ylabel(r"$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
 
-        ax[i].legend(fontsize=0.75 * fontsize)
+        # ax[i].legend(fontsize=0.75 * fontsize)
 
     # finishing plot details
     ax[0].set_xlim(0.1, 0.6)
@@ -163,6 +274,40 @@ if __name__ == "__main__":
     ax[1].yaxis.tick_right()
     ax[1].yaxis.set_label_position("right")
     ax[1].xaxis.set_major_formatter(ScalarFormatter())
+    ax[1].yaxis.set_major_formatter(ScalarFormatter())
+
+    # custom legend
+    # custom legend
+    custom_lines = [
+        Line2D([0], [0], color="b", marker="o", markersize=10, alpha=0.5),
+        Line2D([0], [0], color="k", lw=2, alpha=0.65),
+        Line2D([0], [0], color="k", lw=2, alpha=0.5, linestyle="--"),
+        Line2D([0], [0], color="k", lw=2, linestyle=":", alpha=0.65),
+    ]
+    ax[0].legend(
+        custom_lines, ["Diffuse", "FM90 Fit", "FM90 Components", "F19 R(V)=3.1"]
+    )
+
+    # custom legend
+    custom_lines = [
+        Line2D([0], [0], color="b", marker="o", markersize=10, alpha=0.5),
+        Line2D(
+            [0],
+            [0],
+            color="w",
+            marker="o",
+            markerfacecolor="b",
+            markersize=5,
+            alpha=1.0,
+        ),
+        Line2D([0], [0], color="k", lw=2, alpha=0.65),
+        Line2D([0], [0], color="k", lw=2, alpha=0.5, linestyle="--"),
+        Line2D([0], [0], color="k", lw=2, linestyle=":", alpha=0.65),
+    ]
+    ax[1].legend(
+        custom_lines,
+        ["Diffuse", "Diffuse R=25", "G21 Fit", "G21 Components", "F19 R(V)=3.1"],
+    )
 
     fig.tight_layout()
 

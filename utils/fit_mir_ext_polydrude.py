@@ -8,7 +8,6 @@ import astropy.units as u
 from astropy.modeling.fitting import LevMarLSQFitter
 from astropy.modeling.models import Polynomial1D, Drude1D
 
-from dust_extinction.conversions import AxAvToExv
 from measure_extinction.extdata import ExtData
 
 # from models_mcmc_extension import EmceeFitter
@@ -75,9 +74,7 @@ if __name__ == "__main__":
                 "fwhm": [0.0001, 0.5],
             },
         )
-        #    + Gaussian1D(amplitude=1.0, mean=4.6, stddev=1.0,
-        #        bounds={"amplitude": [0.0, 10.0], "mean": [4.5, 4.7], "stddev": [0.5, 1.5]})
-    )   #  | AxAvToExv(Av=av_guess)
+    )
 
     ponly.c0_0 = -1.0 * av_guess
     ponly.c0_0.bounds = (None, -1.0 * av_guess)

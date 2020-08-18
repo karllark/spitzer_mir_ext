@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("extfile", help="file with extinction curve")
     parser.add_argument(
-        "--nsteps", type=int, default=1000, help="# of steps in MCMC chain"
+        "--nsteps", type=int, default=100, help="# of steps in MCMC chain"
     )
     parser.add_argument(
         "--burnfrac", type=float, default=0.1, help="fraction of MCMC chain to burn"
@@ -37,7 +37,10 @@ if __name__ == "__main__":
     # file = '/home/kgordon/Python_git/spitzer_mir_ext/fits/hd147889_hd064802_ext.fits'
     ofile = file.replace(".fits", "_FM90.fits")
     ext = ExtData(filename=file)
-    ext.trans_elv_alav(av=float(ext.columns["AV"][0]))
+
+    if ext.type == "elx":
+        ext.trans_elv_alav(av=float(ext.columns["AV"][0]))
+
     gindxs = ext.npts["IUE"] > 0
     x = 1.0 / ext.waves["IUE"][gindxs].to(u.micron).value
     y = ext.exts["IUE"][gindxs]

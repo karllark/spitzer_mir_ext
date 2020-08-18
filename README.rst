@@ -27,7 +27,7 @@ Extinction Curves
 External packages used include `dust_extintion`, `measure_extinction`, and
 `extstar_data`.  The basic information on each star is given in `extstar_data`
 including (TBD) the IRS/IUE/STIS spectra.  `dust_extinction` provides the
-fitting curves shapes (FM90, P92).  `measure_extinction` gives the routines
+fitting curves shapes (FM90, AxAvToExv).  `measure_extinction` gives the routines
 to read the data and calculate extinction curves.
 
 Curves calculated with `run_all_ext`.

@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
+from matplotlib.ticker import ScalarFormatter
 
 # import astropy.units as u
 
@@ -204,12 +205,16 @@ if __name__ == "__main__":
     ax[0].set_xlim(1.0, 40.0)
     ax[0].set_ylim(-0.7, 1.1)
     ax[0].set_ylabel(r"$E(\lambda - K)/E(J - K)$", fontsize=1.3 * fontsize)
+    ax[0].xaxis.set_major_formatter(ScalarFormatter())
 
     ax[1].set_xlim(1.0, 40.0)
-    ax[1].set_ylim(0.0, 3.0)
+    ax[1].set_ylim(0.1, 10.0)
+    ax[1].set_yscale("log")
     ax[1].set_ylabel(r"$A(\lambda)/A(K)$", fontsize=1.3 * fontsize)
     ax[1].yaxis.tick_right()
     ax[1].yaxis.set_label_position("right")
+    ax[1].xaxis.set_major_formatter(ScalarFormatter())
+    ax[1].yaxis.set_major_formatter(ScalarFormatter())
 
     fig.tight_layout()
 
