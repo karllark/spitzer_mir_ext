@@ -56,14 +56,14 @@ if __name__ == "__main__":
     file_lines = list(f)
     extnames = []
     extdatas = []
-    avs = []
+    # avs = []
     for line in file_lines:
         if (line.find("#") != 0) & (len(line) > 0):
             name = line.rstrip()
             extnames.append(name)
             text = ExtData(filename="fits/%s" % name)
             extdatas.append(text)
-            avs.append(text.columns["AV"][0])
+            # avs.append(text.columns["AV"][0])
 
     fontsize = 18
 
@@ -84,7 +84,7 @@ if __name__ == "__main__":
         figsize = (10, 10)
     fig, ax = pyplot.subplots(nrows=1, ncols=1, figsize=figsize)
 
-    sindxs = np.argsort(avs)
+    # sindxs = np.argsort(avs)
 
     kxrange = [1.0, 100.0]
     ann_xvals = [41.0, 50.0]
@@ -97,7 +97,8 @@ if __name__ == "__main__":
 
     mod_x = 1.0 / np.arange(1.0, 40.0, 0.1)
     for i in range(len(extnames)):
-        k = sindxs[i]
+        # k = sindxs[i]
+        k = i
 
         # plot the extinction curves
         if not args.modonly:

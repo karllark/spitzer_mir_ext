@@ -41,6 +41,12 @@ if __name__ == "__main__":
     parser.add_argument(
         "--nsteps", type=int, default=100, help="# of steps in MCMC chain"
     )
+    parser.add_argument(
+        "--symfit", help="include symmetric drude fit", action="store_true"
+    )
+    parser.add_argument(
+        "--notitle", help="no title on plot", action="store_true"
+    )
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     parser.add_argument("--path", help="path for the extinction curves")
@@ -59,6 +65,7 @@ if __name__ == "__main__":
 
     # get an observed extinction curve to fit
     (wave, y, y_unc) = obsext.get_fitdata(["BAND", "IRS"])
+
     # remove units as fitting routines often cannot take numbers with units
     x = wave.to(1.0 / u.micron, equivalencies=u.spectral()).value
 
@@ -167,17 +174,15 @@ if __name__ == "__main__":
     obsext.plot(ax[0], color="k")
     g20_fit_y = g20_fit(wave[gvals])
     g20_asym_fit_y = g20_asym_fit(wave[gvals])
-    # ax.plot(wave[gvals], g20_init(wave[gvals]), "c-", label="Initial Guess")
-    ax[0].plot(wave[gvals], g20_fit_y, "g-", label="Best Fit", alpha=0.7)
-    # ax[0].plot(wave[gvals], g20_asym_init(wave[gvals]), "b-", label="Asym Init")
-    ax[0].plot(wave[gvals], g20_asym_fit_y, "b-", label="Asym Best Fit")
+
     if obsext.type == "elx":
-        ax[0].plot(
-            wave[gvals],
-            g20_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
-            "g:",
-            label="-A(V)",
-        )
+        if args.symfit:
+            ax[0].plot(
+                wave[gvals],
+                g20_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
+                "g:",
+                label="-A(V)",
+            )
         ax[0].plot(
             wave[gvals],
             g20_asym_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
@@ -201,7 +206,11 @@ if __name__ == "__main__":
         _fitter_to_model_params(model_copy, sample)
         ax[0].plot(wave[gvals], model_copy(wave[gvals]), "C1", alpha=0.05)
     # for the figure legend
-    ax[0].plot(wave[gvals], model_copy(wave[gvals]), "C1", label="EMCEE Fits")
+    ax[0].plot(wave[gvals], g20_asym_fit2(wave[gvals]), "C1", label="EMCEE Fits")
+
+    if args.symfit:
+        ax[0].plot(wave[gvals], g20_fit_y, "g-", label="Sym Best Fit", alpha=0.7)
+    ax[0].plot(wave[gvals], g20_asym_fit_y, "b-", label="Best Fit")
 
     mmy = np.array([min(g20_fit_y), max(g20_fit_y)])
     if obsext.type == "elx":
@@ -212,7 +221,8 @@ if __name__ == "__main__":
     ax[0].set_ylim(mmy + np.array([-1.0, 1.0]) * mmd)
     ax[0].set_xlim(1.0, 40.0)
     ax[0].set_xscale("log")
-    ax[0].set_title(file)
+    if not args.notitle:
+        ax[0].set_title(file)
 
     g21_comps = g20_asym_fit.copy()
     if obsext.type == "elx":
@@ -241,8 +251,22 @@ if __name__ == "__main__":
 
     # residuals
     ax[1].plot(wave[gvals], np.zeros((len(wave[gvals]))), "k--")
-    ax[1].plot(wave[gvals], y[gvals] - g20_fit_y, "g-", alpha=0.7)
-    ax[1].plot(wave[gvals], y[gvals] - g20_asym_fit_y, "b-")
+    if args.symfit:
+        ax[1].plot(wave[gvals], y[gvals] - g20_fit_y, "g-", alpha=0.7)
+
+    gbands = obsext.waves["BAND"] > (1.0 * u.micron)
+    ax[1].errorbar(
+        obsext.waves["BAND"][gbands].value,
+        obsext.exts["BAND"][gbands] - g20_asym_fit(obsext.waves["BAND"][gbands]),
+        yerr=obsext.uncs["BAND"][gbands],
+        fmt="bo",
+        mfc="white",
+    )
+    ax[1].plot(
+        obsext.waves["IRS"].value,
+        obsext.exts["IRS"] - g20_asym_fit(obsext.waves["IRS"]),
+        "b-",
+    )
     ax[1].set_ylim(np.array([-1.0, 1.0]) * mmd)
 
     plt.tight_layout()

@@ -48,17 +48,17 @@ Figures
 
 3. MIR spectra windy stars: Figs/plot_mir_specra_reddened_windy.py
 
-4. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_18feb20.dat
+4. Example fit: python utils/fit_mir_ext_powerlaw.py fits/hd112272_hd204172_ext.fits --notitle --nsteps=10000 --burnfrac=0.4
 
-5. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20.dat --models
+5. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_18feb20.dat
 
-6. UV+MIR Average diffuse extinction curve: Figs/plot_ave_ext.py
+6. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20_pldrude.dat --models
 
-7. MIR ext literature comparison: Figs/plot_ext_litcomp.py
+7. UV+MIR Average diffuse extinction curve: Figs/plot_ave_ext.py
 
-8. Silicate (10 um) versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
+8. MIR ext literature comparison: Figs/plot_ext_litcomp.py
 
-
+9. Silicate (10 um) versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
 
 Tables
 ------
@@ -71,8 +71,8 @@ Tables
 
 4. MIR extinction parameters: by hand
 
-5. MIR general extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20.dat
+5. MIR general extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20_pldrude.dat
 
-6. MIR silicate extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20.dat --sil
+6. MIR silicate extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20_pldrude.dat --sil
 
 7. UV extinction parameters: Tables/gen_uv_ext_params_table.py data/all_ext_18feb20_uv.dat
