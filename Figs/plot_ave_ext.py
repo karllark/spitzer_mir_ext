@@ -49,8 +49,8 @@ if __name__ == "__main__":
     # New measurements
     avefilenames = [
         "data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits",
-        # "fits/hd283809_hd064802_ext_P92_FM90.fits",
-        # "fits/hd029647_hd195986_ext_P92_FM90.fits",
+        # "fits_good_18aug20/hd283809_hd064802_ext_POWLAW2DRUDE.fits",
+        # "fits_good_18aug20/hd029647_hd195986_ext_POWLAW2DRUDE.fits",
     ]
     pcol = ["b", "g", "c"]
     psym = ["o", "s", "^"]
@@ -64,7 +64,10 @@ if __name__ == "__main__":
 
         # UV fit
         obsext2 = ExtData()
-        obsext2.read(avefilename.replace("POWLAW2DRUDE", "FM90"))
+        if plabel[i] == "diffuse":
+            obsext2.read(avefilename.replace("POWLAW2DRUDE", "FM90"))
+        else:
+            obsext2.read(avefilename.replace(".fits", "_FM90.fits"))
 
         obsext_wave = obsext.waves["BAND"].value
 
