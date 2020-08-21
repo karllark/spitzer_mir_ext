@@ -204,7 +204,7 @@ if __name__ == "__main__":
 
         if args.dg_models:
             a = Table.read(
-                "data/kext_albedo_WD_MW_3.1_60_D03.all_modified",
+                "data/old/kext_albedo_WD_MW_3.1_60_D03.all_modified",
                 format="ascii.commented_header",
             )
             ax.plot(
@@ -216,7 +216,7 @@ if __name__ == "__main__":
             )
 
             b = Table.read(
-                "data/kext_albedo_WD_MW_5.5A_30_D03.all_modified",
+                "data/old/kext_albedo_WD_MW_5.5A_30_D03.all_modified",
                 format="ascii.commented_header",
             )
             ax.plot(
@@ -228,7 +228,7 @@ if __name__ == "__main__":
             )
 
             b = Table.read(
-                "data/kext_albedo_WD_MW_5.5B_30.dat_modified",
+                "data/old/kext_albedo_WD_MW_5.5B_30.dat_modified",
                 format="ascii.commented_header",
             )
             ax.plot(
