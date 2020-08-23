@@ -8,7 +8,12 @@ from matplotlib.lines import Line2D
 
 import astropy.units as u
 
-from dust_extinction.grain_models import D03_MWRV31, D03_MWRV40, D03_MWRV55
+from dust_extinction.grain_models import (
+    D03_MWRV31,
+    D03_MWRV40,
+    D03_MWRV55,
+    ZDA04_MWRV31,
+)
 from measure_extinction.merge_obsspec import _wavegrid
 from measure_extinction.extdata import ExtData
 
@@ -124,9 +129,12 @@ if __name__ == "__main__":
     dmod = D03_MWRV31()
     dmod2 = D03_MWRV40()
     dmod3 = D03_MWRV55()
-    ax.plot(mod_x, dmod(mod_x), "g-", label="D03_MWRV31")
-    ax.plot(mod_x, dmod2(mod_x), "g-", label="D03_MWRV40")
-    ax.plot(mod_x, dmod3(mod_x), "g-", label="D03_MWRV55")
+    ax.plot(mod_x, dmod(mod_x), "g-", lw=2, label="D03_MWRV31")
+    # ax.plot(mod_x, dmod2(mod_x), "g-", label="D03_MWRV40")
+    # ax.plot(mod_x, dmod3(mod_x), "g-", label="D03_MWRV55")
+
+    zmod = ZDA04_MWRV31()
+    ax.plot(mod_x, zmod(mod_x), "m-", lw=2, label="ZDA04_MWRV31")
 
     ax.set_yscale("linear")
     ax.set_xlabel(r"$\lambda$ [$\mu m$]")
@@ -154,11 +162,11 @@ if __name__ == "__main__":
             alpha=1.0,
         ),
         Line2D([0], [0], color="k", lw=2, alpha=0.65),
-        # Line2D([0], [0], color="k", lw=2, alpha=0.5, linestyle="--"),
-        # Line2D([0], [0], color="k", lw=2, linestyle=":", alpha=0.65),
+        Line2D([0], [0], color="g", lw=2, linestyle="-"),
+        Line2D([0], [0], color="m", lw=2, linestyle="-"),
     ]
     ax.legend(
-        custom_lines, ["Diffuse", "Diffuse R=25", "G21 Fit"],
+        custom_lines, ["Diffuse", "Diffuse R=25", "G21 Fit", "D03", "ZDA04"],
     )
 
     fig.tight_layout()
