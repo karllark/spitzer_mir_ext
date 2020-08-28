@@ -54,11 +54,15 @@ Figures
 
 6. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20_pldrude.dat --models
 
-7. UV+MIR Average diffuse extinction curve: Figs/plot_ave_ext.py
+7. Sample properties: Figs/plot_sampprob.py data/all_ext_18feb20_pldrude.dat
 
-8. MIR ext literature comparison: Figs/plot_ext_litcomp.py
+8. UV+MIR Average diffuse extinction curve: Figs/plot_ave_ext.py
 
-9. Silicate (10 um) versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
+9. MIR ext literature comparison: Figs/plot_ext_litcomp.py
+
+10. MIR ext dust grain model comparision: Figs/plot_ext_modcomp.py
+
+11. Silicate (10 um) versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
 
 Tables
 ------
