@@ -8,12 +8,7 @@ from matplotlib.lines import Line2D
 
 import astropy.units as u
 
-from dust_extinction.grain_models import (
-    D03_MWRV31,
-    D03_MWRV40,
-    D03_MWRV55,
-    ZDA04_MWRV31,
-)
+from dust_extinction.grain_models import D03, ZDA04, J13
 from measure_extinction.merge_obsspec import _wavegrid
 from measure_extinction.extdata import ExtData
 
@@ -71,9 +66,9 @@ if __name__ == "__main__":
     )
 
     # IRS
-    ax.plot(
-        obsext_IRS_wave, obsext_IRS_ext, "b-", lw=2, alpha=0.65,
-    )
+    # ax.plot(
+    #     obsext_IRS_wave, obsext_IRS_ext, "b-", lw=2, alpha=0.65,
+    # )
 
     # rebin IRS
     wrange = [5.0, 36.0]
@@ -124,17 +119,16 @@ if __name__ == "__main__":
     )
 
     mod_x = np.logspace(np.log10(1.0), np.log10(39.0), num=1000) * u.micron
-    ax.plot(mod_x, G21_p50(mod_x), "k:", lw=2, alpha=0.65, label="G21 Fit")
+    ax.plot(mod_x, G21_p50(mod_x), "k-", lw=2, alpha=0.65, label="G21 Fit")
 
-    dmod = D03_MWRV31()
-    dmod2 = D03_MWRV40()
-    dmod3 = D03_MWRV55()
-    ax.plot(mod_x, dmod(mod_x), "g-", lw=2, label="D03_MWRV31")
-    # ax.plot(mod_x, dmod2(mod_x), "g-", label="D03_MWRV40")
-    # ax.plot(mod_x, dmod3(mod_x), "g-", label="D03_MWRV55")
+    dmod = D03()
+    ax.plot(mod_x, dmod(mod_x), "g:", lw=2, label="D03 MWRV31")
 
-    zmod = ZDA04_MWRV31()
-    ax.plot(mod_x, zmod(mod_x), "m-", lw=2, label="ZDA04_MWRV31")
+    zmod = ZDA04()
+    ax.plot(mod_x, zmod(mod_x), "m--", lw=2, label="ZDA04 MWRV31")
+
+    jmod = J13()
+    ax.plot(mod_x, jmod(mod_x), "c-.", lw=2, label="J11 MWRV31")
 
     ax.set_yscale("linear")
     ax.set_xlabel(r"$\lambda$ [$\mu m$]")
@@ -145,13 +139,21 @@ if __name__ == "__main__":
     ax.set_yscale("log")
     ax.set_xscale("log")
     ax.set_xlim(1.0, 40.0)
-    ax.set_ylim(0.01, 0.4)
+    ax.set_ylim(0.007, 0.4)
     ax.xaxis.set_major_formatter(ScalarFormatter())
     ax.yaxis.set_major_formatter(ScalarFormatter())
 
     # custom legend
     custom_lines = [
-        Line2D([0], [0], color="b", marker="o", markersize=10, alpha=0.5),
+        Line2D(
+            [0],
+            [0],
+            color="w",
+            marker="o",
+            markersize=5,
+            markerfacecolor="b",
+            alpha=0.5,
+        ),
         Line2D(
             [0],
             [0],
@@ -162,11 +164,12 @@ if __name__ == "__main__":
             alpha=1.0,
         ),
         Line2D([0], [0], color="k", lw=2, alpha=0.65),
-        Line2D([0], [0], color="g", lw=2, linestyle="-"),
-        Line2D([0], [0], color="m", lw=2, linestyle="-"),
+        Line2D([0], [0], color="g", lw=2, linestyle=":"),
+        Line2D([0], [0], color="m", lw=2, linestyle="--"),
+        Line2D([0], [0], color="c", lw=2, linestyle="-."),
     ]
-    ax.legend(
-        custom_lines, ["Diffuse", "Diffuse R=25", "G21 Fit", "D03", "ZDA04"],
+    ax.legend(  # w/o "Diffuse R=25",
+        custom_lines, ["Diffuse phot", "Diffuse R=25", "G21 Fit", "D03", "ZDA04", "J13"],
     )
 
     fig.tight_layout()
