@@ -62,7 +62,7 @@ Figures
 
 10. MIR ext dust grain model comparision: Figs/plot_ext_modcomp.py
 
-11. Silicate (10 um) versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
+11. Silicate versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
 
 Tables
 ------
