@@ -16,7 +16,7 @@ from dust_extinction.conversions import AxAvToExv
 
 from models_mcmc_extension import EmceeFitter
 
-from G21 import G20, G20_drude_asym
+from G21 import G21, G21_drude_asym
 
 
 def clean_pnames(pnames):
@@ -78,30 +78,30 @@ if __name__ == "__main__":
         if not np.isfinite(av_guess):
             av_guess = 1.0
 
-        g20_init = G20() | AxAvToExv(Av=av_guess)
-        g20_asym_init = G20_drude_asym() | AxAvToExv(Av=av_guess)
-        # g20_init = G20_x() | AxAvToExv(Av=av_guess)
+        g21_init = G21() | AxAvToExv(Av=av_guess)
+        g21_asym_init = G21_drude_asym() | AxAvToExv(Av=av_guess)
+        # g21_init = g21_x() | AxAvToExv(Av=av_guess)
 
-        g20_asym_init[0].sil2_fwhm.fixed = True
+        g21_asym_init[0].sil2_fwhm.fixed = True
 
         if max(1.0 / x) <= 20.0:
             print("fix amp")
-            g20_asym_init[0].sil2_amp.fixed = True
-            g20_asym_init[0].sil2_center.fixed = True
-            g20_asym_init[0].sil2_fwhm.fixed = True
-            g20_asym_init[0].sil2_asym.fixed = True
+            g21_asym_init[0].sil2_amp.fixed = True
+            g21_asym_init[0].sil2_center.fixed = True
+            g21_asym_init[0].sil2_fwhm.fixed = True
+            g21_asym_init[0].sil2_asym.fixed = True
         elif max(1.0 / x) <= 26.0:
-            # g20_asym_init[0].sil2_amp.fixed = True
-            g20_asym_init[0].sil2_center.fixed = True
-            g20_asym_init[0].sil2_fwhm.fixed = True
-            g20_asym_init[0].sil2_asym.fixed = True
+            # g21_asym_init[0].sil2_amp.fixed = True
+            g21_asym_init[0].sil2_center.fixed = True
+            g21_asym_init[0].sil2_fwhm.fixed = True
+            g21_asym_init[0].sil2_asym.fixed = True
     elif obsext.type == "alav":
-        g20_init = G20()
-        g20_asym_init = G20_drude_asym()
+        g21_init = G21()
+        g21_asym_init = G21_drude_asym()
 
-        g20_asym_init.sil2_fwhm.fixed = True
+        # g21_asym_init.sil2_fwhm.fixed = True
 
-    # g20_asym_init[0].sil1_amp.fixed = True
+    # g21_asym_init[0].sil1_amp.fixed = True
 
     # fit the extinction only using data between 1 and 40 micron
     gvals = (1.0 < 1.0 / x) & (1.0 / x < 40.0)
@@ -117,8 +117,8 @@ if __name__ == "__main__":
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
-        g20_fit = fit(
-            g20_init,
+        g21_fit = fit(
+            g21_init,
             x[gvals],
             y[gvals],
             weights=weights,
@@ -126,29 +126,29 @@ if __name__ == "__main__":
             # epsilon=0.001,
         )
 
-        g20_asym_fit = fit(
-            g20_asym_init,
+        g21_asym_fit = fit(
+            g21_asym_init,
             x[gvals],
             y[gvals],
             weights=weights,
             # maxiter=10000,
             # epsilon=0.1,
         )
-        # print(g20_fit.parameters)
-        # print(g20_asym_fit.param_names)
-        # print(g20_asym_fit.parameters)
+        # print(g21_fit.parameters)
+        # print(g21_asym_fit.param_names)
+        # print(g21_asym_fit.parameters)
 
-        g20_asym_fit2 = fit2(g20_asym_fit, x[gvals], y[gvals], weights=weights)
+        g21_asym_fit2 = fit2(g21_asym_fit, x[gvals], y[gvals], weights=weights)
 
     # make the standard mcmc plots
-    fit2.plot_emcee_results(g20_asym_fit2, filebase=ofile.replace(".fits", ""))
+    fit2.plot_emcee_results(g21_asym_fit2, filebase=ofile.replace(".fits", ""))
 
     # save the extinction curve and fit
-    best_params = (clean_pnames(g20_asym_fit.param_names), g20_asym_fit.parameters)
+    best_params = (clean_pnames(g21_asym_fit.param_names), g21_asym_fit.parameters)
     per_param_vals = zip(
-        g20_asym_fit2.parameters, g20_asym_fit2.uncs_plus, g20_asym_fit2.uncs_minus
+        g21_asym_fit2.parameters, g21_asym_fit2.uncs_plus, g21_asym_fit2.uncs_minus
     )
-    per_params = (clean_pnames(g20_asym_fit2.param_names), list(per_param_vals))
+    per_params = (clean_pnames(g21_asym_fit2.param_names), list(per_param_vals))
 
     with warnings.catch_warnings():
         # warnings.simplefilter("ignore", category=AstropyWarning)
@@ -172,20 +172,20 @@ if __name__ == "__main__":
     )
 
     obsext.plot(ax[0], color="k")
-    g20_fit_y = g20_fit(wave[gvals])
-    g20_asym_fit_y = g20_asym_fit(wave[gvals])
+    g21_fit_y = g21_fit(wave[gvals])
+    g21_asym_fit_y = g21_asym_fit(wave[gvals])
 
     if obsext.type == "elx":
         if args.symfit:
             ax[0].plot(
                 wave[gvals],
-                g20_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
+                g21_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
                 "g:",
                 label="-A(V)",
             )
         ax[0].plot(
             wave[gvals],
-            g20_asym_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
+            g21_asym_fit.Av_1.value * np.full((len(wave[gvals])), -1.0),
             "b:",
             label="-A(V)",
         )
@@ -200,22 +200,22 @@ if __name__ == "__main__":
         discard=int(0.1 * nsteps), flat=True
     )
     inds = np.random.randint(len(flat_samples), size=100)
-    model_copy = g20_asym_fit2.copy()
+    model_copy = g21_asym_fit2.copy()
     for ind in inds:
         sample = flat_samples[ind]
         _fitter_to_model_params(model_copy, sample)
         ax[0].plot(wave[gvals], model_copy(wave[gvals]), "C1", alpha=0.05)
     # for the figure legend
-    ax[0].plot(wave[gvals], g20_asym_fit2(wave[gvals]), "C1", label="EMCEE Fits")
+    ax[0].plot(wave[gvals], g21_asym_fit2(wave[gvals]), "C1", label="EMCEE Fits")
 
     if args.symfit:
-        ax[0].plot(wave[gvals], g20_fit_y, "g-", label="Sym Best Fit", alpha=0.7)
-    ax[0].plot(wave[gvals], g20_asym_fit_y, "b-", label="Best Fit")
+        ax[0].plot(wave[gvals], g21_fit_y, "g-", label="Sym Best Fit", alpha=0.7)
+    ax[0].plot(wave[gvals], g21_asym_fit_y, "b-", label="Best Fit")
 
-    mmy = np.array([min(g20_fit_y), max(g20_fit_y)])
+    mmy = np.array([min(g21_fit_y), max(g21_fit_y)])
     if obsext.type == "elx":
         mmy[0] = min(
-            [mmy[0], -1.0 * g20_fit.Av_1.value, -1.0 * g20_asym_fit.Av_1.value]
+            [mmy[0], -1.0 * g21_fit.Av_1.value, -1.0 * g21_asym_fit.Av_1.value]
         )
     mmd = 0.1 * (mmy[1] - mmy[0])
     ax[0].set_ylim(mmy + np.array([-1.0, 1.0]) * mmd)
@@ -224,21 +224,21 @@ if __name__ == "__main__":
     if not args.notitle:
         ax[0].set_title(file)
 
-    g21_comps = g20_asym_fit.copy()
+    g21_comps = g21_asym_fit.copy()
     if obsext.type == "elx":
         g21_comps[0].sil1_amp = 0.0
     else:
         g21_comps.sil1_amp = 0.0
     ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
 
-    g21_comps = g20_asym_fit.copy()
+    g21_comps = g21_asym_fit.copy()
     if obsext.type == "elx":
         g21_comps[0].sil2_amp = 0.0
     else:
         g21_comps.sil2_amp = 0.0
     ax[0].plot(wave[gvals], g21_comps(wave[gvals]), "k--", alpha=0.5)
 
-    g21_comps = g20_asym_fit.copy()
+    g21_comps = g21_asym_fit.copy()
     if obsext.type == "elx":
         g21_comps[0].sil1_amp = 0.0
         g21_comps[0].sil2_amp = 0.0
@@ -252,19 +252,19 @@ if __name__ == "__main__":
     # residuals
     ax[1].plot(wave[gvals], np.zeros((len(wave[gvals]))), "k--")
     if args.symfit:
-        ax[1].plot(wave[gvals], y[gvals] - g20_fit_y, "g-", alpha=0.7)
+        ax[1].plot(wave[gvals], y[gvals] - g21_fit_y, "g-", alpha=0.7)
 
     gbands = obsext.waves["BAND"] > (1.0 * u.micron)
     ax[1].errorbar(
         obsext.waves["BAND"][gbands].value,
-        obsext.exts["BAND"][gbands] - g20_asym_fit(obsext.waves["BAND"][gbands]),
+        obsext.exts["BAND"][gbands] - g21_asym_fit(obsext.waves["BAND"][gbands]),
         yerr=obsext.uncs["BAND"][gbands],
         fmt="bo",
         mfc="white",
     )
     ax[1].plot(
         obsext.waves["IRS"].value,
-        obsext.exts["IRS"] - g20_asym_fit(obsext.waves["IRS"]),
+        obsext.exts["IRS"] - g21_asym_fit(obsext.waves["IRS"]),
         "b-",
     )
     ax[1].set_ylim(np.array([-1.0, 1.0]) * mmd)

@@ -26,7 +26,7 @@ def drude_asym(x, scale, x_o, gamma_o, asym):
     return y
 
 
-class G20(Fittable1DModel):
+class G21(Fittable1DModel):
     """
     Powerlaw plus Drude profiles for the silicate features for the
     1 to 40 micron A(lambda)/A(V) extinction curve.
@@ -54,7 +54,7 @@ class G20(Fittable1DModel):
     sil1_fwhm = Parameter(default=2.0, bounds=(0.01, 5.0))
     sil2_amp = Parameter(default=0.1, min=0.001)
     sil2_center = Parameter(default=20.0, bounds=(16.0, 24.0))
-    sil2_fwhm = Parameter(default=3.0, bounds=(0.01, 10.0))
+    sil2_fwhm = Parameter(default=13.0, bounds=(5.0, 20.0))
 
     x_range = [1.0 / 40.0, 1.0]
 
@@ -71,7 +71,7 @@ class G20(Fittable1DModel):
         sil2_fwhm,
     ):
         """
-        G20 function
+        G21 function
 
         Parameters
         ----------
@@ -92,7 +92,7 @@ class G20(Fittable1DModel):
         x = _get_x_in_wavenumbers(in_x)
 
         # check that the wavenumbers are within the defined range
-        _test_valid_x_range(x, self.x_range, "G20")
+        _test_valid_x_range(x, self.x_range, "G21")
 
         # powerlaw
         axav = scale * ((1.0 / x) ** (-1.0 * alpha))
@@ -105,7 +105,7 @@ class G20(Fittable1DModel):
         return axav
 
 
-class G20_drude_asym(Fittable1DModel):
+class G21_drude_asym(Fittable1DModel):
     """
     Powerlaw plus Drude profiles for the silicate features for the
     1 to 40 micron A(lambda)/A(V) extinction curve.
@@ -134,10 +134,10 @@ class G20_drude_asym(Fittable1DModel):
     sil1_center = Parameter(default=10.0, bounds=(8.0, 12.0))
     sil1_fwhm = Parameter(default=2.5, bounds=(1.0, 10.0))
     sil1_asym = Parameter(default=-0.3, bounds=(-2.0, 2.0))
-    sil2_amp = Parameter(default=0.03, bounds=(0.001, 0.3))
+    sil2_amp = Parameter(default=0.025, bounds=(0.001, 0.3))
     sil2_center = Parameter(default=20., bounds=(16.0, 24.0))
-    sil2_fwhm = Parameter(default=10.0, bounds=(3.0, 15.0))
-    sil2_asym = Parameter(default=0.0, bounds=(-2.0, 2.0))
+    sil2_fwhm = Parameter(default=13.0, bounds=(5.0, 20.0))
+    sil2_asym = Parameter(default=-0.3, bounds=(-2.0, 2.0))
 
     x_range = [1.0 / 40.0, 1.0]
 
@@ -156,7 +156,7 @@ class G20_drude_asym(Fittable1DModel):
         sil2_asym,
     ):
         """
-        G20 function
+        G21 function
 
         Parameters
         ----------
@@ -177,7 +177,7 @@ class G20_drude_asym(Fittable1DModel):
         x = _get_x_in_wavenumbers(in_x)
 
         # check that the wavenumbers are within the defined range
-        _test_valid_x_range(x, self.x_range, "G20")
+        _test_valid_x_range(x, self.x_range, "G21")
 
         # powerlaw
         axav = scale * ((1.0 / x) ** (-1.0 * alpha))

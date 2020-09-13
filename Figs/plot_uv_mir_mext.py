@@ -10,9 +10,8 @@ import astropy.units as u
 
 # from calc_ext import P92_Elv
 from dust_extinction.shapes import FM90
-from utils.P92_mod import P92_mod as P92
 from measure_extinction.extdata import ExtData
-from utils.G21 import G20_drude_asym as G21
+from utils.G21 import G21_drude_asym as G21
 
 
 def plot_all_ext(

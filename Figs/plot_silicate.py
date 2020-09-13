@@ -55,6 +55,8 @@ if __name__ == "__main__":
     sil_area_unc = np.full((n_ext), 0.0)
     sil2_amp = np.full((n_ext), 0.0)
     sil2_amp_unc = np.full((n_ext), 0.0)
+    sil_amp_ratio = np.full((n_ext), 0.0)
+    sil_amp_ratio_unc = np.full((n_ext), 0.0)
     nuv_amp = np.full((n_ext), 0.0)
     nuv_amp_unc = np.full((n_ext), 0.0)
     nuv_lambda = np.full((n_ext), 0.0)
@@ -75,7 +77,7 @@ if __name__ == "__main__":
     for k, cname in enumerate(extfnames):
 
         # get P92 fits
-        bfile = f"fits_good_18aug20/{cname}"
+        bfile = f"fits/{cname}"
         cext = ExtData(filename=bfile)
 
         mcmcfile = bfile.replace(".fits", ".h5")
@@ -116,6 +118,8 @@ if __name__ == "__main__":
         silasm_dist = unc.Distribution(samples[:, 5])
         silamp2_dist = unc.Distribution(samples[:, 6])
 
+        silampratio_dist = unc.Distribution(samples[:, 2] / samples[:, 6])
+
         sil_amp[k] = silamp_dist.pdf_mean()
         sil_amp_unc[k] = silamp_dist.pdf_std()
         sil_width[k] = silwid_dist.pdf_mean()
@@ -133,6 +137,9 @@ if __name__ == "__main__":
 
         sil2_amp[k] = silamp2_dist.pdf_mean()
         sil2_amp_unc[k] = silamp2_dist.pdf_std()
+
+        sil_amp_ratio[k] = silampratio_dist.pdf_mean()
+        sil_amp_ratio_unc[k] = silampratio_dist.pdf_std()
 
         # get FM90 fits
         uvfname = bfile.replace(".fits", "_FM90.fits")

@@ -32,7 +32,8 @@ to read the data and calculate extinction curves.
 
 Curves calculated with `run_all_ext`.
 
-(UV/Opt/)NIR/MIR portion fit with P92 shape using `fit_plasymdrude_all_ext`.
+(UV/Opt/)NIR/MIR portion fit with powerlaw + plus 2 asymmetric drudes using
+'fit_plasymdrude_all_ext`.
 
 UV portion fit with FM90 shape using `fit_fm90_all_ext`.
 
@@ -42,7 +43,7 @@ Average extinction curve made using
 Figures
 -------
 
-1. MIR spectra comparison stars: Figs/plot_mir_specra_standards.py
+1. MIR spectra comparison stars: Figs/plot_mir_spectra_standards.py
 
 2. MIR spectra reddened stars: Figs/plot_mir_specra_reddened.py
 
@@ -62,7 +63,7 @@ Figures
 
 10. MIR ext dust grain model comparision: Figs/plot_ext_modcomp.py
 
-11. Silicate versus various: Figs/plot_silicate.py data/all_ext_18feb20.dat
+11. Silicate versus various: Figs/plot_silicate.py data/all_ext_18feb20_pldrude.dat
 
 Tables
 ------

@@ -19,7 +19,6 @@ from dust_extinction.averages import (
     F11_MWGC,
 )
 
-from utils.P92_mod import P92_mod as P92
 from measure_extinction.extdata import ExtData, AverageExtData
 
 if __name__ == "__main__":
