@@ -33,8 +33,13 @@ if __name__ == "__main__":
     for line in file_lines:
         if (line.find("#") != 0) & (len(line) > 0):
             name = line.rstrip()
-            extfnames.append(name)
+            bfile = f"fits/{name}"
+            extfnames.append(bfile)
             extnames.append(name.split("_")[0])
+
+    # add diffuse average
+    extnames.append("diffuse")
+    extfnames.append("data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits")
 
     # Amplitude of the feature when x = x_o (FM90) or lambda = lambda_o (P92)
     # FM90: I(x_o) = C3/(2*gamma**2)
@@ -77,7 +82,7 @@ if __name__ == "__main__":
     for k, cname in enumerate(extfnames):
 
         # get P92 fits
-        bfile = f"fits/{cname}"
+        bfile = cname
         cext = ExtData(filename=bfile)
 
         mcmcfile = bfile.replace(".fits", ".h5")
@@ -172,6 +177,10 @@ if __name__ == "__main__":
             nuv_area[k] = nuvarea_dist.pdf_mean()
             nuv_area_unc[k] = nuvarea_dist.pdf_std()
 
+    rvs[-1] = 3.1
+    rvs_unc[0, -1] = 0.0
+    rvs_unc[1, -1] = 0.0
+
     # output some info
     a = Table()
     a["name"] = extnames
@@ -206,10 +215,13 @@ if __name__ == "__main__":
             diffuse.append(False)
         elif tname == "hd029647":
             diffuse.append(False)
+        elif tname == "diffuse":
+            diffuse.append(False)
         else:
             diffuse.append(True)
     diffuse = np.array(diffuse)
     dense = ~diffuse
+    dense[-1] = False
 
     gooduv = nuv_amp > 0
     uvdiffuse = np.logical_and(diffuse, gooduv)
@@ -218,6 +230,8 @@ if __name__ == "__main__":
     # uncs are way over estimated as the amplitude and width are very well correlated
     # update once the samples are available
     # print(sil_amp_unc)
+
+    avemarksize = 15
 
     # silicate1 lambda versus asymmetry
     ax[0].errorbar(
@@ -234,6 +248,14 @@ if __name__ == "__main__":
         yerr=sil_asym_unc[dense],
         fmt="bo",
         markerfacecolor="none",
+    )
+    ax[0].errorbar(
+        sil_lambda[-1],
+        sil_asym[-1],
+        xerr=sil_lambda_unc[-1],
+        yerr=sil_asym_unc[-1],
+        fmt="mP",
+        markersize=avemarksize,
     )
     ax[0].set_xlabel(r"$\lambda_{o1}$ $[\mu m]$")
     ax[0].set_ylabel(r"$a_1$")
@@ -255,6 +277,14 @@ if __name__ == "__main__":
         yerr=sil_amp_unc[dense],
         fmt="bo",
         markerfacecolor="none",
+    )
+    ax[1].errorbar(
+        rvs[-1],
+        sil_amp[-1],
+        xerr=[0.0],
+        yerr=sil_amp_unc[-1],
+        fmt="mP",
+        markersize=avemarksize,
     )
     ax[1].set_xlabel(r"$R(V)$")
     ax[1].set_ylabel(r"$A(S_1)/A(V)$")
@@ -354,6 +384,15 @@ if __name__ == "__main__":
         markerfacecolor="none",
         label="dense",
     )
+    ax[2].errorbar(
+        nuv_ceninten[-1],
+        sil_amp[-1],
+        xerr=0.5 * (nuv_ceninten_unc[0, -1] + nuv_ceninten_unc[1, -1]),
+        yerr=sil_amp_unc[-1],
+        fmt="mP",
+        markersize=avemarksize,
+        label="ave diffuse",
+    )
     ax[2].set_xlabel(r"$A(2175)/A(V)$")
     ax[2].set_ylabel(r"$A(S_1)/A(V)$")
     ax[2].tick_params("both", length=10, width=2, which="major")
@@ -378,6 +417,14 @@ if __name__ == "__main__":
         markerfacecolor="none",
         label="dense",
     )
+    ax[4].errorbar(
+        sil_amp[-1],
+        sil2_amp[-1],
+        xerr=sil_amp_unc[-1],
+        yerr=sil2_amp_unc[-1],
+        fmt="mP",
+        markersize=avemarksize,
+    )
     ax[4].set_xlabel(r"$A(S_1)/A(V)$")
     ax[4].set_ylabel(r"$A(S_2)/A(V)$")
     ax[4].tick_params("both", length=10, width=2, which="major")
@@ -400,10 +447,82 @@ if __name__ == "__main__":
         fmt="bo",
         markerfacecolor="none",
     )
+    ax[5].errorbar(
+        sil_lambda[-1],
+        sil_width[-1],
+        xerr=sil_lambda_unc[-1],
+        yerr=sil_width_unc[-1],
+        fmt="mP",
+        markersize=avemarksize,
+    )
     ax[5].set_xlabel(r"$\lambda_{o1}$ $[\mu m]$")
     ax[5].set_ylabel(r"$\gamma_{o1}$ $[\mu m]$")
     ax[5].tick_params("both", length=10, width=2, which="major")
     ax[5].tick_params("both", length=5, width=1, which="minor")
+
+    # add dust grain model information
+    dgmods = ["D03", "ZDA04", "J13"]
+    dgmods_panmes = (
+        "scale",
+        "alpha",
+        "sil1_amp",
+        "sil1_center",
+        "sil1_fwhm",
+        "sil1_asym",
+        "sil2_amp",
+        "sil2_center",
+        "sil2_fwhm",
+        "sil2_asym",
+        "rv",
+    )
+    dgmods_params = {
+        "D03": [
+            4.17303027e-01,
+            1.67785775e00,
+            7.52904971e-02,
+            9.54062734e00,
+            2.42917078e00,
+            -4.08727110e-01,
+            1.68137823e-02,
+            1.82909690e01,
+            1.34864548e01,
+            -7.28572694e-01,
+            3.1,
+        ],
+        "ZDA04": [
+            3.70463175e-01,
+            2.08921063e00,
+            6.56263217e-02,
+            9.63161831e00,
+            2.78269485e00,
+            -2.41498456e-01,
+            1.48762629e-02,
+            1.85401810e01,
+            1.74906269e01,
+            -6.18042400e-01,
+            3.1,
+        ],
+        "J13": [
+            0.48745857,
+            1.74461468,
+            0.04241238,
+            9.73331878,
+            1.4451629,
+            -0.629558,
+            0.01810168,
+            17.91978645,
+            8.239197,
+            -0.66422626,
+            3.1,
+        ],
+    }
+    syms = ['s', '^', 'd']
+    pindx = [(0, 3, 5), (1, 10, 2), (4, 2, 6), (5, 3, 4)]
+    for pi in pindx:
+        for i, cmod in enumerate(dgmods):
+            params = dgmods_params[cmod]
+            ax[pi[0]].plot(params[pi[1]], params[pi[2]], f"k{syms[i]}", label=cmod)
+    ax[1].legend()
 
     fig.tight_layout()
 

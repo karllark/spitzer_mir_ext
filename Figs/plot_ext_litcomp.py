@@ -5,7 +5,7 @@ import matplotlib.pyplot as pyplot
 import matplotlib
 from matplotlib.ticker import ScalarFormatter
 
-# import astropy.units as u
+from astropy.table import Table
 
 # from dust_extinction.shapes import P92
 from dust_extinction.averages import (
@@ -134,6 +134,17 @@ if __name__ == "__main__":
     # fmt: on
     X16_y = -1 * X16_eklejk
     ax[0].plot(X16_wave, X16_y, "yv", label="GalPlane: Xue et al. (2016)")
+
+    # Hensley & Draine
+    a = Table.read("litdata/alam_ak_apj_v2.dat", format="ascii.basic", data_start=1)
+    ax[1].plot(
+        a["lambda"],
+        a["alk"],
+        "b-.",
+        label="Cyg OB-12: Hensley & Draine (2020)",
+        lw=3,
+        alpha=0.25,
+    )
 
     # New measurements
     avefilename = "data/all_ext_18feb20_diffuse_ave.fits"
