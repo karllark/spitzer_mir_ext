@@ -42,6 +42,8 @@ if __name__ == "__main__":
     # C3 = a_i * lambda_i**2 * 2.
 
     n_ext = len(extnames)
+    alpha = np.full((n_ext), 0.0)
+    alpha_unc = np.full((n_ext), 0.0)
     sil_amp = np.full((n_ext), 0.0)
     sil_amp_unc = np.full((n_ext), 0.0)
     sil_width = np.full((n_ext), 0.0)
@@ -113,11 +115,15 @@ if __name__ == "__main__":
 
         # print(np.corrcoef(np.stack([avs_dist.distribution, rvs_dist.distribution])))
 
+        alpha_dist = unc.Distribution(samples[:, 1])
         silamp_dist = unc.Distribution(samples[:, 2])
         sillam_dist = unc.Distribution(samples[:, 3])
         silwid_dist = unc.Distribution(samples[:, 4])
         silasm_dist = unc.Distribution(samples[:, 5])
         silamp2_dist = unc.Distribution(samples[:, 6])
+
+        alpha[k] = alpha_dist.pdf_mean()
+        alpha_unc[k] = alpha_dist.pdf_std()
 
         sil_amp[k] = silamp_dist.pdf_mean()
         sil_amp_unc[k] = silamp_dist.pdf_std()
@@ -181,7 +187,8 @@ if __name__ == "__main__":
     # output some info
     a = Table()
     a["AV"] = avs
-    a["RV"] = rvs
+    # a["RV"] = rvs
+    a["alpha"] = alpha
     a["Sil1_amp"] = sil_amp
     a["Sil1_lambda"] = sil_lambda
     a["Sil1_width"] = sil_width
@@ -191,7 +198,8 @@ if __name__ == "__main__":
     # output some info
     a_unc = Table()
     a_unc["AV"] = 0.5 * (avs_unc[0, :] + avs_unc[0, :])
-    a_unc["RV"] = 0.5 * (rvs_unc[0, :] + rvs_unc[0, :])
+    # a_unc["RV"] = 0.5 * (rvs_unc[0, :] + rvs_unc[0, :])
+    a_unc["alpha"] = alpha_unc
     a_unc["Sil1_amp"] = sil_amp_unc
     a_unc["Sil1_lambda"] = sil_lambda_unc
     a_unc["Sil1_width"] = sil_width_unc
