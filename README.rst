@@ -65,6 +65,10 @@ Figures
 
 11. Silicate versus various: Figs/plot_silicate.py data/all_ext_18feb20_pldrude.dat
 
+12. residuals
+
+13. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_18feb20_pldrude.dat
+
 Tables
 ------
 
