@@ -49,7 +49,7 @@ Figures
 
 3. MIR spectra windy stars: Figs/plot_mir_specra_reddened_windy.py
 
-4. Example fit: python utils/fit_mir_ext_powerlaw.py fits/hd112272_hd204172_ext.fits --notitle --nsteps=10000 --burnfrac=0.4
+4. Example fit: utils/fit_mir_ext_powerlaw.py fits/hd112272_hd204172_ext.fits --notitle --nsteps=10000 --burnfrac=0.4 --pdf
 
 5. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_18feb20.dat
 
@@ -65,7 +65,7 @@ Figures
 
 11. Silicate versus various: Figs/plot_silicate.py data/all_ext_18feb20_pldrude.dat
 
-12. residuals
+12. Fit residuals of average curve: Figs/plot_residuals.py
 
 13. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_18feb20_pldrude.dat
 
@@ -85,3 +85,5 @@ Tables
 6. MIR silicate extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20_pldrude.dat --sil
 
 7. UV extinction parameters: Tables/gen_uv_ext_params_table.py data/all_ext_18feb20_uv.dat
+
+8. Generated as part of Figs/plot_ave_ext.py and saved as average_table.tex

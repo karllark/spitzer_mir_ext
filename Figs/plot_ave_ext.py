@@ -211,7 +211,7 @@ if __name__ == "__main__":
         rebintab["unc2"] = tunc[nt // 2 : nt]
         rebintab["fit2"] = G21_p50(rebintab["wave2"])
         rebintab.write(
-            "test.tex",
+            "average_table.tex",
             formats={
                 "wave1": "%4.2f",
                 "ext1": "%4.4f",

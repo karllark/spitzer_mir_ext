@@ -17,6 +17,18 @@ if __name__ == "__main__":
     f = open(filename, "r")
     file_lines = list(f)
 
+    files = []
+    names = []
+    for line in sorted(file_lines):
+        if (line.find("#") != 0) & (len(line) > 0):
+            name = line.rstrip()
+            names.append(name)
+            bfile = f"fits/{name}"
+            files.append(bfile)
+    # add diffuse average
+    names.append("diffuse")
+    files.append("data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits")
+
     first_line = True
     hstr = r"\colhead{name} & "
     hstr2 = r" & "
@@ -48,26 +60,26 @@ if __name__ == "__main__":
 
     okeys = ["C1", "C2", "C3", "C4", "XO", "GAMMA"]
 
-    for line in sorted(file_lines):
-        if (line.find("#") != 0) & (len(line) > 0):
-            name = line.rstrip()
-            bfilename = f"fits/{name}"
-            edata = ExtData(filename=bfilename.replace(".fits", "_FM90.fits"))
+    for k, bfile in enumerate(files):
+        edata = ExtData(filename=bfile.replace(".fits", "_FM90.fits"))
 
-            spos = name.find("_")
-            sname = name[:spos].upper()
+        spos = names[k].find("_")
+        sname = names[k][:spos].upper()
 
-            pstr = f"{sname} & "
-            for k, ckey in enumerate(okeys):
-                if first_line:
-                    hstr += fr"\colhead{phead[ckey]} & "
-                    hstr2 += fr"\colhead{phead2[ckey]} & "
-                val, punc, munc = edata.fm90_p50_fit[ckey]
-                cmval = float(mval[ckey])
-                pstr += f"${cmval*val:.3f}^{{+{cmval*punc:.3f}}}_{{-{cmval*munc:.3f}}}$ & "
+        pstr = f"{sname} & "
+        for k, ckey in enumerate(okeys):
             if first_line:
-                first_line = False
-                print(f"\\tablehead{{{hstr[:-3]}}} \\\\")
-                print(f"\\{{{hstr2[:-3]}}}")
-                print(f"\\startdata")
-            print(f"{pstr[:-3]} \\\\")
+                hstr += fr"\colhead{phead[ckey]} & "
+                hstr2 += fr"\colhead{phead2[ckey]} & "
+            val, punc, munc = edata.fm90_p50_fit[ckey]
+            cmval = float(mval[ckey])
+            if sname == "DIFFUS":
+                pstr += f"${cmval*val:.4f}^{{+{cmval*punc:.4f}}}_{{-{cmval*munc:.4f}}}$ & "
+            else:
+                pstr += f"${cmval*val:.3f}^{{+{cmval*punc:.3f}}}_{{-{cmval*munc:.3f}}}$ & "
+        if first_line:
+            first_line = False
+            print(f"\\tablehead{{{hstr[:-3]}}} \\\\")
+            print(f"\\{{{hstr2[:-3]}}}")
+            print(f"\\startdata")
+        print(f"{pstr[:-3]} \\\\")

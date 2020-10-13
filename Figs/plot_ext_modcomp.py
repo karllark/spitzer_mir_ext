@@ -12,7 +12,7 @@ from dust_extinction.grain_models import D03, ZDA04, J13
 from measure_extinction.merge_obsspec import _wavegrid
 from measure_extinction.extdata import ExtData
 
-from utils.G21 import G20_drude_asym as G21
+from utils.G21 import G21_drude_asym as G21
 
 if __name__ == "__main__":
 

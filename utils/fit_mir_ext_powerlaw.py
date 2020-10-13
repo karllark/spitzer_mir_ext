@@ -204,13 +204,13 @@ if __name__ == "__main__":
     for ind in inds:
         sample = flat_samples[ind]
         _fitter_to_model_params(model_copy, sample)
-        ax[0].plot(wave[gvals], model_copy(wave[gvals]), "C1", alpha=0.05)
+        ax[0].plot(wave[gvals], model_copy(wave[gvals]), "C1", alpha=0.05, color='b')
     # for the figure legend
-    ax[0].plot(wave[gvals], g21_asym_fit2(wave[gvals]), "C1", label="EMCEE Fits")
+    ax[0].plot(wave[gvals], g21_asym_fit2(wave[gvals]), "C1", label="EMCEE Fits", color='b')
 
-    if args.symfit:
-        ax[0].plot(wave[gvals], g21_fit_y, "g-", label="Sym Best Fit", alpha=0.7)
-    ax[0].plot(wave[gvals], g21_asym_fit_y, "b-", label="Best Fit")
+    # if args.symfit:
+    #    ax[0].plot(wave[gvals], g21_fit_y, "g-", label="Sym Best Fit", alpha=0.7)
+    # ax[0].plot(wave[gvals], g21_asym_fit_y, "b-", label="Best Fit")
 
     mmy = np.array([min(g21_fit_y), max(g21_fit_y)])
     if obsext.type == "elx":
@@ -251,8 +251,8 @@ if __name__ == "__main__":
 
     # residuals
     ax[1].plot(wave[gvals], np.zeros((len(wave[gvals]))), "k--")
-    if args.symfit:
-        ax[1].plot(wave[gvals], y[gvals] - g21_fit_y, "g-", alpha=0.7)
+    # if args.symfit:
+    #    ax[1].plot(wave[gvals], y[gvals] - g21_asym_fit_y, "g-", alpha=0.7)
 
     gbands = obsext.waves["BAND"] > (1.0 * u.micron)
     ax[1].errorbar(

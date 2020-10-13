@@ -116,6 +116,9 @@ if __name__ == "__main__":
     diffuse = np.array(diffuse)
     dense = ~diffuse
 
+    print(f"total diffuse A(V) {np.sum(avs[diffuse])}")
+    print(f"mean diffuse A(V) {np.average(avs[diffuse])}")
+
     # R(V) versus A(V)
     ax.errorbar(
         rvs[diffuse],
