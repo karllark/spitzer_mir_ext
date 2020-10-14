@@ -34,7 +34,7 @@ if __name__ == "__main__":
             files.append(bfile)
     # add diffuse average
     names.append("diffuse")
-    files.append("data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits")
+    files.append("data/all_ext_14oct20_diffuse_ave_POWLAW2DRUDE.fits")
 
     first_line = True
     hstr = r"\colhead{name} & "

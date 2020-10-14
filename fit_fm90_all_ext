@@ -14,6 +14,7 @@ $fmfit fits/hd147889_hd064802_ext_POWLAW2DRUDE.fits $extargs
 $fmfit fits/hd029309_hd064802_ext_POWLAW2DRUDE.fits $extargs
 $fmfit fits/hd283809_hd064802_ext_POWLAW2DRUDE.fits $extargs
 $fmfit fits/hd281159_hd064802_ext_POWLAW2DRUDE.fits $extargs
+$fmfit fits/hd147933_hd031726_ext_POWLAW2DRUDE.fits $extargs
 
 # III stars
 $fmfit fits/hd147701_hd195986_ext_POWLAW2DRUDE.fits $extargs

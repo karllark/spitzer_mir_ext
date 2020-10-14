@@ -15,6 +15,7 @@ $fit fits/hd147889_hd064802_ext.fits $extargs
 $fit fits/hd029309_hd064802_ext.fits $extargs
 $fit fits/hd283809_hd064802_ext.fits $extargs
 $fit fits/hd281159_hd064802_ext.fits $extargs
+$fit fits/hd147933_hd031726_ext.fits $exttags
 
 # III stars
 $fit fits/hd147701_hd195986_ext.fits $extargs

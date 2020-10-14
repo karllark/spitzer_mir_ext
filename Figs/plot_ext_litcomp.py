@@ -147,7 +147,7 @@ if __name__ == "__main__":
     )
 
     # New measurements
-    avefilename = "data/all_ext_18feb20_diffuse_ave.fits"
+    avefilename = "data/all_ext_14oct20_diffuse_ave.fits"
 
     # get G20_MWAvg
     G20 = ExtData()

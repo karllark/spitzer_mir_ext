@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # New measurements
     avefilenames = [
-        "data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits",
+        "data/all_ext_14oct20_diffuse_ave_POWLAW2DRUDE.fits",
         # "fits_good_18aug20/hd283809_hd064802_ext_POWLAW2DRUDE.fits",
         # "fits_good_18aug20/hd029647_hd195986_ext_POWLAW2DRUDE.fits",
     ]

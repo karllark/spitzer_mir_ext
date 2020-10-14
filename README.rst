@@ -38,7 +38,7 @@ Curves calculated with `run_all_ext`.
 UV portion fit with FM90 shape using `fit_fm90_all_ext`.
 
 Average extinction curve made using
-`Figs/plot_mir_mext.py --alav --ave data/all_ext_18feb20_diffuse.dat`.
+`Figs/plot_mir_mext.py --alav --ave data/all_ext_14oct20_diffuse.dat`.
 
 Figures
 -------
@@ -51,23 +51,23 @@ Figures
 
 4. Example fit: utils/fit_mir_ext_powerlaw.py fits/hd112272_hd204172_ext.fits --notitle --nsteps=10000 --burnfrac=0.4 --pdf
 
-5. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_18feb20.dat
+5. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_14oct20.dat
 
-6. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_18feb20_pldrude.dat --models
+6. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_14oct20_pldrude.dat --models
 
-7. Sample properties: Figs/plot_sampprob.py data/all_ext_18feb20_pldrude.dat
+7. Sample properties: Figs/plot_sampprob.py data/all_ext_14oct20_pldrude.dat
 
 8. UV+MIR Average diffuse extinction curve: Figs/plot_ave_ext.py
 
 9. MIR ext literature comparison: Figs/plot_ext_litcomp.py
 
-10. MIR ext dust grain model comparision: Figs/plot_ext_modcomp.py
+10. MIR ext dust grain model comparison: Figs/plot_ext_modcomp.py
 
-11. Silicate versus various: Figs/plot_silicate.py data/all_ext_18feb20_pldrude.dat
+11. Silicate versus various: Figs/plot_silicate.py data/all_ext_14oct20_pldrude.dat
 
 12. Fit residuals of average curve: Figs/plot_residuals.py
 
-13. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_18feb20_pldrude.dat
+13. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_14oct20_pldrude.dat
 
 Tables
 ------
@@ -80,10 +80,10 @@ Tables
 
 4. MIR extinction parameters: by hand
 
-5. MIR general extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20_pldrude.dat
+5. MIR general extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_14oct20_pldrude.dat
 
-6. MIR silicate extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_18feb20_pldrude.dat --sil
+6. MIR silicate extinction parameters: Tables/gen_mir_ext_params_table.py data/all_ext_14oct20_pldrude.dat --sil
 
-7. UV extinction parameters: Tables/gen_uv_ext_params_table.py data/all_ext_18feb20_uv.dat
+7. UV extinction parameters: Tables/gen_uv_ext_params_table.py data/all_ext_14oct20_uv.dat
 
 8. Generated as part of Figs/plot_ave_ext.py and saved as average_table.tex

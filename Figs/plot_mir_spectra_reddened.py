@@ -45,6 +45,7 @@ if __name__ == "__main__":
     starnames = [
         "hd281159",
         "hd283809",
+        "hd147933",
         "hd029309",
         "hd147889",
         "hd204827",
@@ -64,7 +65,7 @@ if __name__ == "__main__":
         ax,
         fontsize,
         [37.0, 40.0],
-        [3.9, 0.9],
+        [4.4, 0.9],
         [45.0, 42.0],
         "Main Sequence",
         "(ordered by spectral type)",
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     plot_mir_set(
         ax,
         starnames,
-        extra_off_val=3.5,
+        extra_off_val=4.0,
         ann_xvals=[6.0, 6.0] * u.micron,
         ann_wave_range=[5.0, 9.0] * u.micron,
         ann_rot=2.5,
@@ -96,14 +97,14 @@ if __name__ == "__main__":
         ax,
         fontsize,
         [37.0, 40.0],
-        [9.25, 4.4],
+        [9.75, 4.9],
         [45.0, 42.0],
         "Giants and Supergiants",
         "(ordered by spectral type)",
     )
 
     ax.set_yscale("linear")
-    ax.set_ylim(0.5, 9.75)
+    ax.set_ylim(0.5, 10.25)
     ax.set_xscale("log")
     ax.set_xlim(kxrange)
     ax.set_xlabel(r"$\lambda$ [$\mu m$]", fontsize=1.3 * fontsize)

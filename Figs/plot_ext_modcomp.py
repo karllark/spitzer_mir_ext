@@ -39,7 +39,7 @@ if __name__ == "__main__":
     fig, ax = pyplot.subplots(figsize=figsize)
 
     # New measurements
-    avefilename = "data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits"
+    avefilename = "data/all_ext_14oct20_diffuse_ave_POWLAW2DRUDE.fits"
 
     # IR Fit
     obsext = ExtData()

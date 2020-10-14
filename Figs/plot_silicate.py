@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # add diffuse average
     extnames.append("diffuse")
-    extfnames.append("data/all_ext_18feb20_diffuse_ave_POWLAW2DRUDE.fits")
+    extfnames.append("data/all_ext_14oct20_diffuse_ave_POWLAW2DRUDE.fits")
 
     # Amplitude of the feature when x = x_o (FM90) or lambda = lambda_o (P92)
     # FM90: I(x_o) = C3/(2*gamma**2)

@@ -128,6 +128,8 @@ if __name__ == "__main__":
                 av_guess += 0.17
             elif ltext == "hd229238":
                 av_guess += 0.1
+            elif ltext == "hd029309":
+                av_guess += 0.025
             ax.text(
                 40.0,
                 -1.0 * av_guess,
