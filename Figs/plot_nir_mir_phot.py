@@ -54,6 +54,7 @@ if __name__ == "__main__":
     ]
 
     red_starnames = [
+        "hd147933",
         "hd281159",
         "hd283809",
         "hd029309",
@@ -73,7 +74,6 @@ if __name__ == "__main__":
 
     windy_starnames = [
         "hd096042",
-        "hd147933",
         "hd197702",
         "hd149404",
         "hd169454",
@@ -109,7 +109,7 @@ if __name__ == "__main__":
     plt.rc("ytick.major", width=2)
     plt.rc("ytick.minor", width=2)
 
-    fig, ax = plt.subplots(figsize=(10, 8))
+    fig, ax = plt.subplots(figsize=(8, 6))
 
     ax.errorbar(
         xvals_comp[:, 0],
@@ -117,7 +117,7 @@ if __name__ == "__main__":
         xerr=xvals_comp[:, 1],
         yerr=yvals_comp[:, 1],
         fmt="ko",
-        label="unreddened",
+        label="standards",
         alpha=0.5,
     )
     ax.errorbar(

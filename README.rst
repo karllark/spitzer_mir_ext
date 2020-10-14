@@ -49,25 +49,27 @@ Figures
 
 3. MIR spectra windy stars: Figs/plot_mir_specra_reddened_windy.py
 
-4. Example fit: utils/fit_mir_ext_powerlaw.py fits/hd112272_hd204172_ext.fits --notitle --nsteps=10000 --burnfrac=0.4 --pdf
+4. J-K versus K-MIPS24: Figs/plot_nir_mir_phot.py
 
-5. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_14oct20.dat
+5. Example fit: utils/fit_mir_ext_powerlaw.py fits/hd112272_hd204172_ext.fits --notitle --nsteps=10000 --burnfrac=0.4 --pdf
 
-6. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_14oct20_pldrude.dat --models
+6. MIR E(lambda-V) curves: Figs/plot_mir_mext.py data/all_ext_14oct20.dat
 
-7. Sample properties: Figs/plot_sampprob.py data/all_ext_14oct20_pldrude.dat
+7. UV+MIR extinction: Figs/plot_uv_mir_mext.py data/all_ext_14oct20_pldrude.dat --models
 
-8. UV+MIR Average diffuse extinction curve: Figs/plot_ave_ext.py
+8. Sample properties: Figs/plot_sampprob.py data/all_ext_14oct20_pldrude.dat
 
-9. MIR ext literature comparison: Figs/plot_ext_litcomp.py
+9. UV+MIR Average diffuse extinction curve: Figs/plot_ave_ext.py
 
-10. MIR ext dust grain model comparison: Figs/plot_ext_modcomp.py
+10. MIR ext literature comparison: Figs/plot_ext_litcomp.py
 
-11. Silicate versus various: Figs/plot_silicate.py data/all_ext_14oct20_pldrude.dat
+11. MIR ext dust grain model comparison: Figs/plot_ext_modcomp.py
 
-12. Fit residuals of average curve: Figs/plot_residuals.py
+12. Silicate versus various: Figs/plot_silicate.py data/all_ext_14oct20_pldrude.dat
 
-13. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_14oct20_pldrude.dat
+13. Fit residuals of average curve: Figs/plot_residuals.py
+
+14. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_14oct20_pldrude.dat
 
 Tables
 ------
