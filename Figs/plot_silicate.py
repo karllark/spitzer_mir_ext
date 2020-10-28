@@ -12,6 +12,7 @@ import astropy.units as u
 from astropy.table import Table
 from astropy import uncertainty as unc
 
+from dust_extinction.parameter_averages import F19
 from measure_extinction.extdata import ExtData
 
 if __name__ == "__main__":
@@ -342,6 +343,28 @@ if __name__ == "__main__":
         label="CT06",
         markerfacecolor="none",
     )
+    vB11_tausil = np.array([0.65, 0.62, 0.73, 0.74, 0.58, 0.42, 0.45])
+    vB11_tausil_unc = np.array([0.05, 0.05, 0.05, 0.05, 0.04, 0.04, 0.05])
+    vB11_ejk = np.array([1.66, 1.66, 2.97, 3.52, 1.97, 2.28, 1.64])
+    vB11_ejk_unc = np.array([0.1, 0.1, 0.4, 0.4, 0.1, 0.05, 0.25])
+    mod31 = F19()
+    ejk_av = mod31(1.22 * u.micron) - mod31(2.19 * u.micron)
+    vB11_av = vB11_ejk / ejk_av
+    vB11_av_unc = vB11_ejk_unc / ejk_av
+    vB11_tausilav = vB11_tausil / (1.086 * vB11_av)
+    vB11_tausilav_unc = vB11_tausilav * np.sqrt(
+        (vB11_tausil_unc / vB11_tausil) ** 2 + (vB11_av_unc / vB11_av) ** 2
+    )
+    ax[3].errorbar(
+        vB11_av,
+        vB11_tausilav,
+        xerr=vB11_av_unc,
+        yerr=vB11_tausilav_unc,
+        fmt="kp",
+        label="vB11",
+        markerfacecolor="none",
+    )
+
     ax[3].errorbar(
         avs[diffuse],
         sil_amp[diffuse],
@@ -362,9 +385,10 @@ if __name__ == "__main__":
     ax[3].set_xlabel(r"$A(V)$")
     ax[3].set_ylabel(r"$A(S_1)/A(V)$")
     ax[3].set_xscale("log")
+    ax[3].set_ylim(0.02, 0.16)
     ax[3].tick_params("both", length=10, width=2, which="major")
     ax[3].tick_params("both", length=5, width=1, which="minor")
-    ax[3].legend(loc=[0.44, 0.62])
+    ax[3].legend(loc=[0.44, 0.55])
 
     # silicate verus 2175
     ax[2].errorbar(
@@ -474,6 +498,13 @@ if __name__ == "__main__":
         "sil2_fwhm",
         "sil2_asym",
         "rv",
+        "C1",
+        "C2",
+        "C3",
+        "C4",
+        "xo",
+        "gamma",
+        "nuvamp",
     )
     dgmods_params = {
         "D03": [
@@ -488,6 +519,13 @@ if __name__ == "__main__":
             1.34864548e01,
             -7.28572694e-01,
             3.1,
+            1.19579122,
+            0.19312069,
+            1.09868171,
+            0.15237746,
+            4.59984358,
+            0.99012333,
+            1.09868171 / (0.99012333 ** 2),
         ],
         "ZDA04": [
             3.70463175e-01,
@@ -501,6 +539,13 @@ if __name__ == "__main__":
             1.74906269e01,
             -6.18042400e-01,
             3.1,
+            1.14096224,
+            0.22931655,
+            1.53559166,
+            0.23403299,
+            4.60091559,
+            0.99196388,
+            1.53559166 / (0.99196388 ** 2)
         ],
         "J13": [
             0.48745857,
@@ -514,10 +559,17 @@ if __name__ == "__main__":
             8.239197,
             -0.66422626,
             3.1,
+            1.7720158,
+            0.09791649,
+            0.95423255,
+            0.18662392,
+            4.60025479,
+            0.9944175,
+            0.95423255 / (0.9944175 ** 2)
         ],
     }
-    syms = ['s', '^', 'd']
-    pindx = [(0, 3, 5), (1, 10, 2), (4, 2, 6), (5, 3, 4)]
+    syms = ["s", "^", "d"]
+    pindx = [(0, 3, 5), (1, 10, 2), (4, 2, 6), (5, 3, 4), (2, 17, 2)]
     for pi in pindx:
         for i, cmod in enumerate(dgmods):
             params = dgmods_params[cmod]
