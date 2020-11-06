@@ -6,6 +6,7 @@ import matplotlib
 from matplotlib.ticker import ScalarFormatter
 
 from astropy.table import Table
+import astropy.units as u
 
 # from dust_extinction.shapes import P92
 from dust_extinction.averages import (
@@ -72,11 +73,11 @@ if __name__ == "__main__":
 
     litmods = [RL85_MWGC(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
     litdesc = [
-        "GalCenter: Rieke & Lebofsky (1985)",
-        "GalPlane: Indebetouw et al. (2005)",
-        "GalCenter: Chiar & Tielens (2006)",
-        "Local: Chiar & Tielens (2006)",
-        "GalCenter: Fritz et al. (2011)",
+        "GalCenter: Rieke & Lebofsky 1985",
+        "GalPlane: Indebetouw et al. 2005",
+        "GalCenter: Chiar & Tielens 2006",
+        "Local: Chiar & Tielens 2006",
+        "GalCenter: Fritz et al. 2011",
     ]
     litfmt = ["bs", "gP", "c--", "c:", "m^"]
     for k, cmod in enumerate(litmods):
@@ -95,6 +96,38 @@ if __name__ == "__main__":
         if k == 1:
             ax[0].plot(lit_wave, lit_y, litfmt[k], alpha=0.25, lw=3, label=litdesc[k])
 
+    # Wang & Chen 2019
+    WG19_wave = np.array([1.23, 1.64, 2.18, 3.32, 4.55, 11.73])
+    WG19_alav = np.array([0.243, 0.131, 0.078, 0.039, 0.026, 0.040])
+    WG19_alav_unc = np.array([0.004, 0.006, 0.004, 0.004, 0.004, 0.009])
+    ax[1].errorbar(
+        WG19_wave,
+        WG19_alav / WG19_alav[2],
+        yerr=WG19_alav_unc / WG19_alav[2],
+        fmt="r>",
+        markerfacecolor=None,
+        label="GalBulge: Wang & Chen 2019",
+        alpha=0.4,
+    )
+
+    # Jiang et al. 2006 (ISO!)
+    # measured E(l-k)/E(j-k), but only reported A(l)/A(k) using literature curves (e.g., RL85)
+    J06_wave = np.array([7.0, 15.0])
+    J06_alak = np.array([0.47, 0.4])
+    J06_alak_unc = np.array([0.07, 0.1])
+    rl85 = RL85_MWGC()
+    ak_ejk = rl85(2.22 * u.micron) / (rl85(1.25 * u.micron) - rl85(2.22 * u.micron))
+    J06_elkejk = (J06_alak - 1.0) * ak_ejk
+    J06_elkejk_unc = J06_alak_unc * ak_ejk
+    ax[0].errorbar(
+        J06_wave,
+        J06_elkejk,
+        yerr=J06_elkejk_unc,
+        fmt="c<",
+        alpha=0.25,
+        label="GalPlane: Jiang et al. 2006",
+    )
+
     # Zasowski et al. 2009 (supercedes Indebetouw?)
     Z09_wave = np.array([1.22, 1.63, 2.22, 3.6, 4.5, 5.8, 8.0])
     Z09_ehlehk_l10 = np.array([-1.97, 0.0, 1.0, 1.79, 1.92, 2.08, 2.00])
@@ -110,7 +143,7 @@ if __name__ == "__main__":
         markersize=8,
         markeredgewidth=2.0,
         alpha=0.5,
-        label="GalPlane (l=10-15): Zasowski et al. (2009)",
+        label="GalPlane (l=10-15): Zasowski et al. 2009",
     )
     ax[0].plot(
         Z09_wave,
@@ -119,7 +152,7 @@ if __name__ == "__main__":
         markersize=8,
         markeredgewidth=1.0,
         alpha=0.5,
-        label="GalPlane (l=90): Zasowski et al. (2009)",
+        label="GalPlane (l=90): Zasowski et al. 2009",
     )
 
     # Xue et al. 2016
@@ -133,7 +166,7 @@ if __name__ == "__main__":
     )
     # fmt: on
     X16_y = -1 * X16_eklejk
-    ax[0].plot(X16_wave, X16_y, "yv", label="GalPlane: Xue et al. (2016)")
+    ax[0].plot(X16_wave, X16_y, "yv", label="GalPlane: Xue et al. 2016")
 
     # Hensley & Draine
     a = Table.read("litdata/alam_ak_apj_v2.dat", format="ascii.basic", data_start=1)
@@ -141,7 +174,7 @@ if __name__ == "__main__":
         a["lambda"],
         a["alk"],
         "b-.",
-        label="Cyg OB-12: Hensley & Draine (2020)",
+        label="Cyg OB-12: Hensley & Draine 2020",
         lw=3,
         alpha=0.25,
     )
@@ -200,7 +233,12 @@ if __name__ == "__main__":
     G20_akejk = G20_ext[ki] / (G20_ext[ji] - G20_ext[ki])
     G20_IRS_y = G20_IRS_y - G20_akejk
     ax[0].plot(
-        G20_IRS_wave, G20_IRS_y, "k-", lw=2, alpha=0.65, label="this work (IRS)",
+        G20_IRS_wave,
+        G20_IRS_y,
+        "k-",
+        lw=2,
+        alpha=0.65,
+        label="this work (IRS)",
     )
 
     for i in range(2):
@@ -210,7 +248,19 @@ if __name__ == "__main__":
         ax[i].tick_params("both", length=10, width=2, which="major")
         ax[i].tick_params("both", length=5, width=1, which="minor")
 
-        ax[i].legend(fontsize=0.75 * fontsize)
+    # sillyness to get the legend to give the order as created
+    handles, labels = ax[0].get_legend_handles_labels()
+    indxs = [0, 6, 1, 2, 3, 4, 5]
+    nlabels = [labels[i] for i in indxs]
+    nhandles = [handles[i] for i in indxs]
+    ax[0].legend(nhandles, nlabels, fontsize=0.75 * fontsize)
+
+    # sillyness to get the legend to give the order as created
+    handles, labels = ax[1].get_legend_handles_labels()
+    indxs = [0, 1, 2, 3, 4, 7, 5, 8, 6]
+    nlabels = [labels[i] for i in indxs]
+    nhandles = [handles[i] for i in indxs]
+    ax[1].legend(nhandles, nlabels, fontsize=0.75 * fontsize)
 
     # finishing plot details
     ax[0].set_xlim(1.0, 40.0)
@@ -219,7 +269,7 @@ if __name__ == "__main__":
     ax[0].xaxis.set_major_formatter(ScalarFormatter())
 
     ax[1].set_xlim(1.0, 40.0)
-    ax[1].set_ylim(0.1, 10.0)
+    ax[1].set_ylim(0.1, 20.0)
     ax[1].set_yscale("log")
     ax[1].set_ylabel(r"$A(\lambda)/A(K)$", fontsize=1.3 * fontsize)
     ax[1].yaxis.tick_right()

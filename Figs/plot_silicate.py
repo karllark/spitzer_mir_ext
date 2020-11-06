@@ -364,7 +364,17 @@ if __name__ == "__main__":
         label="vB11",
         markerfacecolor="none",
     )
+    Z18_av = np.array([12.2, 11.9, 11.4, 3.01, 2.38])
+    Z18_tausil = np.array([0.58, 0.71, 0.82, 0.17, 0.11])
+    ax[3].plot(
+        Z18_av,
+        Z18_tausil / (1.086 * Z18_av),
+        "k^",
+        label="Z18",
+        markerfacecolor="none",
+    )
 
+    # our results
     ax[3].errorbar(
         avs[diffuse],
         sil_amp[diffuse],
@@ -388,7 +398,7 @@ if __name__ == "__main__":
     ax[3].set_ylim(0.02, 0.16)
     ax[3].tick_params("both", length=10, width=2, which="major")
     ax[3].tick_params("both", length=5, width=1, which="minor")
-    ax[3].legend(loc=[0.44, 0.55])
+    ax[3].legend(ncol=2, loc="upper left")
 
     # silicate verus 2175
     ax[2].errorbar(
@@ -455,7 +465,11 @@ if __name__ == "__main__":
     ax[4].tick_params("both", length=5, width=1, which="minor")
     ax[4].set_ylim(0.0, 0.05)
 
-    # silicate1 lambda versus asymmetry
+    # silicate1 lambda versus width
+    Z18_lambda = np.array([9.75, 9.69, 9.81, 9.87, 9.75])
+    Z18_width = np.array([1.78, 2.11, 2.99, 3.07, 1.90])
+    ax[5].plot(Z18_lambda, Z18_width, "k^", markerfacecolor="none")
+
     ax[5].errorbar(
         sil_lambda[diffuse],
         sil_width[diffuse],
@@ -545,7 +559,7 @@ if __name__ == "__main__":
             0.23403299,
             4.60091559,
             0.99196388,
-            1.53559166 / (0.99196388 ** 2)
+            1.53559166 / (0.99196388 ** 2),
         ],
         "J13": [
             0.48745857,
@@ -565,7 +579,7 @@ if __name__ == "__main__":
             0.18662392,
             4.60025479,
             0.9944175,
-            0.95423255 / (0.9944175 ** 2)
+            0.95423255 / (0.9944175 ** 2),
         ],
     }
     syms = ["s", "^", "d"]

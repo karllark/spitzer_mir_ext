@@ -135,12 +135,20 @@ if __name__ == "__main__":
     # print(a)
 
     # compute mean rk
+    gvals = rks > -2.0
+    mean_rk = np.average(rks[gvals], weights=0.5 * np.sum(rks_unc[:, gvals], axis=0))
+    std_rk = np.std(rks[gvals])
+    print("K (all)", mean_rk, std_rk, 100.0 * std_rk / mean_rk)
+
     gvals = rks > -1.15
     mean_rk = np.average(rks[gvals], weights=0.5 * np.sum(rks_unc[:, gvals], axis=0))
+    std_rk = np.std(rks[gvals])
+    print("K (clipped)", mean_rk, std_rk, 100.0 * std_rk / mean_rk)
 
     gvals = ris > -2.0
     mean_ri = np.average(ris[gvals], weights=0.5 * np.sum(ris_unc[:, gvals], axis=0))
-    print(mean_rk, mean_ri)
+    std_ri = np.std(ris[gvals])
+    print("I3", mean_ri, std_ri, 100.0 * std_ri / mean_ri)
 
     # plots
     fontsize = 14
