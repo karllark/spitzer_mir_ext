@@ -33,6 +33,7 @@ def get_colors(starnames):
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--mirband", default="MIPS24", help="MIR band for color")
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
@@ -89,7 +90,7 @@ if __name__ == "__main__":
     subpath = "DAT_files/"
 
     xbands = ("J", "K")
-    ybands = ("K", "MIPS24")
+    ybands = ("K", args.mirband)
 
     # standard stars
     xvals_comp, yvals_comp = get_colors(comp_starnames)
