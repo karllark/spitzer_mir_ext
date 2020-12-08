@@ -74,7 +74,6 @@ if __name__ == "__main__":
     ]
 
     windy_starnames = [
-        "hd096042",
         "hd197702",
         "hd149404",
         "hd169454",
@@ -86,6 +85,8 @@ if __name__ == "__main__":
         "hd152408",
     ]
 
+    bad_starnames = ["hd096042"]
+
     path = "/home/kgordon/Python_git/extstar_data/"
     subpath = "DAT_files/"
 
@@ -96,6 +97,7 @@ if __name__ == "__main__":
     xvals_comp, yvals_comp = get_colors(comp_starnames)
     xvals_red, yvals_red = get_colors(red_starnames)
     xvals_windy, yvals_windy = get_colors(windy_starnames)
+    xvals_bad, yvals_bad = get_colors(bad_starnames)
 
     fontsize = 18
 
@@ -135,7 +137,16 @@ if __name__ == "__main__":
         xerr=xvals_windy[:, 1],
         yerr=yvals_windy[:, 1],
         fmt="ro",
-        label="windy+bad",
+        label="windy",
+        alpha=0.5,
+    )
+    ax.errorbar(
+        xvals_bad[:, 0],
+        yvals_bad[:, 0],
+        xerr=xvals_bad[:, 1],
+        yerr=yvals_bad[:, 1],
+        fmt="co",
+        label="bad",
         alpha=0.5,
     )
 
