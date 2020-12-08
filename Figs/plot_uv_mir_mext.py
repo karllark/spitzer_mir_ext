@@ -28,7 +28,7 @@ def plot_all_ext(
     lin_vals = ["--", ":", "-."]
     n_cols = len(col_vals)
 
-    mod_x = np.logspace(0.0, 2.0, 200) * u.micron
+    # mod_x = np.logspace(0.0, 2.0, 200) * u.micron
     mod_x_g21 = np.logspace(0.1, np.log10(39.0), 200) * u.micron
     mod_x_fm90 = np.logspace(-1.0, -0.5, 200) * u.micron
     for i in range(len(extnames)):
@@ -54,43 +54,6 @@ def plot_all_ext(
 
         if args.models:
 
-            # plot the best fit P92 model
-            if hasattr(extdatas[k], "p92_p50_fit"):
-                P92_best = P92(
-                    BKG_amp=extdatas[k].p92_p50_fit["BKG_AMP"][0],
-                    BKG_lambda=extdatas[k].p92_p50_fit["BKG_LAMBDA"][0],
-                    BKG_width=extdatas[k].p92_p50_fit["BKG_WIDTH"][0],
-                    FUV_amp=extdatas[k].p92_p50_fit["FUV_AMP"][0],
-                    FUV_lambda=extdatas[k].p92_p50_fit["FUV_LAMBDA"][0],
-                    FUV_n=extdatas[k].p92_p50_fit["FUV_N"][0],
-                    FUV_b=extdatas[k].p92_p50_fit["FUV_B"][0],
-                    NUV_amp=extdatas[k].p92_p50_fit["NUV_AMP"][0],
-                    NUV_lambda=extdatas[k].p92_p50_fit["NUV_LAMBDA"][0],
-                    NUV_width=extdatas[k].p92_p50_fit["NUV_WIDTH"][0],
-                    SIL1_amp=extdatas[k].p92_p50_fit["SIL1_AMP"][0],
-                    SIL1_lambda=extdatas[k].p92_p50_fit["SIL1_LAMBDA"][0],
-                    SIL1_width=extdatas[k].p92_p50_fit["SIL1_WIDTH"][0],
-                    SIL2_amp=extdatas[k].p92_p50_fit["SIL2_AMP"][0],
-                    SIL2_lambda=extdatas[k].p92_p50_fit["SIL2_LAMBDA"][0],
-                    SIL2_width=extdatas[k].p92_p50_fit["SIL2_WIDTH"][0],
-                    FIR_amp=extdatas[k].p92_p50_fit["FIR_AMP"][0],
-                    FIR_lambda=extdatas[k].p92_p50_fit["FIR_LAMBDA"][0],
-                    FIR_width=extdatas[k].p92_p50_fit["FIR_WIDTH"][0],
-                )
-
-                mod_y = P92_best(mod_x) / normval + i * yoffset_factor
-                ax.plot(
-                    mod_x,
-                    mod_y,
-                    lin_vals[i % 3],
-                    color=col_vals[i % n_cols],
-                    alpha=0.5,
-                )
-
-                # annotate_yoffset=0.025,
-                # annotate_text=extnames[k].split("_")[0],
-                # annotate_wave_range=ann_wave_range,
-
             if hasattr(extdatas[k], "g21_best_fit"):
                 # best fit G21 model
                 if extdatas[k] is not None:
@@ -106,33 +69,22 @@ def plot_all_ext(
                         sil2_fwhm=extdatas[k].g21_best_fit["SIL2_FWHM"],
                         sil2_asym=extdatas[k].g21_best_fit["SIL2_ASYM"],
                     )
-                    G21_p50 = G21(
-                        scale=extdatas[k].g21_p50_fit["SCALE"][0],
-                        alpha=extdatas[k].g21_p50_fit["ALPHA"][0],
-                        sil1_amp=extdatas[k].g21_p50_fit["SIL1_AMP"][0],
-                        sil1_center=extdatas[k].g21_p50_fit["SIL1_CENTER"][0],
-                        sil1_fwhm=extdatas[k].g21_p50_fit["SIL1_FWHM"][0],
-                        sil1_asym=extdatas[k].g21_p50_fit["SIL1_ASYM"][0],
-                        sil2_amp=extdatas[k].g21_p50_fit["SIL2_AMP"][0],
-                        sil2_center=extdatas[k].g21_p50_fit["SIL2_CENTER"][0],
-                        sil2_fwhm=extdatas[k].g21_p50_fit["SIL2_FWHM"][0],
-                        sil2_asym=extdatas[k].g21_p50_fit["SIL2_ASYM"][0],
-                    )
 
                 mod_y = G21_best(mod_x_g21) / normval + i * yoffset_factor
 
-                annx = 30.0
-                annvals = np.absolute(mod_x_g21.value - annx) < 2.5
-                anny = np.mean(mod_y[annvals]) + 0.1 * yoffset_factor
-                ax.text(
-                    annx,
-                    anny,
-                    extnames[k].split("_")[0],
-                    color=col_vals[i % n_cols],
-                    alpha=0.75,
-                    fontsize=12,
-                    horizontalalignment="center",
-                )
+                if annotate_key is not None:
+                    annx = 30.0
+                    annvals = np.absolute(mod_x_g21.value - annx) < 2.5
+                    anny = np.mean(mod_y[annvals]) + 0.1 * yoffset_factor
+                    ax.text(
+                        annx,
+                        anny,
+                        extnames[k].split("_")[0],
+                        color=col_vals[i % n_cols],
+                        alpha=0.75,
+                        fontsize=12,
+                        horizontalalignment="center",
+                    )
 
                 ax.plot(
                     mod_x_g21,
@@ -146,14 +98,6 @@ def plot_all_ext(
                 if hasattr(extdatas_fm90[k], "fm90_best_fit"):
                     # best fit FM90 model
                     if extdatas_fm90[k] is not None:
-                        FM90_best = FM90(
-                            C1=extdatas_fm90[k].fm90_best_fit["C1"],
-                            C2=extdatas_fm90[k].fm90_best_fit["C2"],
-                            C3=extdatas_fm90[k].fm90_best_fit["C3"],
-                            C4=extdatas_fm90[k].fm90_best_fit["C4"],
-                            xo=extdatas_fm90[k].fm90_best_fit["XO"],
-                            gamma=extdatas_fm90[k].fm90_best_fit["GAMMA"],
-                        )
 
                         FM90_p50 = FM90(
                             C1=extdatas_fm90[k].fm90_p50_fit["C1"][0],

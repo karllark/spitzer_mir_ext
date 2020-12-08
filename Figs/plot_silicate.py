@@ -187,9 +187,9 @@ if __name__ == "__main__":
     a["name"] = extnames
     a["AV"] = avs
     a["RV"] = rvs
-    a["Sil_amp"] = sil_amp
-    a["Sil_width"] = sil_width
-    a["Sil_area"] = sil_area
+    # a["Sil_amp"] = sil_amp
+    # a["Sil_width"] = sil_width
+    # a["Sil_area"] = sil_area
     # print(a)
 
     # plots
@@ -370,7 +370,7 @@ if __name__ == "__main__":
         Z18_av,
         Z18_tausil / (1.086 * Z18_av),
         "k^",
-        label="Z18",
+        label="S18",
         markerfacecolor="none",
     )
 

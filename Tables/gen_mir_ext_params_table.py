@@ -5,8 +5,9 @@
 import argparse
 
 import emcee
-
-# from astropy import uncertainty as unc
+import numpy as np
+from astropy import uncertainty as unc
+import astropy.units as u
 
 from measure_extinction.extdata import ExtData
 
@@ -81,30 +82,23 @@ if __name__ == "__main__":
 
         phead = {
             "AV": r"{$A(V)$}",
+            "RV": r"{$R(V)$}",
             "SCALE": r"{$B$}",
-            "ALPHA": r"{$\alpha$}"
+            "ALPHA": r"{$\alpha$}",
         }
         phead2 = {
             "AV": "{[mag]}",
+            "RV": {},
             "SCALE": r"{$A(\lambda)/A(V)$}",
-            "ALPHA": {}
+            "ALPHA": {},
         }
-        mval = {
-            "AV": 1,
-            "SCALE": 1,
-            "ALPHA": 1
-        }
+        mval = {"AV": 1, "RV": 1, "SCALE": 1, "ALPHA": 1}
 
-        okeys = ["AV", "SCALE", "ALPHA"]
+        okeys = ["AV", "RV", "SCALE", "ALPHA"]
 
     mcmc_burnfrac = 0.4
     for k, bfile in enumerate(files):
         edata = ExtData(filename=bfile)
-
-        mcmcfile = bfile.replace(".fits", ".h5")
-        reader = emcee.backends.HDFBackend(mcmcfile)
-        nsteps, nwalkers = reader.get_log_prob().shape
-        samples = reader.get_chain(discard=int(mcmc_burnfrac * nsteps), flat=True)
 
         spos = names[k].find("_")
         sname = names[k][:spos].upper()
@@ -120,22 +114,49 @@ if __name__ == "__main__":
                     val, punc, munc = edata.columns_p50_fit[ckey]
                 else:
                     val, punc, munc = (1.0, 0.0, 0.0)
+            elif ckey == "RV":
+                if sname != "DIFFUS":
+                    mcmcfile = bfile.replace(".fits", ".h5")
+                    reader = emcee.backends.HDFBackend(mcmcfile)
+                    nsteps, nwalkers = reader.get_log_prob().shape
+                    samples = reader.get_chain(
+                        discard=int(mcmc_burnfrac * nsteps), flat=True
+                    )
+
+                    # R(V) calc
+                    avs_dist = unc.Distribution(samples[:, -1])
+                    (indxs,) = np.where(
+                        (edata.waves["BAND"] > 0.4 * u.micron)
+                        & (edata.waves["BAND"] < 0.5 * u.micron)
+                    )
+                    ebvs_dist = unc.normal(
+                        edata.exts["BAND"][indxs[0]],
+                        std=edata.uncs["BAND"][indxs[0]],
+                        n_samples=avs_dist.n_samples,
+                    )
+
+                    rvs_dist = avs_dist / ebvs_dist
+                    rv_per = rvs_dist.pdf_percentiles([16.0, 50.0, 84.0])
+                    val = rv_per[1]
+                    punc = rv_per[2] - rv_per[1]
+                    munc = rv_per[1] - rv_per[0]
+                else:
+                    (indxs,) = np.where(
+                        (edata.waves["BAND"] > 0.4 * u.micron)
+                        & (edata.waves["BAND"] < 0.5 * u.micron)
+                    )
+                    val, punc, munc = (1.0 / (edata.exts["BAND"][indxs[0]] - 1), 0.0, 0.0)
             else:
                 val, punc, munc = edata.g21_p50_fit[ckey]
+
             cmval = float(mval[ckey])
             if (punc == 0.0) & (munc == 0.0):
-                pstr += (
-                    f"${cmval*val:.2f}$ & "
-                )
+                pstr += f"${cmval*val:.2f}$ & "
             else:
                 if sname == "DIFFUS":
-                    pstr += (
-                        f"${cmval*val:.3f}^{{+{cmval*punc:.3f}}}_{{-{cmval*munc:.3f}}}$ & "
-                    )
+                    pstr += f"${cmval*val:.3f}^{{+{cmval*punc:.3f}}}_{{-{cmval*munc:.3f}}}$ & "
                 else:
-                    pstr += (
-                        f"${cmval*val:.2f}^{{+{cmval*punc:.2f}}}_{{-{cmval*munc:.2f}}}$ & "
-                    )
+                    pstr += f"${cmval*val:.2f}^{{+{cmval*punc:.2f}}}_{{-{cmval*munc:.2f}}}$ & "
         if first_line:
             first_line = False
             print(f"\\tablehead{{{hstr[:-3]}}} \\\\")
