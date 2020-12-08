@@ -105,7 +105,7 @@ if __name__ == "__main__":
         [8.9, 4.3],
         [45.0, 42.0],
         "Giants and Supergiants",
-        "(ordered by wind srength)",
+        "(ordered by wind strength)",
     )
 
     fig.tight_layout()

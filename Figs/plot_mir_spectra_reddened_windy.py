@@ -78,7 +78,7 @@ if __name__ == "__main__":
         [9.4, 0.8],
         [45.0, 42.0],
         "Unusable for Extinction",
-        "(ordered by wind srength)",
+        "(ordered by wind strength)",
     )
 
     ax.set_yscale("linear")

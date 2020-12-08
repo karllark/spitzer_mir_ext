@@ -45,9 +45,9 @@ Figures
 
 1. MIR spectra comparison stars: Figs/plot_mir_spectra_standards.py
 
-2. MIR spectra reddened stars: Figs/plot_mir_specra_reddened.py
+2. MIR spectra reddened stars: Figs/plot_mir_spectra_reddened.py
 
-3. MIR spectra windy stars: Figs/plot_mir_specra_reddened_windy.py
+3. MIR spectra windy stars: Figs/plot_mir_spectra_reddened_windy.py
 
 4. J-K versus K-MIPS24: Figs/plot_nir_mir_phot.py
 
