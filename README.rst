@@ -67,9 +67,11 @@ Figures
 
 12. Silicate versus various: Figs/plot_silicate.py data/all_ext_14oct20_pldrude.dat
 
-13. Fit residuals of average curve: Figs/plot_residuals.py
+13. Dense versus diffuse ave: Figs/plot_ave_ext.py --dense
 
-14. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_14oct20_pldrude.dat
+14. Fit residuals of average curve: Figs/plot_residuals.py
+
+15. A(V) from E(K-V) or E(I3-V): Figs/plot_avekv.py data/all_ext_14oct20_pldrude.dat
 
 Tables
 ------
