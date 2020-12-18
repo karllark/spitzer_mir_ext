@@ -30,6 +30,8 @@ if __name__ == "__main__":
         "--rebin_fac", type=int, default=None, help="rebin factor for spectra"
     )
     parser.add_argument("--alav", help="plot A(lambda)/A(V)", action="store_true")
+    parser.add_argument("--rel_band", help="Band to use for normalization",
+                        default="V")
     parser.add_argument("--ave", help="plot the average", action="store_true")
     parser.add_argument(
         "--models", help="plot the best fit models", action="store_true"
@@ -108,6 +110,7 @@ if __name__ == "__main__":
                 alpha=0.5,
                 rebin_fac=args.rebin_fac,
                 fontsize=fontsize,
+                plot_rel_band=args.rel_band,
             )
 
             # label the curves
@@ -182,11 +185,11 @@ if __name__ == "__main__":
 
     ax.set_yscale("linear")
     ax.set_xscale("log")
-    ax.set_xlim(kxrange)
+    # ax.set_xlim(kxrange)
     if args.alav:
-        ax.set_ylim(-0.05, 0.4)
-        ax.set_xlim(1.0, 40.0)
-        ax.set_ylabel(r"$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
+        # ax.set_ylim(-0.05, 0.4)
+        # ax.set_xlim(1.0, 40.0)
+        ax.set_ylabel(rf"$A(\lambda)/A({args.rel_band})$", fontsize=1.3 * fontsize)
         if args.prevobs:
             litmods = [RL85_MWGC(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
             litdesc = [
@@ -255,7 +258,7 @@ if __name__ == "__main__":
             )
             ave_extdata.save(args.filelist.replace(".dat", "_ave.fits"))
 
-        ax.legend(fontsize=fontsize)
+        # ax.legend(fontsize=fontsize)
     else:
         ax.set_xlim(1.0, 100.0)
         ax.set_ylim(-6, -1.0)
