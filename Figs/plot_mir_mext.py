@@ -118,25 +118,26 @@ if __name__ == "__main__":
             (indxs,) = np.where(wave.value > 5.0)
             av_guess = -1.0 * np.average(y[indxs])
 
-            if ltext == "vicyg8a":
-                av_guess += 0.1
-            elif ltext == "hd112272":
-                av_guess += 0.12
-            elif ltext == "hd281159":
-                av_guess += 0.22
-            elif ltext == "hd147701":
-                av_guess += 0.17
-            elif ltext == "hd229238":
-                av_guess += 0.1
-            elif ltext == "hd029309":
-                av_guess += 0.025
-            ax.text(
-                40.0,
-                -1.0 * av_guess,
-                ltext,
-                color=col_vals[i % n_cols],
-                fontsize=0.8 * fontsize,
-            )
+            if not args.alav:
+                if ltext == "vicyg8a":
+                    av_guess += 0.1
+                elif ltext == "hd112272":
+                    av_guess += 0.12
+                elif ltext == "hd281159":
+                    av_guess += 0.22
+                elif ltext == "hd147701":
+                    av_guess += 0.17
+                elif ltext == "hd229238":
+                    av_guess += 0.1
+                elif ltext == "hd029309":
+                    av_guess += 0.025
+                ax.text(
+                    40.0,
+                    -1.0 * av_guess,
+                    ltext,
+                    color=col_vals[i % n_cols],
+                    fontsize=0.8 * fontsize,
+                )
 
         if args.models:
             # plot the best fit P92 model
@@ -183,7 +184,8 @@ if __name__ == "__main__":
     ax.set_xscale("log")
     ax.set_xlim(kxrange)
     if args.alav:
-        ax.set_ylim(0.0, 0.25)
+        ax.set_ylim(-0.05, 0.4)
+        ax.set_xlim(1.0, 40.0)
         ax.set_ylabel(r"$A(\lambda)/A(V)$", fontsize=1.3 * fontsize)
         if args.prevobs:
             litmods = [RL85_MWGC(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
