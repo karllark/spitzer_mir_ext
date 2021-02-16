@@ -2,6 +2,7 @@ import argparse
 
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.ticker import ScalarFormatter
 
 import astropy.units as u
 
@@ -66,7 +67,7 @@ if __name__ == "__main__":
         starnames,
         extra_off_val=0.0,
         ann_xvals=[9.0, 9.0],
-        ann_wave_range=[6.0, 10.0] * u.micron,
+        ann_wave_range=[5.0, 6.0] * u.micron,
         ann_offset=0.1,
         col_vals=col_vals,
     )
@@ -95,6 +96,10 @@ if __name__ == "__main__":
 
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
+
+    ax.xaxis.set_minor_formatter(ScalarFormatter())
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.set_xticks([3, 4, 5, 6, 7, 8, 9, 12, 15.0, 20.0, 25.0, 30.0, 40.0], minor=True)
 
     fig.tight_layout()
 

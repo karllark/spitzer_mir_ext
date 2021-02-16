@@ -4,6 +4,7 @@
 #
 from __future__ import absolute_import, division, print_function, unicode_literals
 import argparse
+from matplotlib.ticker import ScalarFormatter
 
 import numpy as np
 import matplotlib.pyplot as pyplot
@@ -272,6 +273,11 @@ if __name__ == "__main__":
 
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
+
+    ax.xaxis.set_minor_formatter(ScalarFormatter())
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.set_xticks([1.0, 10.0])
+    ax.set_xticks([2, 3, 4, 5, 6, 7, 8, 15.0, 20.0, 30.0, 40.0], minor=True)
 
     fig.tight_layout()
 

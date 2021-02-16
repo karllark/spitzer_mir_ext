@@ -2,6 +2,7 @@ import argparse
 
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.ticker import ScalarFormatter
 
 import astropy.units as u
 
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         starnames,
         extra_off_val=0.0,
         ann_xvals=[6.0, 6.0],
-        ann_wave_range=[6.0, 10.0] * u.micron,
+        ann_wave_range=[5.0, 6.0] * u.micron,
         ann_rot=0.0,
         ann_offset=0.15,
         col_vals=col_vals,
@@ -68,7 +69,7 @@ if __name__ == "__main__":
         starnames,
         extra_off_val=3.5,
         ann_xvals=[6.0, 6.0],
-        ann_wave_range=[6.0, 10.0] * u.micron,
+        ann_wave_range=[5.0, 6.0] * u.micron,
         ann_rot=0.0,
         col_vals=col_vals,
     )
@@ -107,6 +108,10 @@ if __name__ == "__main__":
         "Giants and Supergiants",
         "(ordered by wind strength)",
     )
+
+    ax.xaxis.set_minor_formatter(ScalarFormatter())
+    ax.xaxis.set_major_formatter(ScalarFormatter())
+    ax.set_xticks([3, 4, 5, 6, 7, 8, 9, 12, 15.0, 20.0, 25.0, 30.0, 40.0], minor=True)
 
     fig.tight_layout()
 

@@ -92,6 +92,8 @@ if __name__ == "__main__":
 
     xbands = ("J", "K")
     ybands = ("K", args.mirband)
+    lab_xbands = ("$J$", "$K_s$")
+    lab_ybands = ("$K_s$", f"${args.mirband}$")
 
     # standard stars
     xvals_comp, yvals_comp = get_colors(comp_starnames)
@@ -150,8 +152,8 @@ if __name__ == "__main__":
         alpha=0.5,
     )
 
-    ax.set_xlabel(f"{xbands[0]} - {xbands[1]}")
-    ax.set_ylabel(f"{ybands[0]} - {ybands[1]}")
+    ax.set_xlabel(f"{lab_xbands[0]} - {lab_xbands[1]}")
+    ax.set_ylabel(f"{lab_ybands[0]} - {lab_ybands[1]}")
 
     ax.legend()
 

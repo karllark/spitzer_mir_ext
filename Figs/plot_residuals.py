@@ -162,7 +162,7 @@ if __name__ == "__main__":
 
     ax.plot([5.0, 40.0], [0.0, 0.0], "k--", alpha=0.75, lw=2)
     ax.plot([5.0, 40.0], [0.002, 0.002], "k:", alpha=0.5, lw=2)
-    linewaves = [6.2, 6.85, 7.7]
+    linewaves = [6.2, 6.85, 7.7, 10.7, 11.2, 11.7]
     for cwave in linewaves:
         ax.plot([cwave, cwave], [0.0, 0.01], "k-.", alpha=0.5, lw=2)
         ax.text(
@@ -185,7 +185,7 @@ if __name__ == "__main__":
     ax.xaxis.set_minor_formatter(ScalarFormatter())
     ax.yaxis.set_major_formatter(ScalarFormatter())
 
-    ax.legend(loc="upper center")
+    ax.legend(loc="upper right")
 
     fig.tight_layout()
 
