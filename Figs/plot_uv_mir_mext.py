@@ -40,6 +40,9 @@ def plot_all_ext(
             normval = 1.0
 
         # plot the extinction curves
+        if extnames[k].split("_")[0] == "hd283809":
+            extdatas[k].npts["IUE"][extdatas[k].waves["IUE"] > 0.315 * u.micron] = 0
+
         if not args.modonly:
             extdatas[k].plot(
                 ax,
@@ -72,9 +75,10 @@ def plot_all_ext(
 
                 mod_y = G21_best(mod_x_g21) / normval + i * yoffset_factor
 
-                if annotate_key is not None:
+                if annotate_key == "IRS":
                     annx = 30.0
-                    annvals = np.absolute(mod_x_g21.value - annx) < 2.5
+                    annx_delta = 2.5
+                    annvals = np.absolute(mod_x_g21.value - annx) < annx_delta
                     anny = np.mean(mod_y[annvals]) + 0.1 * yoffset_factor
                     ax.text(
                         annx,
@@ -108,9 +112,27 @@ def plot_all_ext(
                             gamma=extdatas_fm90[k].fm90_p50_fit["GAMMA"][0],
                         )
 
+                        mod_y = FM90_p50(mod_x_fm90) / normval + i * yoffset_factor
+
+                        if annotate_key == "IUE":
+                            annx = 0.28
+                            annx_delta = 0.02
+                            annvals = np.absolute(mod_x_fm90.value - annx) < annx_delta
+                            anny = np.mean(mod_y[annvals]) + 0.1 * yoffset_factor
+                            ax.text(
+                                annx,
+                                anny,
+                                extnames[k].split("_")[0],
+                                color=col_vals[i % n_cols],
+                                alpha=0.75,
+                                fontsize=12,
+                                rotation=-10.0,
+                                horizontalalignment="center",
+                            )
+
                         ax.plot(
                             mod_x_fm90,
-                            FM90_p50(mod_x_fm90) / normval + i * yoffset_factor,
+                            mod_y,
                             lin_vals[i % 3],
                             color="k",  # col_vals[i % n_cols],
                             alpha=0.5,
@@ -238,6 +260,8 @@ if __name__ == "__main__":
         kxrange=[0.115, 0.33],
         kyrange=[1.0, 10.0],
         normvals=normvals,
+        # annotate_key=None,
+        annotate_key="IUE",
         yoffset_factor=0.5,
     )
 
