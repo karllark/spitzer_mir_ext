@@ -2,20 +2,20 @@
 #
 
 # extargs="--png --nsteps=10000 --burnfrac=0.4"
-extargs="--png --nsteps=10000 --burnfrac=0.4"
+extargs="--nsteps=10000 --burnfrac=0.4 --png"
 # extargs="--png"
 fit="python utils/fit_mir_ext_powerlaw.py"
 
 rm -f fits/*POWLAW2DRUDE.h5
 
 # V stars
+$fit fits/hd147933_hd031726_ext.fits $extargs
 $fit fits/hd204827_hd036512_ext.fits $extargs
 $fit fits/vicyg1_hd214680_ext.fits $extargs
 $fit fits/hd147889_hd064802_ext.fits $extargs
 $fit fits/hd029309_hd064802_ext.fits $extargs
 $fit fits/hd283809_hd064802_ext.fits $extargs
 $fit fits/hd281159_hd064802_ext.fits $extargs
-$fit fits/hd147933_hd031726_ext.fits $exttags
 
 # III stars
 $fit fits/hd147701_hd195986_ext.fits $extargs

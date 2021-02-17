@@ -242,13 +242,14 @@ class EmceeFitter(Fitter):
 
                 # set the uncertainty arrays - could be done via the parameter objects
                 # but would need an update to the model properties to make this happen
-                model.parameters[i] = mcmc[1]
+                # model.parameters[i] = mcmc[1]
                 model.uncs[i] = 0.5 * (mcmc[2] - mcmc[0])
                 model.uncs_plus[i] = mcmc[2] - mcmc[1]
                 model.uncs_minus[i] = mcmc[1] - mcmc[0]
 
                 # set the posterior distribution to the samples
                 param = getattr(model, pname)
+                param.value = mcmc[1]
                 param.posterior = astrounc.Distribution(flat_samples[:, k])
                 k += 1
             else:
