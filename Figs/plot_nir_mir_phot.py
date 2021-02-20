@@ -61,16 +61,16 @@ if __name__ == "__main__":
         "hd029309",
         "hd147889",
         "hd204827",
-        "vicyg1",
+        "cygob2-1",
         "hd029647",
         "hd147701",
         "hd014956",
-        "vicyg2",
+        "cygob2-2",
         "hd112272",
         "bd+63d1964",
         "hd192660",
         "hd229238",
-        "vicyg8a",
+        "cygob2-8a",
     ]
 
     windy_starnames = [
@@ -80,7 +80,7 @@ if __name__ == "__main__":
         "hd229059",
         "hd166734",
         "hd206773",
-        "vicyg5",
+        "cygob2-5",
         "hd034921",
         "hd152408",
     ]
@@ -142,15 +142,15 @@ if __name__ == "__main__":
         label="windy",
         alpha=0.5,
     )
-    ax.errorbar(
-        xvals_bad[:, 0],
-        yvals_bad[:, 0],
-        xerr=xvals_bad[:, 1],
-        yerr=yvals_bad[:, 1],
-        fmt="co",
-        label="bad",
-        alpha=0.5,
-    )
+    # ax.errorbar(
+    #    xvals_bad[:, 0],
+    #    yvals_bad[:, 0],
+    #    xerr=xvals_bad[:, 1],
+    #    yerr=yvals_bad[:, 1],
+    #    fmt="co",
+    #    label="bad",
+    #    alpha=0.5,
+    # )
 
     ax.set_xlabel(f"{lab_xbands[0]} - {lab_xbands[1]}")
     ax.set_ylabel(f"{lab_ybands[0]} - {lab_ybands[1]}")

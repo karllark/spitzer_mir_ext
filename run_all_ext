@@ -3,8 +3,9 @@
 
 # V stars
 python utils/calc_ext.py hd204827 hd036512
-python utils/calc_ext.py vicyg1 hd214680
+python utils/calc_ext.py cygob2-1 hd214680
 python utils/calc_ext.py hd147889 hd064802
+python utils/calc_ext.py hd147933 hd031726
 python utils/calc_ext.py hd029309 hd064802
 python utils/calc_ext.py hd283809 hd064802
 python utils/calc_ext.py hd281159 hd064802
@@ -15,9 +16,9 @@ python utils/calc_ext.py hd029647 hd195986
 python utils/calc_ext.py bd+63d1964 hd188209
 
 # I stars
-python utils/calc_ext.py vicyg8a hd188209
+python utils/calc_ext.py cygob2-8a hd188209
 python utils/calc_ext.py hd192660 hd204172
 python utils/calc_ext.py hd229238 hd204172
 python utils/calc_ext.py hd112272 hd204172
-python utils/calc_ext.py vicyg2 hd214680
+python utils/calc_ext.py cygob2-2 hd214680
 python utils/calc_ext.py hd014956 hd204172

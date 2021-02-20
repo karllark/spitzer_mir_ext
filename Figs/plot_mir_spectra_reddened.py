@@ -50,7 +50,7 @@ if __name__ == "__main__":
         "hd029309",
         "hd147889",
         "hd204827",
-        "vicyg1",
+        "cygob2-1",
     ]
     plot_mir_set(
         ax,
@@ -76,12 +76,12 @@ if __name__ == "__main__":
         "hd029647",
         "hd147701",
         "hd014956",
-        "vicyg2",
+        "cygob2-2",
         "hd112272",
         "bd+63d1964",
         "hd192660",
         "hd229238",
-        "vicyg8a",
+        "cygob2-8a",
     ]
     plot_mir_set(
         ax,

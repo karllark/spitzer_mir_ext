@@ -11,6 +11,7 @@ import astropy.units as u
 # from dust_extinction.shapes import P92
 from dust_extinction.averages import (
     RL85_MWGC,
+    RRP89_MWGC,
     I05_MWAvg,
     CT06_MWGC,
     CT06_MWLoc,
@@ -71,15 +72,16 @@ if __name__ == "__main__":
     figsize = (14, 6)
     fig, ax = pyplot.subplots(nrows=1, ncols=2, figsize=figsize)
 
-    litmods = [RL85_MWGC(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
+    litmods = [RL85_MWGC(), RRP89_MWGC(), I05_MWAvg(), CT06_MWGC(), CT06_MWLoc(), F11_MWGC()]
     litdesc = [
         "GalCenter: Rieke & Lebofsky 1985",
+        "GalCenter: Rieke, Rieke, & Paul 1989",
         "GalPlane: Indebetouw et al. 2005",
         "GalCenter: Chiar & Tielens 2006",
         "Local: Chiar & Tielens 2006",
         "GalCenter: Fritz et al. 2011",
     ]
-    litfmt = ["bs", "gP", "c--", "c:", "m^"]
+    litfmt = ["bs", "b<", "gP", "c--", "c:", "m^"]
     for k, cmod in enumerate(litmods):
         lit_wave = 1.0 / cmod.obsdata_x
         lit_axav = cmod.obsdata_axav
@@ -91,9 +93,9 @@ if __name__ == "__main__":
             litfmt[k],
             alpha=0.25,
             label=litdesc[k],
-            lw=3,
+            lw=2,
         )
-        if k == 1:
+        if k == 2:
             ax[0].plot(lit_wave, lit_y, litfmt[k], alpha=0.25, lw=3, label=litdesc[k])
 
     # Wang & Chen 2019
@@ -175,7 +177,7 @@ if __name__ == "__main__":
         a["alk"],
         "b-.",
         label="Cyg OB-12: Hensley & Draine 2020",
-        lw=3,
+        lw=2,
         alpha=0.25,
     )
 
@@ -257,10 +259,11 @@ if __name__ == "__main__":
 
     # sillyness to get the legend to give the order as created
     handles, labels = ax[1].get_legend_handles_labels()
-    indxs = [0, 1, 2, 3, 4, 7, 5, 8, 6]
+    indxs = [0, 1, 2, 3, 4, 5, 8, 6, 9, 7]
     nlabels = [labels[i] for i in indxs]
     nhandles = [handles[i] for i in indxs]
     ax[1].legend(nhandles, nlabels, fontsize=0.75 * fontsize)
+    # ax[1].legend()
 
     # finishing plot details
     ax[0].set_xlim(1.0, 40.0)
