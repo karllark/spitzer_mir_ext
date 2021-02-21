@@ -57,7 +57,7 @@ if __name__ == "__main__":
     if not args.dense:
         avefilenames = avefilenames[0:1]
 
-    pcol = ["k", "b", "m"]
+    pcol = ["b", "g", "m"]
     psym = ["o", "s", "^"]
     pline = ["-", "-.", ":"]
     plabel = ["diffuse", "HD283809", "HD029647"]
@@ -70,7 +70,7 @@ if __name__ == "__main__":
         # UV fit
         obsext2 = ExtData()
         if plabel[i] == "diffuse":
-            obsext2.read(avefilename.replace("POWLAW2DRUDE", "FM90"))
+            obsext2.read(avefilename.replace(".fits", "_FM90.fits"))
             obsext_wave = obsext.waves["BAND"].value
             obsext_ext = obsext.exts["BAND"]
             obsext_ext_uncs = obsext.uncs["BAND"]
@@ -89,6 +89,10 @@ if __name__ == "__main__":
             obsext_IRS_wave = obsext2.waves["IRS"][gindxs_IRS].value
             obsext_IRS_ext = obsext2.exts["IRS"][gindxs_IRS]
             obsext_IRS_uncs = obsext2.uncs["IRS"][gindxs_IRS]
+
+        x = 1.0 / obsext2.waves["IUE"].to(u.micron).value
+        bvals = ((x > 6.42) & (x < 6.55)) | (x > 8.0)
+        obsext2.npts["IUE"][bvals] = 0
 
         gindxs_IUE = np.where(obsext2.npts["IUE"] > 0)
         obsext_IUE_wave = obsext2.waves["IUE"][gindxs_IUE].value
@@ -137,7 +141,7 @@ if __name__ == "__main__":
                 full_unc[k] += np.sum(1.0 / np.square(cuncs[indxs]))
                 full_npts[k] += len(indxs)
 
-        findxs = full_npts > 0
+        findxs = (full_npts > 0) & np.isfinite(full_unc)
         full_flux[findxs] /= full_npts[findxs]
         full_unc[findxs] = np.sqrt(1.0 / full_unc[findxs])
 
@@ -216,7 +220,7 @@ if __name__ == "__main__":
             ax[1].plot(mod_x, g21_comps(mod_x), "k--", alpha=0.5)
 
             # write ext to table
-            gphot = obsext_wave > 1.0
+            gphot = (obsext_wave > 1.0) & np.isfinite(obsext_ext_uncs)
             rebintab = QTable()
             twaves = np.concatenate([obsext_wave[gphot], full_wave[findxs]]) * u.micron
             text = np.concatenate([obsext_ext[gphot], full_flux[findxs]])
@@ -391,6 +395,9 @@ if __name__ == "__main__":
             custom_lines,
             ["Diffuse", "Diffuse R=25", "G21 Fit", "G21 Components", "F19 R(V)=3.1"],
         )
+
+    ax[1].xaxis.set_minor_formatter(ScalarFormatter())
+    ax[1].set_xticks([2, 3, 4, 5, 6, 7, 8, 15.0, 20.0, 30.0], minor=True)
 
     fig.tight_layout()
 

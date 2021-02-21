@@ -4,6 +4,7 @@ import os.path
 import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
+from matplotlib.ticker import ScalarFormatter
 
 # from astropy.table import Table
 import astropy.units as u
@@ -29,7 +30,7 @@ def plot_all_ext(
     n_cols = len(col_vals)
 
     # mod_x = np.logspace(0.0, 2.0, 200) * u.micron
-    mod_x_g21 = np.logspace(0.1, np.log10(39.0), 200) * u.micron
+    mod_x_g21 = np.logspace(0.1, np.log10(35.0), 200) * u.micron
     mod_x_fm90 = np.logspace(-1.0, -0.5, 200) * u.micron
     for i in range(len(extnames)):
         k = sindxs[i]
@@ -250,14 +251,14 @@ if __name__ == "__main__":
 
     plot_all_ext(
         ax[1],
-        kxrange=[1.0, 40.0],
+        kxrange=[1.0, 35.0],
         kyrange=[-6.0, -0.5],
         yoffset_factor=0.1,
         annotate_key="IRS",
     )
     plot_all_ext(
         ax[0],
-        kxrange=[0.115, 0.33],
+        kxrange=[0.11, 0.33],
         kyrange=[1.0, 10.0],
         normvals=normvals,
         # annotate_key=None,
@@ -272,6 +273,13 @@ if __name__ == "__main__":
 
     ax[1].yaxis.set_label_position("right")
     ax[1].yaxis.tick_right()
+
+    ax[1].xaxis.set_minor_formatter(ScalarFormatter())
+    ax[1].xaxis.set_major_formatter(ScalarFormatter())
+    ax[1].set_xticks([1, 5, 15, 25, 35], minor=True)
+
+    ax[0].xaxis.set_minor_formatter(ScalarFormatter())
+    ax[0].set_xticks([0.11, 0.33], minor=True)
 
     fig.tight_layout()  # rect=(0.9,0.9))
 

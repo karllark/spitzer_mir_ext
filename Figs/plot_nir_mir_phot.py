@@ -54,14 +54,7 @@ if __name__ == "__main__":
         "hd051283",
     ]
 
-    red_starnames = [
-        "hd147933",
-        "hd281159",
-        "hd283809",
-        "hd029309",
-        "hd147889",
-        "hd204827",
-        "cygob2-1",
+    red_starnames_super = [
         "hd029647",
         "hd147701",
         "hd014956",
@@ -71,6 +64,16 @@ if __name__ == "__main__":
         "hd192660",
         "hd229238",
         "cygob2-8a",
+    ]
+
+    red_starnames_main = [
+        "hd147933",
+        "hd281159",
+        "hd283809",
+        "hd029309",
+        "hd147889",
+        "hd204827",
+        "cygob2-1",
     ]
 
     windy_starnames = [
@@ -97,7 +100,8 @@ if __name__ == "__main__":
 
     # standard stars
     xvals_comp, yvals_comp = get_colors(comp_starnames)
-    xvals_red, yvals_red = get_colors(red_starnames)
+    xvals_red_super, yvals_red_super = get_colors(red_starnames_super)
+    xvals_red_main, yvals_red_main = get_colors(red_starnames_main)
     xvals_windy, yvals_windy = get_colors(windy_starnames)
     xvals_bad, yvals_bad = get_colors(bad_starnames)
 
@@ -126,12 +130,21 @@ if __name__ == "__main__":
         alpha=0.5,
     )
     ax.errorbar(
-        xvals_red[:, 0],
-        yvals_red[:, 0],
-        xerr=xvals_red[:, 1],
-        yerr=yvals_red[:, 1],
+        xvals_red_super[:, 0],
+        yvals_red_super[:, 0],
+        xerr=xvals_red_super[:, 1],
+        yerr=yvals_red_super[:, 1],
         fmt="go",
         label="reddened",
+    )
+    ax.errorbar(
+        xvals_red_main[:, 0],
+        yvals_red_main[:, 0],
+        xerr=xvals_red_main[:, 1],
+        yerr=yvals_red_main[:, 1],
+        fmt="go",
+        # label="reddened V-IV",
+        # fillstyle="none",
     )
     ax.errorbar(
         xvals_windy[:, 0],
@@ -151,6 +164,12 @@ if __name__ == "__main__":
     #    label="bad",
     #    alpha=0.5,
     # )
+
+    # line at 0.6
+    if args.mirband == "MIPS24":
+        ax.plot([-0.3, 0.9], [0.6, 0.6], "k--", alpha=0.25, lw=2)
+    if args.mirband == "IRAC4":
+        ax.plot([-0.3, 0.9], [0.4, 0.4], "k--", alpha=0.25, lw=2)
 
     ax.set_xlabel(f"{lab_xbands[0]} - {lab_xbands[1]}")
     ax.set_ylabel(f"{lab_ybands[0]} - {lab_ybands[1]}")

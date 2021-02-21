@@ -41,6 +41,10 @@ if __name__ == "__main__":
     if ext.type == "elx":
         ext.trans_elv_alav(av=float(ext.columns["AV"][0]))
 
+    x = 1.0 / ext.waves["IUE"].to(u.micron).value
+    bvals = (x > 6.42) & (x < 6.55)
+    ext.npts["IUE"][bvals] = 0
+
     gindxs = ext.npts["IUE"] > 0
     x = 1.0 / ext.waves["IUE"][gindxs].to(u.micron).value
     y = ext.exts["IUE"][gindxs]

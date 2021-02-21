@@ -42,7 +42,7 @@ Average extinction curve made using
 
 Fit average:
 `python utils/fit_mir_ext_powerlaw.py data/all_ext_14oct20_diffuse_ave.fits --nsteps=10000 --burnfrac=0.4 --png`
-`python utils/fit_uv_ext_fm90.py all_ext_14oct20_diffuse_ave_POWLAW2DRUDE.fits --png --nsteps=10000 --burnfrac=0.4`
+`python utils/fit_uv_ext_fm90.py data/all_ext_14oct20_diffuse_ave_POWLAW2DRUDE.fits --png --nsteps=10000 --burnfrac=0.4`
 
 Figures
 -------

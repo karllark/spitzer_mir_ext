@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib
+from matplotlib.ticker import ScalarFormatter
 
 import numpy as np
 import argparse
@@ -95,7 +96,7 @@ if __name__ == "__main__":
             g21_asym_init[0].sil2_center.fixed = True
             g21_asym_init[0].sil2_fwhm.fixed = True
             g21_asym_init[0].sil2_asym.fixed = True
-    elif obsext.type == "alav":
+    elif obsext.type == "alax":
         g21_init = G21()
         g21_asym_init = G21_drude_asym()
 
@@ -268,6 +269,10 @@ if __name__ == "__main__":
         "b-",
     )
     ax[1].set_ylim(np.array([-1.0, 1.0]) * mmd)
+
+    ax[1].xaxis.set_minor_formatter(ScalarFormatter())
+    ax[1].xaxis.set_major_formatter(ScalarFormatter())
+    ax[1].set_xticks([2, 3, 4, 5, 6, 7, 8, 15.0, 20.0, 25.0, 30.0, 35.0], minor=True)
 
     plt.tight_layout()
 

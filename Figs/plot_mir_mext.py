@@ -11,6 +11,7 @@ import matplotlib.pyplot as pyplot
 import matplotlib
 
 from astropy.table import Table
+import astropy.units as u
 
 from dust_extinction.averages import (
     RL85_MWGC,
@@ -20,7 +21,86 @@ from dust_extinction.averages import (
     F11_MWGC,
 )
 
-from measure_extinction.extdata import ExtData, AverageExtData
+from measure_extinction.extdata import ExtData
+
+
+def AverageExtData(extdatas):
+    """
+    Generate the average extinction curve from a list of ExtData objects
+    Parameters
+    ----------
+    extdatas : list of ExtData objects
+        list of extinction curves to average
+    Returns
+    -------
+    aveext: ExtData object
+        the average extintion curve
+    """
+    aveext = ExtData()
+    aveext.stds = {}
+    keys = []
+    names = []
+    bwaves = []
+    for extdata in extdatas:
+        # check the data type of the extinction curves, and convert if needed
+        if extdata.type != "alav" or extdata.type != "alax":
+            extdata.trans_elv_alav()
+
+        # collect the keywords of the data in the extinction curves, and collect the names of the BAND data in the extinction curves, and determine the wavelengths of the data
+        for src in extdata.waves.keys():
+            if src not in keys:
+                keys.append(src)
+                aveext.waves[src] = extdata.waves[src]
+            if src == "BAND":
+                for i, name in enumerate(extdata.names["BAND"]):
+                    if name not in names:
+                        names.append(name)
+                        bwaves.append(extdata.waves["BAND"][i].value)
+    aveext.names["BAND"] = names
+    aveext.waves["BAND"] = bwaves * u.micron
+    aveext.type = 'alax'
+    aveext.type_rel_band = extdatas[0].type_rel_band
+
+    # calculate the average for all spectral data
+    bexts = {k: [] for k in aveext.names["BAND"]}
+    for src in keys:
+        exts = []
+        for extdata in extdatas:
+            if src in extdata.waves.keys():
+                if src == "BAND":
+                    for i, name in enumerate(extdata.names["BAND"]):
+                        bexts[name].append(extdata.exts["BAND"][i])
+                else:
+                    extdata.exts[src][np.where(extdata.npts[src] == 0)] = np.nan
+                    exts.append(extdata.exts[src])
+
+        if src == "BAND":
+            texts = []
+            tnpts = []
+            tstds = []
+            for name in aveext.names["BAND"]:
+                texts.append(np.nanmean(bexts[name]))
+                tnpts.append(len(bexts[name]))
+
+                # calculation of the standard deviation (this is the spread of the sample around the population mean)
+                tstds.append(np.nanstd(bexts[name], ddof=1))
+
+            aveext.exts["BAND"] = np.array(texts)
+            aveext.npts["BAND"] = np.array(tnpts)
+            aveext.stds["BAND"] = np.array(tstds)
+            # calculation of the standard error of the average
+            #   (the standard error of the sample mean is an estimate of how far
+            #    the sample mean is likely to be from the population mean)
+            aveext.uncs["BAND"] = aveext.stds["BAND"] / np.sqrt(aveext.npts["BAND"])
+
+        else:
+            aveext.exts[src] = np.nanmean(exts, axis=0)
+            aveext.npts[src] = np.sum(~np.isnan(exts), axis=0)
+            aveext.stds[src] = np.nanstd(exts, axis=0, ddof=1)
+            aveext.uncs[src] = aveext.stds[src] / np.sqrt(aveext.npts[src])
+
+    return aveext
+
 
 if __name__ == "__main__":
 
@@ -31,8 +111,7 @@ if __name__ == "__main__":
         "--rebin_fac", type=int, default=None, help="rebin factor for spectra"
     )
     parser.add_argument("--alav", help="plot A(lambda)/A(V)", action="store_true")
-    parser.add_argument("--rel_band", help="Band to use for normalization",
-                        default="V")
+    parser.add_argument("--rel_band", help="Band to use for normalization", default="V")
     parser.add_argument("--ave", help="plot the average", action="store_true")
     parser.add_argument(
         "--models", help="plot the best fit models", action="store_true"
@@ -123,7 +202,7 @@ if __name__ == "__main__":
             av_guess = -1.0 * np.average(y[indxs])
 
             if not args.alav:
-                if ltext == "vicyg8a":
+                if ltext == "cygob2-8a":
                     av_guess += 0.1
                 elif ltext == "hd112272":
                     av_guess += 0.12
@@ -206,7 +285,12 @@ if __name__ == "__main__":
                 lit_axav = cmod.obsdata_axav
 
                 ax.plot(
-                    lit_wave, lit_axav, litfmt[k], alpha=0.25, label=litdesc[k], lw=3,
+                    lit_wave,
+                    lit_axav,
+                    litfmt[k],
+                    alpha=0.25,
+                    label=litdesc[k],
+                    lw=3,
                 )
 
         if args.dg_models:
@@ -247,8 +331,9 @@ if __name__ == "__main__":
             )
 
         # get the average extinction curve
+        print("doing average")
         if args.ave:
-            ave_extdata = AverageExtData(extdatas, alav=True)
+            ave_extdata = AverageExtData(extdatas)  # , alav=True)
             ave_extdata.plot(
                 ax,
                 color="k",
