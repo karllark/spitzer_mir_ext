@@ -188,3 +188,98 @@ class G21_drude_asym(Fittable1DModel):
         axav += drude_asym(wave, sil2_amp, sil2_center, sil2_fwhm, sil2_asym)
 
         return axav
+
+
+class G21_drude_asym_w_11(Fittable1DModel):
+    """
+    Powerlaw plus Drude profiles for the silicate features for the
+    1 to 40 micron A(lambda)/A(V) extinction curve.
+
+    Powerlaw portion based on Martin & Whittet (1990).
+
+    Parameters
+    ----------
+    scale: float
+        amplitude of the curve
+
+    alpha : float
+        power of powerlaw
+
+    TBD: parameters for silicate features
+    """
+
+    # inputs = ("x",)
+    # outputs = ("axav",)
+
+    scale = Parameter(description="amplitude", default=0.5, bounds=(0.0, 1.0))
+    alpha = Parameter(
+        description="alpha (power of powerlaw)", default=1.8, bounds=(0.5, 5.0)
+    )
+    sil1_amp = Parameter(default=0.07, bounds=(0.001, 0.3))
+    sil1_center = Parameter(default=10.0, bounds=(8.0, 12.0))
+    sil1_fwhm = Parameter(default=2.5, bounds=(1.0, 10.0))
+    sil1_asym = Parameter(default=-0.3, bounds=(-2.0, 2.0))
+    sil2_amp = Parameter(default=0.025, bounds=(0.001, 0.3))
+    sil2_center = Parameter(default=20., bounds=(16.0, 24.0))
+    sil2_fwhm = Parameter(default=13.0, bounds=(5.0, 20.0))
+    sil2_asym = Parameter(default=-0.3, bounds=(-2.0, 2.0))
+
+    csil_amp = Parameter(default=0.07 * 0.05, bounds=(0.0001, 0.01))
+    csil_center = Parameter(default=11.1, bounds=(10.5, 12.0))
+    csil_fwhm = Parameter(default=0.7, bounds=(0.3, 2.0))
+    csil_asym = Parameter(default=-0.3, bounds=(-2.0, 2.0))
+
+    x_range = [1.0 / 40.0, 1.0]
+
+    def evaluate(
+        self,
+        in_x,
+        scale,
+        alpha,
+        sil1_amp,
+        sil1_center,
+        sil1_fwhm,
+        sil1_asym,
+        sil2_amp,
+        sil2_center,
+        sil2_fwhm,
+        sil2_asym,
+        csil_amp,
+        csil_center,
+        csil_fwhm,
+        csil_asym,
+    ):
+        """
+        G21 function
+
+        Parameters
+        ----------
+        in_x: float
+           expects either x in units of wavelengths or frequency
+           or assumes wavelengths in wavenumbers [1/micron]
+
+        Returns
+        -------
+        axav: np array (float)
+            A(x)/A(V) extinction curve [mag]
+
+        Raises
+        ------
+        ValueError
+           Input x values outside of defined range
+        """
+        x = _get_x_in_wavenumbers(in_x)
+
+        # check that the wavenumbers are within the defined range
+        _test_valid_x_range(x, self.x_range, "G21")
+
+        # powerlaw
+        axav = scale * ((1.0 / x) ** (-1.0 * alpha))
+
+        # silicate feature drudes
+        wave = 1 / x
+        axav += drude_asym(wave, sil1_amp, sil1_center, sil1_fwhm, sil1_asym)
+        axav += drude_asym(wave, sil2_amp, sil2_center, sil2_fwhm, sil2_asym)
+        axav += drude_asym(wave, csil_amp, csil_center, csil_fwhm, csil_asym)
+
+        return axav

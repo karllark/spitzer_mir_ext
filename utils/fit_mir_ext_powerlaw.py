@@ -17,7 +17,7 @@ from dust_extinction.conversions import AxAvToExv
 
 from models_mcmc_extension import EmceeFitter
 
-from G21 import G21, G21_drude_asym
+from G21 import G21, G21_drude_asym, G21_drude_asym_w_11
 
 
 def clean_pnames(pnames):
@@ -99,6 +99,7 @@ if __name__ == "__main__":
     elif obsext.type == "alax":
         g21_init = G21()
         g21_asym_init = G21_drude_asym()
+        # g21_asym_init = G21_drude_asym_w_11()
 
         # g21_asym_init.sil2_fwhm.fixed = True
 

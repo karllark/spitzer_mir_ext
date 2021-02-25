@@ -8,6 +8,7 @@ import emcee
 import numpy as np
 import matplotlib.pyplot as pyplot
 import matplotlib
+from matplotlib.ticker import ScalarFormatter
 import astropy.units as u
 from astropy.table import Table
 from astropy import uncertainty as unc
@@ -399,6 +400,10 @@ if __name__ == "__main__":
     ax[3].tick_params("both", length=10, width=2, which="major")
     ax[3].tick_params("both", length=5, width=1, which="minor")
     ax[3].legend(ncol=2, loc="upper left")
+
+    ax[3].xaxis.set_major_formatter(ScalarFormatter())
+    ax[3].xaxis.set_minor_formatter(ScalarFormatter())
+    ax[3].set_xticks([2, 3, 4, 5, 6, 7, 8, 15.0, 20.0, 30.0], minor=True)
 
     # silicate verus 2175
     ax[2].errorbar(

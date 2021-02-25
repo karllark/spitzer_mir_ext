@@ -280,6 +280,11 @@ if __name__ == "__main__":
     ax[1].xaxis.set_major_formatter(ScalarFormatter())
     ax[1].yaxis.set_major_formatter(ScalarFormatter())
 
+    ax[0].xaxis.set_minor_formatter(ScalarFormatter())
+    ax[1].xaxis.set_minor_formatter(ScalarFormatter())
+    ax[0].set_xticks([2, 3, 4, 5, 6, 7, 8, 15.0, 20.0, 30.0], minor=True)
+    ax[1].set_xticks([2, 3, 4, 5, 6, 7, 8, 15.0, 20.0, 30.0], minor=True)
+
     fig.tight_layout()
 
     save_str = "_litcomp"

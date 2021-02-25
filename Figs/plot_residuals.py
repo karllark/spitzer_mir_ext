@@ -184,6 +184,7 @@ if __name__ == "__main__":
     ax.xaxis.set_major_formatter(ScalarFormatter())
     ax.xaxis.set_minor_formatter(ScalarFormatter())
     ax.yaxis.set_major_formatter(ScalarFormatter())
+    ax.set_xticks([5, 6, 7, 8, 9, 12.0, 15.0, 20.0, 25.0, 30.0, 40.0], minor=True)
 
     ax.legend(loc="upper right")
 

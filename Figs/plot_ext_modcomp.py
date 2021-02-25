@@ -172,6 +172,9 @@ if __name__ == "__main__":
         custom_lines, ["Diffuse phot", "Diffuse R=25", "G21 Fit", "D03", "ZDA04", "J13"],
     )
 
+    ax.xaxis.set_minor_formatter(ScalarFormatter())
+    ax.set_xticks([2, 3, 4, 5, 6, 7, 8, 15.0, 20.0, 30.0], minor=True)
+
     fig.tight_layout()
 
     save_fname = "diffuse_ext_modcomp"
