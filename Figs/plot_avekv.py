@@ -198,7 +198,7 @@ if __name__ == "__main__":
         label="dense",
     )
     ax.axhline(mean_rk, ls=":", lw=2, alpha=0.5, color="k", label="clipped average")
-    ax.set_ylabel(r"$A(V)/E(K-V)$")
+    ax.set_ylabel(r"$A(V)/E(Ks-V)$")
     ax.set_xlabel(r"$A(V)$")
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")
