@@ -41,24 +41,26 @@ if __name__ == "__main__":
     if ext.type == "elx":
         ext.trans_elv_alav(av=float(ext.columns["AV"][0]))
 
-    x = 1.0 / ext.waves["IUE"].to(u.micron).value
-    bvals = (x > 6.42) & (x < 6.55)
-    ext.npts["IUE"][bvals] = 0
+    wave, y, y_unc = ext.get_fitdata(
+        ["IUE"],
+        remove_uvwind_region=True,
+        remove_lya_region=True,
+    )
+    x = 1.0 / wave.value
 
-    gindxs = ext.npts["IUE"] > 0
-    x = 1.0 / ext.waves["IUE"][gindxs].to(u.micron).value
-    y = ext.exts["IUE"][gindxs]
-    y_unc = ext.uncs["IUE"][gindxs]
-    gindxs = (x > 3.3) & (x < 8.0)
-    # gindxs = ((x > 3.3) & (x < 8.1)) | ((x > 8.35) & (x < 8.6))
+    # remove points above x = 8.0
+    gvals = x < 8.0
+    x = x[gvals]
+    y = y[gvals]
+    y_unc = y_unc[gvals]
 
     # initialize the model
     fm90_init = FM90()
 
-    fm90_init.C1.bounds = (0., 3.)
-    fm90_init.C2.bounds = (-0.1, 0.6)
-    fm90_init.C3.bounds = (0., 2.5)
-    fm90_init.C4.bounds = (0., 1.)
+    fm90_init.C1.bounds = (-2.0, 3.0)
+    fm90_init.C2.bounds = (-0.1, 1.0)
+    fm90_init.C3.bounds = (0.0, 2.5)
+    fm90_init.C4.bounds = (0.0, 1.0)
     fm90_init.xo.bounds = (4.5, 4.9)
     fm90_init.gamma.bounds = (0.6, 1.5)
 
@@ -73,16 +75,15 @@ if __name__ == "__main__":
     )
 
     # modify weights to make sure the 2175 A bump is fit
-    weights = 1.0 / y_unc[gindxs]
-    # weights[(x[gindxs] < 5.9)] *= 4.0
-    weights[(x[gindxs] > 4.0) & (x[gindxs] < 5.1)] *= 10.0
+    weights = 1.0 / y_unc
+    weights[(x > 4.0) & (x < 5.1)] *= 10.0
 
     # fit the data to the FM90 model using the fitter
     #   use the initialized model as the starting point
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=UserWarning)
-        fm90_fit = fit(fm90_init, x[gindxs], y[gindxs], weights=weights)
-        fm90_fit3 = fit3(fm90_fit, x[gindxs], y[gindxs], weights=weights)
+        fm90_fit = fit(fm90_init, x, y, weights=weights)
+        fm90_fit3 = fit3(fm90_fit, x, y, weights=weights)
 
     print("autocorr tau = ", fit3.fit_info["sampler"].get_autocorr_time(quiet=True))
 
@@ -105,10 +106,10 @@ if __name__ == "__main__":
     # remove pesky x without units warnings
     x /= u.micron
 
-    # ax.plot(x[gindxs], fm90_init(x[gindxs]), label='Initial guess')
+    # ax.plot(x, fm90_init(x), label='Initial guess')
     ax.plot(x, y, label="Observed Curve")
-    ax.plot(x[gindxs], fm90_fit3(x[gindxs]), label="emcee")
-    ax.plot(x[gindxs], fm90_fit(x[gindxs]), label="LevMarLSQ")
+    ax.plot(x, fm90_fit3(x), label="emcee")
+    ax.plot(x, fm90_fit(x), label="LevMarLSQ")
 
     # plot samples from the mcmc chaing
     flat_samples = fit3.fit_info["sampler"].get_chain(
@@ -119,7 +120,7 @@ if __name__ == "__main__":
     for ind in inds:
         sample = flat_samples[ind]
         _fitter_to_model_params(model_copy, sample)
-        plt.plot(x[gindxs], model_copy(x[gindxs]), "C1", alpha=0.05)
+        plt.plot(x, model_copy(x), "C1", alpha=0.05)
 
     ax.set_xlabel(r"$x$ [$\mu m^{-1}$]")
     ax.set_ylabel(r"$A(\lambda)/A(V)$")

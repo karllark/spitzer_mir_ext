@@ -126,7 +126,7 @@ if __name__ == "__main__":
         xerr=xvals_comp[:, 1],
         yerr=yvals_comp[:, 1],
         fmt="ko",
-        label="standards",
+        label="comparison",
         alpha=0.5,
     )
     ax.errorbar(

@@ -46,7 +46,7 @@ if __name__ == "__main__":
         mod_x = np.logspace(np.log10(0.115), np.log10(2.5), num=1000) * u.micron
         F19_Rv = F19(Rv=3.1)
         for cax in ax:
-            cax.plot(mod_x, F19_Rv(mod_x), "k:", lw=2, alpha=0.65, label="F19 R(V) = 3.1")
+            cax.plot(mod_x, F19_Rv(mod_x), "g:", lw=2, alpha=0.75, label="F19 R(V) = 3.1")
 
     # New measurements
     avefilenames = [
@@ -115,7 +115,7 @@ if __name__ == "__main__":
             obsext_IRS_ext,
             pcol[i] + pline[i],
             lw=2,
-            alpha=0.65,
+            alpha=0.3,
         )
 
         # rebin IRS
@@ -152,7 +152,7 @@ if __name__ == "__main__":
             fmt=pcol[i] + psym[i],  # pcol[i] + psym[i],
             markersize=5,
             markeredgewidth=1.0,
-            alpha=1.0,
+            alpha=0.5,
         )
 
         # Opt photometry
@@ -172,7 +172,7 @@ if __name__ == "__main__":
             obsext_IUE_ext,
             pcol[i] + pline[i],
             lw=2,
-            alpha=0.85,
+            alpha=0.5,
         )
 
         if not args.dense:
@@ -370,7 +370,7 @@ if __name__ == "__main__":
             Line2D([0], [0], color="b", marker="o", markersize=10, alpha=0.5),
             Line2D([0], [0], color="k", lw=2, alpha=0.65),
             Line2D([0], [0], color="k", lw=2, alpha=0.5, linestyle="--"),
-            Line2D([0], [0], color="k", lw=2, linestyle=":", alpha=0.65),
+            Line2D([0], [0], color="g", lw=2, linestyle=":", alpha=0.75),
         ]
         ax[0].legend(
             custom_lines, ["Diffuse", "FM90 Fit", "FM90 Components", "F19 R(V)=3.1"]
@@ -389,7 +389,7 @@ if __name__ == "__main__":
             ),
             Line2D([0], [0], color="k", lw=2, alpha=0.65),
             Line2D([0], [0], color="k", lw=2, alpha=0.5, linestyle="--"),
-            Line2D([0], [0], color="k", lw=2, linestyle=":", alpha=0.65),
+            Line2D([0], [0], color="g", lw=2, linestyle=":", alpha=0.75),
         ]
         ax[1].legend(
             custom_lines,
