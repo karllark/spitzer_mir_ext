@@ -14,6 +14,9 @@ from measure_extinction.extdata import ExtData
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("filelist", help="file with list of curves to plot")
+    parser.add_argument(
+        "--irv", help="fit versus 1/R(V) instead of R(V) - 3.1", action="store_true"
+    )
     parser.add_argument("--png", help="save figure as a png file", action="store_true")
     parser.add_argument("--pdf", help="save figure as a pdf file", action="store_true")
     args = parser.parse_args()
@@ -42,7 +45,7 @@ if __name__ == "__main__":
     irvs_unc = np.full((2, n_ext), 0.0)
 
     # bands have to be treated separately as they are variable in length
-    bandwaves = [1.235, 1.662, 2.159, 3.52, 4.45, 5.66, 7.67]
+    bandwaves = [1.235, 1.662, 2.159, 3.52, 4.45, 5.66, 7.67, 15.4, 23.36]
     n_band = len(bandwaves)
     bandexts = np.zeros((n_band, n_ext))
     bandexts_unc = np.zeros((n_band, n_ext))
@@ -115,24 +118,38 @@ if __name__ == "__main__":
     line_func = models.Linear1D()
     slopes = []
     intercepts = []
+    stds = []
     wave_list = irswaves
     for j, wave in enumerate(wave_list):
         mask = irsexts_npts[j] > 0
-        fitted_line = fit(
-            line_func, (rvs[mask] - 3.1), (irsexts[j][mask] / avs[mask]) + 1.0
-        )
+        if args.irv:
+            xvals = irvs[mask]
+        else:
+            xvals = rvs[mask] - 3.1
+        yvals = (irsexts[j][mask] / avs[mask]) + 1.0
+        yuncs = irsexts_unc[j][mask] / avs[mask]
+        fitted_line = fit(line_func, xvals, yvals, weights=1.0 / yuncs)
+        std = np.sqrt(np.sum((fitted_line(xvals) - yvals) ** 2) / len(xvals))
         slopes.append(fitted_line.slope.value)
         intercepts.append(fitted_line.intercept.value)
+        stds.append(std)
 
     bslopes = []
     bintercepts = []
+    bstds = []
     for j, wave in enumerate(bandwaves):
         mask = bandexts_npts[j] > 0
-        fitted_line = fit(
-            line_func, (rvs[mask] - 3.1), (bandexts[j][mask] / avs[mask]) + 1.0
-        )
+        if args.irv:
+            xvals = irvs[mask]
+        else:
+            xvals = rvs[mask] - 3.1
+        yvals = (bandexts[j][mask] / avs[mask]) + 1.0
+        yuncs = bandexts_unc[j][mask] / avs[mask]
+        fitted_line = fit(line_func, xvals, yvals, weights=1.0 / yuncs)
+        std = np.sqrt(np.sum((fitted_line(xvals) - yvals) ** 2) / len(xvals))
         bslopes.append(fitted_line.slope.value)
         bintercepts.append(fitted_line.intercept.value)
+        bstds.append(std)
 
     # plots
     fontsize = 14
@@ -150,28 +167,36 @@ if __name__ == "__main__":
 
     # plot the slopes and intercepts vs. wavelength
     figsize = (10.0, 8.0)
-    fig, ax = plt.subplots(2, figsize=figsize, sharex=True)
+    fig, ax = plt.subplots(3, figsize=figsize, sharex=True)
     ax[0].plot(irswaves, slopes, "bo", markersize=2)
-    ax[1].plot(irswaves, intercepts, "bo", markersize=2)
     ax[0].plot(bandwaves, bslopes, "go")
+    ax[1].plot(irswaves, intercepts, "bo", markersize=2)
     ax[1].plot(bandwaves, bintercepts, "go")
+    ax[2].plot(irswaves, stds, "bo", markersize=2)
+    ax[2].plot(bandwaves, bstds, "go")
 
     # add CCM89 RV dependent relation
-    # waves = [0.7, 0.9, 1.25, 1.6, 2.2, 3.4]
-    # intercepts = [0.8686, 0.68, 0.4008, 0.2693, 0.1615, 0.08]
-    # slopes = [-0.366, -0.6239, -0.3679, -0.2473, -0.1483, -0.0734]
-    # ax[0].scatter(waves, slopes, s=5)
-    # ax[1].scatter(waves, intercepts, s=5)
+    if args.irv:
+        waves = [0.7, 0.9, 1.25, 1.6, 2.2, 3.4]
+        intercepts = [0.8686, 0.68, 0.4008, 0.2693, 0.1615, 0.08]
+        slopes = [-0.366, -0.6239, -0.3679, -0.2473, -0.1483, -0.0734]
+        ax[0].scatter(waves, slopes, s=5)
+        ax[1].scatter(waves, intercepts, s=5)
 
     plt.xlabel(r"$\lambda$ [$\mu m$]")
     ax[0].set_ylabel("slopes")
     ax[1].set_ylabel("intercepts")
+    ax[2].set_ylabel("stddevs")
     # plt.subplots_adjust(hspace=0)
     # plt.savefig(outpath + "RV_slope_inter.pdf", bbox_inches="tight")
     ax[0].set_xlim(1.0, 35.0)
     ax[0].set_xscale("log")
-    ax[1].set_ylim(0.0, 0.3)
-    ax[0].set_ylim(-0.05, 0.05)
+    if args.irv:
+        ax[1].set_ylim(-0.3, 0.3)
+        ax[0].set_ylim(-0.5, 0.5)
+    else:
+        ax[1].set_ylim(0.0, 0.3)
+        ax[0].set_ylim(-0.05, 0.05)
 
     ax[0].plot([0.5, 40.0], [0.0, 0.0], "k:", linewidth=3, alpha=0.5)
     ax[1].plot([0.5, 40.0], [0.0, 0.0], "k:", linewidth=3, alpha=0.5)
@@ -187,6 +212,8 @@ if __name__ == "__main__":
     fig.tight_layout()
 
     save_str = "_spec_rvdep"
+    if args.irv:
+        save_str += "_irvs"
     if args.png:
         fig.savefig(args.filelist.replace(".dat", save_str + ".png"))
     elif args.pdf:
