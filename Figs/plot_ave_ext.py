@@ -46,7 +46,9 @@ if __name__ == "__main__":
         mod_x = np.logspace(np.log10(0.115), np.log10(2.5), num=1000) * u.micron
         F19_Rv = F19(Rv=3.1)
         for cax in ax:
-            cax.plot(mod_x, F19_Rv(mod_x), "g:", lw=2, alpha=0.75, label="F19 R(V) = 3.1")
+            cax.plot(
+                mod_x, F19_Rv(mod_x), "g:", lw=2, alpha=0.75, label="F19 R(V) = 3.1"
+            )
 
     # New measurements
     avefilenames = [
@@ -248,6 +250,32 @@ if __name__ == "__main__":
                 },
                 overwrite=True,
             )
+
+            # write ext to ascii files
+            dtable = QTable()
+            dtable["wave"] = obsext_wave[gphot]
+            dtable["ext"] = obsext_ext[gphot]
+            dtable["unc"] = obsext_ext_uncs[gphot]
+            dtable.write(
+                "G21_PHOT.dat", format="ascii.commented_header", overwrite=True
+            )
+
+            dtable = QTable()
+            dtable["wave"] = full_wave[findxs]
+            dtable["ext"] = full_flux[findxs]
+            dtable["unc"] = full_unc[findxs]
+            dtable.write("G21_IRS.dat", format="ascii.commented_header", overwrite=True)
+
+            gindxs_IRS = np.where(obsext.npts["IRS"] > 0)
+            obsext_IRS_wave = obsext.waves["IRS"][gindxs_IRS].value
+            obsext_IRS_ext = obsext.exts["IRS"][gindxs_IRS]
+            obsext_IRS_uncs = obsext.uncs["IRS"][gindxs_IRS]
+
+            dtable = QTable()
+            dtable["wave"] = obsext_IRS_wave
+            dtable["ext"] = obsext_IRS_ext
+            dtable["unc"] = obsext_IRS_uncs
+            dtable.write("G21_IRS_fullres.dat", format="ascii.commented_header", overwrite=True)
 
             # UV
             FM90_p50 = FM90(
