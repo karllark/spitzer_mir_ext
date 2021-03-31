@@ -6,6 +6,7 @@ import matplotlib.pyplot as pyplot
 import matplotlib
 import astropy.units as u
 from astropy import uncertainty as unc
+from astropy.modeling import models, fitting
 
 from measure_extinction.extdata import ExtData
 
@@ -37,6 +38,8 @@ if __name__ == "__main__":
     ebvs_unc = np.full((n_ext), 0.0)
     rvs = np.full((n_ext), 0.0)
     rvs_unc = np.full((2, n_ext), 0.0)
+    irvs = np.full((n_ext), 0.0)
+    irvs_unc = np.full((2, n_ext), 0.0)
     exts = np.zeros(n_ext)
     exts_unc = np.zeros(n_ext)
 
@@ -75,9 +78,21 @@ if __name__ == "__main__":
         rvs_unc[1, k] = rv_per[2] - rv_per[1]
         rvs_unc[0, k] = rv_per[1] - rv_per[0]
 
+        irvs_dist = ebvs_dist / avs_dist
+        irv_per = irvs_dist.pdf_percentiles([16.0, 50.0, 84.0])
+        irvs[k] = irv_per[1]
+        irvs_unc[1, k] = irv_per[2] - irv_per[1]
+        irvs_unc[0, k] = irv_per[1] - irv_per[0]
+
         (indxs,) = np.where(cext.names["BAND"] == args.band)
         exts[k] = (cext.exts["BAND"][indxs[0]] / avs[k]) + 1.0
-        exts_unc[k] = cext.uncs["BAND"][indxs[0]]
+        exts_unc[k] = cext.uncs["BAND"][indxs[0]] / avs[k]
+
+    # fit
+    fit = fitting.LinearLSQFitter()
+    line_func = models.Linear1D()
+    fitted_line = fit(line_func, (rvs - 3.1), exts)
+    print(fitted_line)
 
     # plots
     fontsize = 14
@@ -109,7 +124,7 @@ if __name__ == "__main__":
 
     # R(V) versus A(V)
     ax.errorbar(
-        rvs[diffuse],
+        rvs[diffuse] - 3.1,
         exts[diffuse],
         xerr=rvs_unc[:, diffuse],
         yerr=exts_unc[diffuse],
@@ -117,15 +132,19 @@ if __name__ == "__main__":
         label="diffuse",
     )
     ax.errorbar(
-        rvs[dense],
+        rvs[dense] - 3.1,
         exts[dense],
-        xerr=rvs_unc[:, dense],
+        xerr=irvs_unc[:, dense],
         yerr=exts_unc[dense],
         fmt="bo",
         markerfacecolor="none",
         label="dense",
     )
-    ax.set_xlabel(r"$R(V)$")
+
+    mrvs = np.array([-0.75, 1.5])
+    ax.plot(mrvs, fitted_line(mrvs), "k:")
+
+    ax.set_xlabel(r"$R(V) - 3.1$")
     ax.set_ylabel(rf"$A({args.band})/A(V)$")
     ax.tick_params("both", length=10, width=2, which="major")
     ax.tick_params("both", length=5, width=1, which="minor")
