@@ -80,7 +80,7 @@ if __name__ == "__main__":
     for k, cname in enumerate(extfnames):
 
         # get P92 fits
-        bfile = f"fits_good_18aug20/{cname}"
+        bfile = f"fits/{cname}"
         cext = ExtData(filename=bfile)
 
         mcmcfile = bfile.replace(".fits", ".h5")
