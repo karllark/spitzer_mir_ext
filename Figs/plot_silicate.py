@@ -192,6 +192,7 @@ if __name__ == "__main__":
     # a["Sil_width"] = sil_width
     # a["Sil_area"] = sil_area
     # print(a)
+    a.write("samp_prob.dat", format="ascii.commented_header")
 
     # plots
     fontsize = 14
