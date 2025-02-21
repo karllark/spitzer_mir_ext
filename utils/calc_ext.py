@@ -13,7 +13,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--path",
         help="base path to observed data",
-        default="/home/kgordon/Python_git/extstar_data/",
+        default="/home/kgordon/Python/extstar_data/",
     )
     args = parser.parse_args()
 

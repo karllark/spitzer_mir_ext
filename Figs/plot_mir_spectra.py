@@ -27,7 +27,7 @@ def plot_mir_set(
     ann_rot=5.0,
     ann_offset=0.2,
     fontsize=12,
-    path="/home/kgordon/Python_git/extstar_data/",
+    path="/home/kgordon/Python/extstar_data/",
     subpath="DAT_files/",
 ):
     """
